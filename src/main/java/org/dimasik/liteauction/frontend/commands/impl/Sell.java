@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class Sell extends SubCommand {
     public Sell(String name) {
@@ -62,9 +63,11 @@ public class Sell extends SubCommand {
 
                 int itemCount = itemStack.getAmount();
                 if(confirm){
-                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, full);
-                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
-                    player.setItemInHand(null);
+                    if(canSell(player)) {
+                        LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, full);
+                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
+                        player.setItemInHand(null);
+                    }
                 }
                 else{
                     player.sendMessage(Parser.color("&#00D4FB▶ &fВведите &#00D4FB/ah sell auto confirm&f, чтобы подтвердить продажу. Полная цена: &#FBA800" + Formatter.formatPrice(priceForOne * itemCount) + "&f, за 1 шт.: &#FBA800" + Formatter.formatPrice(priceForOne)));
@@ -121,9 +124,11 @@ public class Sell extends SubCommand {
                     leaveUsage(player);
                     return;
                 }
-                LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price / itemCount, itemCount, full);
-                ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
-                player.setItemInHand(null);
+                if(canSell(player)) {
+                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price / itemCount, itemCount, full);
+                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
+                    player.setItemInHand(null);
+                }
             } catch (IOException e) {
                 player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри кодировании предмета."));
             }
@@ -165,5 +170,31 @@ public class Sell extends SubCommand {
     @Override
     public String getRequiredPermission() {
         return "";
+    }
+
+    private int getItemsInAuction(String player){
+        try {
+            List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(player).get();
+            return sellItems.size();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    private int getPlayerSlots(Player player, int bound){
+        for(int i = bound; i > 0; i--){
+            if(player.hasPermission("liteauction.slots." + i)){
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private boolean canSell(Player player){
+        if(getItemsInAuction(player.getName()) >= getPlayerSlots(player, 250)){
+            player.sendMessage("&#FB2222▶ &fВы не можете больше выставлять товары на аукцион.");
+            return false;
+        }
+        return true;
     }
 }
