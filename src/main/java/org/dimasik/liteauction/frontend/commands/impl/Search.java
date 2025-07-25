@@ -37,9 +37,7 @@ public class Search extends SubCommand {
                 return;
             }
             Main main = new Main(1);
-            HashSet<String> tags = new HashSet<>();
-            tags.add(ItemNameUtil.escapeTag(find));
-            main.setFilters(tags);
+            main.setFilters(ItemNameUtil.escapeTag(find));
             main.setPlayer(player).compile().open();
         }
     }

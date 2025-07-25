@@ -12,9 +12,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 public class ItemNameUtil {
@@ -42,18 +40,18 @@ public class ItemNameUtil {
                 || customTags.keySet().stream().anyMatch(k -> k.equalsIgnoreCase(tag));
     }
 
-    public static String escapeTag(String russianName) {
+    public static HashSet<String> escapeTag(String russianName) {
         loadTranslationsIfNeeded();
 
         for (Map.Entry<String, String> entry : customTags.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(russianName)) {
-                return entry.getValue();
+                return new HashSet<>(Set.of(entry.getValue().split(",")));
             }
         }
 
         for (Map.Entry<String, String> entry : reverseTranslations.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(russianName)) {
-                return entry.getValue();
+                return new HashSet<>(Set.of(entry.getValue().split(",")));
             }
         }
 
