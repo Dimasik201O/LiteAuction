@@ -114,8 +114,7 @@ public class SellItems {
             List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE player = ?")) {
-
+                         "SELECT * FROM sell_items WHERE player = ? ORDER BY create_time DESC")) {
                 statement.setString(1, player);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {

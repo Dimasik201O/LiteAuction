@@ -2,8 +2,9 @@ name: LiteAuction
 version: '${project.version}'
 main: org.dimasik.liteauction.LiteAuction
 api-version: '1.16'
-depend:
+softdepend:
   - StickEco
+  - Vault
 commands:
   ah:
     aliases:

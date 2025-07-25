@@ -17,7 +17,6 @@ import org.dimasik.liteauction.backend.enums.SortingType;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.*;
-import org.dimasik.stickeco.StickEcoAPI;
 
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +46,7 @@ public class MainListener implements Listener {
                         }
                         else{
                             if(event.isLeftClick() || sellItem.isByOne()) {
-                                double money = new StickEcoAPI().getBalance(player.getName().toLowerCase());
+                                double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
                                 int price = sellItem.getPrice() * sellItem.getAmount();
                                 if(money < price){
                                     player.sendMessage(Parser.color("&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."));

@@ -32,6 +32,8 @@ public class ConfigManager {
     private static boolean IS_HEAD;
     @Getter
     private static int DEFAULT_AUTO_PRICE;
+    @Getter
+    private static String ECONOMY_EDITOR;
 
     @Getter
     private static Map<String, String> CUSTOM_TAGS = new HashMap<>();
@@ -56,6 +58,10 @@ public class ConfigManager {
 
         IS_HEAD = config.getBoolean("isHead", true);
         DEFAULT_AUTO_PRICE = config.getInt("default-auto-price", 500);
+        ECONOMY_EDITOR = config.getString("economy-editor", "StickEco");
+        if(!ECONOMY_EDITOR.equalsIgnoreCase("StickEco") && !ECONOMY_EDITOR.equalsIgnoreCase("Vault")){
+            ECONOMY_EDITOR = "StickEco";
+        }
 
         loadCustomTags();
     }

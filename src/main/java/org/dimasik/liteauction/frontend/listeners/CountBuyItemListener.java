@@ -17,7 +17,6 @@ import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.CountBuyItem;
 import org.dimasik.liteauction.frontend.menus.Main;
 import org.dimasik.liteauction.frontend.menus.RemoveItem;
-import org.dimasik.stickeco.StickEcoAPI;
 
 import java.util.Optional;
 
@@ -81,7 +80,7 @@ public class CountBuyItemListener implements Listener {
                     }
 
                     int price = sellItem.getPrice() * countBuyItem.getCount();
-                    double money = new StickEcoAPI().getBalance(player.getName());
+                    double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
                     if(money < price){
                         player.sendMessage(Parser.color("&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."));
                         if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
@@ -100,8 +99,8 @@ public class CountBuyItemListener implements Listener {
                     LiteAuction.getInstance().getRedisManager().publishMessage("msg", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + countBuyItem.getCount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
                     LiteAuction.getInstance().getRedisManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
 
-                    new StickEcoAPI().addBalance(sellItem.getPlayer().toLowerCase(), price);
-                    new StickEcoAPI().subtractBalance(player.getName().toLowerCase(), price);
+                    LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer().toLowerCase(), price);
+                    LiteAuction.getEconomyEditor().subtractBalance(player.getName().toLowerCase(), price);
 
                     addItemInventory(player.getInventory(), itemStack.asQuantity(countBuyItem.getCount()), player.getLocation());
                     if(countBuyItem.getCount() == sellItem.getAmount()) {
