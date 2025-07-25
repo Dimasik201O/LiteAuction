@@ -192,7 +192,7 @@ public class Sell extends SubCommand {
 
     private boolean canSell(Player player){
         if(getItemsInAuction(player.getName()) >= getPlayerSlots(player, 250)){
-            player.sendMessage("&#FB2222▶ &fВы не можете больше выставлять товары на аукцион.");
+            player.sendMessage(Parser.color("&#FB2222▶ &fВы не можете больше выставлять товары на аукцион."));
             return false;
         }
         return true;
