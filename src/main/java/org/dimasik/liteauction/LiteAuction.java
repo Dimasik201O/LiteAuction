@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.mysql.DatabaseManager;
@@ -94,13 +95,14 @@ public final class LiteAuction extends JavaPlugin {
     }
 
     private void setupListeners(){
-        super.getServer().getPluginManager().registerEvents(new MainListener(), this);
-        super.getServer().getPluginManager().registerEvents(new RemoveItemListener(), this);
-        super.getServer().getPluginManager().registerEvents(new SellListener(), this);
-        super.getServer().getPluginManager().registerEvents(new UnsoldListener(), this);
-        super.getServer().getPluginManager().registerEvents(new ConfirmItemListener(), this);
-        super.getServer().getPluginManager().registerEvents(new CountBuyItemListener(), this);
-        super.getServer().getPluginManager().registerEvents(new JoinListener(), this);
+        PluginManager pluginManager = super.getServer().getPluginManager();
+        pluginManager.registerEvents(new MainListener(), this);
+        pluginManager.registerEvents(new RemoveItemListener(), this);
+        pluginManager.registerEvents(new SellListener(), this);
+        pluginManager.registerEvents(new UnsoldListener(), this);
+        pluginManager.registerEvents(new ConfirmItemListener(), this);
+        pluginManager.registerEvents(new CountBuyItemListener(), this);
+        pluginManager.registerEvents(new JoinListener(), this);
     }
 
     private void setupBoughtItem(){
