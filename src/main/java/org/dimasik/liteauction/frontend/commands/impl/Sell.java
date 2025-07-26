@@ -63,6 +63,10 @@ public class Sell extends SubCommand {
 
                 int itemCount = itemStack.getAmount();
                 if(confirm){
+                    if((priceForOne / itemCount) * itemCount > 1000000000){
+                        leaveUsage(player);
+                        return;
+                    }
                     if(canSell(player)) {
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, full);
                         ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
