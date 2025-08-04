@@ -1,5 +1,6 @@
 package org.dimasik.liteauction.frontend.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,7 @@ import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.frontend.menus.ConfirmItem;
 import org.dimasik.liteauction.frontend.menus.Main;
 import org.dimasik.liteauction.frontend.menus.RemoveItem;
 import org.dimasik.liteauction.frontend.menus.Sell;
@@ -29,6 +31,9 @@ public class SellListener implements Listener {
         Inventory inventory = event.getView().getTopInventory();
         if(inventory.getHolder() instanceof Sell) {
             event.setCancelled(true);
+            if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
+                return;
+            }
             Sell sell = (Sell) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
@@ -61,6 +66,7 @@ public class SellListener implements Listener {
                             newPage = Math.min(pages, newPage);
                             newPage = Math.max(1, newPage);
 
+                            sell.setForceClose(true);
                             Sell newSell = new Sell(newPage, sell.getBack());
                             newSell.setPlayer(player).compile().open();
                         }
@@ -83,6 +89,7 @@ public class SellListener implements Listener {
                         if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
                             player.playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1f, 1f);
                         }
+                        sell.setForceClose(true);
                         Sell newSell = new Sell(newPage, sell.getBack());
                         newSell.setPlayer(player).compile().open();
                     }
@@ -99,6 +106,7 @@ public class SellListener implements Listener {
                         if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
                             player.playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1f, 1f);
                         }
+                        sell.setForceClose(true);
                         Sell newSell = new Sell(newPage, sell.getBack());
                         newSell.setPlayer(player).compile().open();
                     }
@@ -115,6 +123,16 @@ public class SellListener implements Listener {
         Inventory inventory = event.getView().getTopInventory();
         if(inventory.getHolder() instanceof Sell){
             removeClosedUpdates();
+            Sell sell = (Sell) inventory.getHolder();
+            if(sell.isForceClose()){
+                return;
+            }
+            Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
+                Main main = sell.getBack();
+                if(main.getViewer() != null) {
+                    main.compile().open();
+                }
+            }, 1);
         }
     }
 }

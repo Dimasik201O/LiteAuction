@@ -23,6 +23,9 @@ public class RemoveItemListener implements Listener {
         Inventory inventory = event.getView().getTopInventory();
         if(inventory.getHolder() instanceof RemoveItem) {
             event.setCancelled(true);
+            if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
+                return;
+            }
             RemoveItem removeItem = (RemoveItem) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();

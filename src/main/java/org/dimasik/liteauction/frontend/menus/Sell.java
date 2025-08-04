@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Sell implements InventoryHolder {
+    @Getter
+    @Setter
+    private boolean forceClose;
     @Setter
     @Getter
     private int page;

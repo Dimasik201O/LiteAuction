@@ -53,7 +53,9 @@ public final class LiteAuction extends JavaPlugin {
         setupCommand();
         setupListeners();
         setupBoughtItem();
-        startRunnable();
+        if(ConfigManager.isIS_HEAD()) {
+            startRunnable();
+        }
     }
 
     private void setupConfig(){
@@ -115,7 +117,6 @@ public final class LiteAuction extends JavaPlugin {
     public void startRunnable(){
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> LiteAuction.getInstance().getDatabaseManager().moveExpiredItems(), 0, 50);
     }
-
 
     public static void removeClosedUpdates(){
         for(Map.Entry<UpdateData, Integer> entry : getItems().entrySet()){

@@ -1,11 +1,8 @@
 package org.dimasik.liteauction.backend.redis;
 
-import com.mysql.fabric.xmlrpc.base.Array;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;

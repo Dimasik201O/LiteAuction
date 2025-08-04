@@ -28,6 +28,9 @@ public class CountBuyItemListener implements Listener {
         Inventory inventory = event.getView().getTopInventory();
         if(inventory.getHolder() instanceof CountBuyItem) {
             event.setCancelled(true);
+            if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
+                return;
+            }
             CountBuyItem countBuyItem = (CountBuyItem) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();

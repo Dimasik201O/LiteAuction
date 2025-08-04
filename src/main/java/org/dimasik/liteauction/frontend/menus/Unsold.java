@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Unsold implements InventoryHolder {
+    @Getter
+    @Setter
+    private boolean forceClose;
     @Setter
     @Getter
     private int page;

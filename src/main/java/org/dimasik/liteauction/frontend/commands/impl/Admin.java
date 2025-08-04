@@ -2,16 +2,21 @@ package org.dimasik.liteauction.frontend.commands.impl;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.utils.ItemEncrypt;
+import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class Admin extends SubCommand {
     public Admin(String name) {
@@ -33,12 +38,70 @@ public class Admin extends SubCommand {
                 player.sendMessage("У вас нет предмета в руке");
             }
         }
+        else if(args[1].equalsIgnoreCase("deleteItem")){
+            if(args.length < 3){
+                player.sendMessage("Укажите ID");
+                return;
+            }
+            try {
+                int id = Integer.parseInt(args[2]);
+                Optional<SellItem> optional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(id).get();
+                if(optional.isEmpty()){
+                    player.sendMessage("Нет предмета с таким ID");
+                }
+                else{
+                    SellItem sellItem = optional.get();
+                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("Предмет %item%&f удален с аукциона игрока " + sellItem.getPlayer()), sellItem.decodeItemStack());
+                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(id);
+                    player.sendMessage("");
+                }
+            } catch (NumberFormatException e) {
+                player.sendMessage("ID не число");
+            } catch (ExecutionException | InterruptedException e) {
+                player.sendMessage("Ошибка удаления предмета. Смотри консоль.");
+                Bukkit.getLogger().warning("Ошибка при удалении предмета через команду: " + e);
+            }
+        }
+        else if(args[1].equalsIgnoreCase("addUnsoldItemTo")){
+            if(args.length < 3){
+                player.sendMessage("Укажите игрока.");
+                return;
+            }
+            String target = args[2];
+
+            ItemStack itemStack = player.getItemInHand();
+            if(itemStack == null || itemStack.getType().isAir()){
+                player.sendMessage(Parser.color("&#FB2222▶ &fДля продажи товара &#FB2222возьмите предмет &fв главную руку."));
+                return;
+            }
+
+            int price = 1;
+            try{
+                price = Integer.parseInt(args[3]);
+            }
+            catch (Exception ignore){}
+
+            int itemCount = itemStack.getAmount();
+            if((price / itemCount) * itemCount < 1){
+                player.sendMessage("Цена <= 0!");
+                return;
+            }
+
+            try {
+                LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(target, ItemEncrypt.encodeItem(itemStack), TagUtil.getAllTags(itemStack), price, itemCount);
+                ItemHoverUtil.sendHoverItemMessage(player, Parser.color("Предмет %item%&f добавлен в истекшие предметы игроку " + target + " по цене " + (price * itemCount) + " (" + price + " за 1 ед.)"), itemStack);
+                player.setItemInHand(null);
+            } catch (IOException e) {
+                player.sendMessage("Ошибка кодирования предмета. Смотри консоль.");
+                Bukkit.getLogger().warning("Ошибка кодирования предмета: " + e);
+            }
+        }
     }
 
     @Override
     public List<String> getTabCompletes(String[] args) {
         if(args.length == 2){
-            return List.of("getTags");
+            return List.of("getTags", "deleteItem", "addUnsoldItemTo");
         }
         return List.of();
     }

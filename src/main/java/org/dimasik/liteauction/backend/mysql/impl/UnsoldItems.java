@@ -33,6 +33,27 @@ public class UnsoldItems {
         });
     }
 
+    public CompletableFuture<Void> addItem(String player, String itemStack, Set<String> tags, int price, int amount) {
+        return CompletableFuture.runAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "INSERT INTO unsold_items (player, itemstack, tags, amount, price, create_time) " +
+                                 "VALUES (?, ?, ?, ?, ?, ?)")) {
+
+                statement.setString(1, player);
+                statement.setString(2, itemStack);
+                statement.setString(3, String.join(",", tags));
+                statement.setInt(4, amount);
+                statement.setInt(5, price);
+                statement.setLong(6, System.currentTimeMillis());
+
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     public CompletableFuture<List<UnsoldItem>> getAllItems() {
         return CompletableFuture.supplyAsync(() -> {
             List<UnsoldItem> items = new ArrayList<>();

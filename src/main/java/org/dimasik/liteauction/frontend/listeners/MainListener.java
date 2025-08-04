@@ -6,6 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -16,6 +17,7 @@ import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.enums.SortingType;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.TagUtil;
 import org.dimasik.liteauction.frontend.menus.*;
 
 import java.util.HashSet;
@@ -30,6 +32,9 @@ public class MainListener implements Listener {
         Inventory inventory = event.getView().getTopInventory();
         if(inventory.getHolder() instanceof Main){
             event.setCancelled(true);
+            if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
+                return;
+            }
             Main main = (Main) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
@@ -45,7 +50,27 @@ public class MainListener implements Listener {
                             return;
                         }
                         else{
-                            if(event.isLeftClick() || sellItem.isByOne()) {
+                            if(event.getClick() == ClickType.SWAP_OFFHAND && player.hasPermission("liteauction.admin")){
+                                player.sendMessage("");
+                                player.sendMessage("Вы нажали 'F' - означает удаление предмета.");
+                                player.sendMessage("Для подтверждения удаления предмета напишите команду:");
+                                player.sendMessage("/ah admin deleteItem " + sellItem.getId());
+                                player.sendMessage("");
+                                player.closeInventory();
+                                player.updateInventory();
+                                Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), player::updateInventory, 1);
+                            }
+                            else if(event.getClick() == ClickType.MIDDLE || event.getClick() == ClickType.DROP){
+                                if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
+                                    player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1f, 1f);
+                                }
+                                Main newMain = new Main(1);
+                                newMain.setFilters(TagUtil.getPartialTags(sellItem.decodeItemStack()));
+                                newMain.setCategoryType(main.getCategoryType());
+                                newMain.setSortingType(main.getSortingType());
+                                newMain.setPlayer(player).compile().open();
+                            }
+                            else if(event.isLeftClick() || sellItem.isByOne() || sellItem.getAmount() == 1) {
                                 double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
                                 int price = sellItem.getPrice() * sellItem.getAmount();
                                 if(money < price){

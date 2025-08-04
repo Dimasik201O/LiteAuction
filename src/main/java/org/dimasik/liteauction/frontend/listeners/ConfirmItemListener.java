@@ -29,6 +29,9 @@ public class ConfirmItemListener implements Listener {
         Inventory inventory = event.getView().getTopInventory();
         if(inventory.getHolder() instanceof ConfirmItem) {
             event.setCancelled(true);
+            if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
+                return;
+            }
             ConfirmItem confirmItem = (ConfirmItem) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
