@@ -42,6 +42,8 @@ public final class LiteAuction extends JavaPlugin {
     private static LiteAuction instance;
     @Getter
     private static EconomyEditor economyEditor;
+    @Getter
+    private static final String currentVersion = "v1.6";
 
     @Override
     public void onEnable() {
