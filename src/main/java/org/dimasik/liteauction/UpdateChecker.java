@@ -1,6 +1,7 @@
 package org.dimasik.liteauction;
 
 import lombok.Getter;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.BufferedReader;
@@ -16,7 +17,7 @@ import java.nio.file.Files;
 public class UpdateChecker {
     private final JavaPlugin plugin;
     private final File pluginFile;
-    private final String currentVersion = "v1.7";
+    private final String currentVersion = "v1.7.1";
     private final String changeLogUrl;
     private final String pluginUrl;
 
@@ -89,9 +90,11 @@ public class UpdateChecker {
             File updateFile = new File(plugin.getDataFolder().getParent(), "LiteAuction-updated.jar");
 
             try {
-                plugin.getServer().getPluginManager().disablePlugin(plugin);
-                Files.move(updateFile.toPath(), pluginFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                plugin.getServer().getPluginManager().enablePlugin(plugin);
+                Files.move(updateFile.toPath(), pluginFile.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                PluginManager pm = plugin.getServer().getPluginManager();
+                pm.disablePlugin(plugin);
+                pm.enablePlugin(pm.loadPlugin(pluginFile));
             } catch (Exception e) {
                 plugin.getLogger().warning("Ошибка при попытке установить обновление плагина: " + e.getMessage());
                 e.printStackTrace();
