@@ -23,8 +23,8 @@ public class UpdateChecker {
     public UpdateChecker(JavaPlugin plugin, File pluginFile) {
         this.plugin = plugin;
         this.pluginFile = pluginFile;
-        this.changeLogUrl = "https://raw.githubusercontent.com/Dimasik201O/LiteAuction/Release/change.log";
-        this.pluginUrl = "https://github.com/Dimasik201O/LiteAuction/releases/download/Release/LiteAuction.jar";
+        this.changeLogUrl = "https://raw.githubusercontent.com/Dimasik201O/LiteAuction/master/change.log";
+        this.pluginUrl = "https://github.com/Dimasik201O/LiteAuction/releases/latest/download/LiteAuction.jar";
     }
 
     public void checkForUpdates() {
