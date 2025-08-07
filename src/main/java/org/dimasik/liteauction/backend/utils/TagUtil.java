@@ -6,6 +6,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -58,6 +59,11 @@ public class TagUtil {
                         effect.getType().getName().toLowerCase(),
                         effect.getDuration(),
                         effect.getAmplifier() + 1);
+                tags.add(potionTag);
+            }
+            PotionData basePotionData = potionMeta.getBasePotionData();
+            if(basePotionData.getType().getEffectType() != null) {
+                String potionTag = "basepotion: %s" + basePotionData.getType().getEffectType().getName().toLowerCase();
                 tags.add(potionTag);
             }
         }
