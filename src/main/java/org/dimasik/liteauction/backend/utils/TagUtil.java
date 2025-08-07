@@ -63,7 +63,7 @@ public class TagUtil {
             }
             PotionData basePotionData = potionMeta.getBasePotionData();
             if(basePotionData.getType().getEffectType() != null) {
-                String potionTag = "basepotion: %s" + basePotionData.getType().getEffectType().getName().toLowerCase();
+                String potionTag = "basepotion: " + basePotionData.getType().getEffectType().getName().toLowerCase();
                 tags.add(potionTag);
             }
         }
