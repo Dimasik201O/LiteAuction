@@ -2,6 +2,7 @@ package org.dimasik.liteauction.backend.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.mysql.impl.SellItems;
 import org.dimasik.liteauction.backend.mysql.impl.Sounds;
 import org.dimasik.liteauction.backend.mysql.impl.UnsoldItems;
@@ -17,13 +18,14 @@ public class DatabaseManager {
     @lombok.Getter
     private final Sounds soundsManager;
 
-    public DatabaseManager(String jdbcUrl, String username, String password) {
+    public DatabaseManager(String host, String username, String password, String database) {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(jdbcUrl);
+        config.setJdbcUrl("jdbc:mysql://" + host + "/" + database);
         config.setUsername(username);
         config.setPassword(password);
+        config.addDataSourceProperty("autoReconnect", "true");
         config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtsCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         this.dataSource = new HikariDataSource(config);
 

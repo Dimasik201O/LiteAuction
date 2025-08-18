@@ -68,7 +68,7 @@ public final class LiteAuction extends JavaPlugin {
     }
 
     private void setupDatabase(){
-        databaseManager = new DatabaseManager("jdbc:mysql://" + ConfigManager.getMYSQL_HOST() + "/" + ConfigManager.getMYSQL_DATABASE(), ConfigManager.getMYSQL_USER(), ConfigManager.getREDIS_PASSWORD());
+        databaseManager = new DatabaseManager(ConfigManager.getMYSQL_HOST(), ConfigManager.getMYSQL_USER(), ConfigManager.getREDIS_PASSWORD(), ConfigManager.getMYSQL_DATABASE());
         databaseManager.initialize().join();
         databaseManager.getSellItemsManager().moveExpiredItems();
 
