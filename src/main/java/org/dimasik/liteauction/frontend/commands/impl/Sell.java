@@ -47,7 +47,7 @@ public class Sell extends SubCommand {
                     if (blockState instanceof ShulkerBox) {
                         ShulkerBox shulkerBoxState = (ShulkerBox) blockState;
                         if (!shulkerBoxState.getInventory().isEmpty()) {
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."));
+                            player.sendMessage(Parser.color("&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."));
                             return;
                         }
                     }
@@ -111,7 +111,7 @@ public class Sell extends SubCommand {
                     if (blockState instanceof ShulkerBox) {
                         ShulkerBox shulkerBoxState = (ShulkerBox) blockState;
                         if (!shulkerBoxState.getInventory().isEmpty()) {
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."));
+                            player.sendMessage(Parser.color("&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."));
                             return;
                         }
                     }
