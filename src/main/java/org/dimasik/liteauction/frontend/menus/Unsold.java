@@ -44,6 +44,7 @@ public class Unsold implements InventoryHolder {
 
     public Unsold compile(){
         try{
+            items.clear();
             int slot = 0;
             List<UnsoldItem> items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(viewer.getName()).get();
             int startIndex = 45 * (page - 1);

@@ -52,6 +52,7 @@ public class Main implements InventoryHolder {
 
     public Main compile(){
         try {
+            items.clear();
             int slot = 0;
             List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType).get();
             int startIndex = 45 * (page - 1);

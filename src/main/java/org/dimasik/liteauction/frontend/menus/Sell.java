@@ -44,6 +44,7 @@ public class Sell implements InventoryHolder {
 
     public Sell compile(){
         try{
+            items.clear();
             int slot = 0;
             List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(viewer.getName()).get();
             int startIndex = 45 * (page - 1);
