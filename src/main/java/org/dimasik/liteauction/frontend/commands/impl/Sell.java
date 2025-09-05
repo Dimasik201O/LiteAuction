@@ -176,11 +176,20 @@ public class Sell extends SubCommand {
         switch (args.length){
             case 2:
                 try{
-                    double cnt = Double.parseDouble(lastArg);
+                    int cnt = Integer.parseInt(lastArg);
                     completions.add(cnt + "k");
                     completions.add(cnt + "kk");
                     completions.add(cnt + "m");
-                } catch (NumberFormatException e) {}
+                } catch (NumberFormatException ignore) {
+                    try{
+                        double cnt = Double.parseDouble(lastArg);
+                        completions.add(cnt + "k");
+                        completions.add(cnt + "kk");
+                        completions.add(cnt + "m");
+                    } catch (NumberFormatException ignored) {
+
+                    }
+                }
         }
         return completions;
     }
