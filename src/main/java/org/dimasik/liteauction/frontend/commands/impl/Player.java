@@ -2,6 +2,7 @@ package org.dimasik.liteauction.frontend.commands.impl;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 import org.dimasik.liteauction.frontend.menus.Main;
 
@@ -28,7 +29,7 @@ public class Player extends SubCommand {
     }
 
     @Override
-    public List<String> getTabCompletes(String[] args) {
+    public List<String> getTabCompletes(CommandSender sender, String[] args) {
         List<String> completions = new ArrayList<>();
         if(args.length == 2){
             for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()){

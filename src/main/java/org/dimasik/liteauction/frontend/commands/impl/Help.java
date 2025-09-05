@@ -1,6 +1,7 @@
 package org.dimasik.liteauction.frontend.commands.impl;
 
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
@@ -18,7 +19,7 @@ public class Help extends SubCommand {
     }
 
     @Override
-    public List<String> getTabCompletes(String[] args) {
+    public List<String> getTabCompletes(CommandSender sender, String[] args) {
         return List.of();
     }
 

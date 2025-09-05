@@ -5,6 +5,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.exceptions.NotAPlayerException;
 import org.dimasik.liteauction.backend.utils.Parser;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public abstract class SubCommand {
 
     public abstract void execute(Player player, Command command, String[] args);
 
-    public abstract List<String> getTabCompletes(String[] args);
+    public abstract List<String> getTabCompletes(CommandSender sender, String[] args) throws NotAPlayerException;
 
     public abstract int getRequiredArgs();
 
@@ -39,5 +40,14 @@ public abstract class SubCommand {
         player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah search [название] &f— найти предметы на аукционе"));
         player.sendMessage(Parser.color(" &#00D4FB▍&#00D4FB /ah player <никнейм> &f— все товары на рынке"));
         player.sendMessage(Parser.color(""));
+    }
+
+    public Player requirePlayer(CommandSender sender){
+        if(sender instanceof Player player){
+            return player;
+        }
+        else{
+            throw new NotAPlayerException();
+        }
     }
 }

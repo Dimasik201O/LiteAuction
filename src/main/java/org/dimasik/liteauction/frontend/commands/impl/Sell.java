@@ -16,14 +16,17 @@ import org.dimasik.liteauction.backend.mysql.DatabaseManager;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.*;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
+import org.dimasik.liteauction.frontend.commands.models.AutoSellData;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class Sell extends SubCommand {
+    private final HashMap<Player, AutoSellData> autoSells = new HashMap<>();
+
     public Sell(String name) {
         super(name);
     }
@@ -63,19 +66,25 @@ public class Sell extends SubCommand {
 
                 int itemCount = itemStack.getAmount();
                 if(confirm){
-                    if((priceForOne / itemCount) * itemCount > 1000000000){
-                        leaveUsage(player);
+                    if(!autoSells.containsKey(player)) return;
+                    AutoSellData model = autoSells.get(player);
+                    if(model.price == priceForOne && model.itemStack.isSimilar(itemStack)) {
+                        boolean isFull = model.full;
+                        autoSells.remove(player);
+                        if ((priceForOne / itemCount) * itemCount > 1000000000) {
+                            leaveUsage(player);
+                            return;
+                        }
+                        if (canSell(player)) {
+                            LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, isFull);
+                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
+                            player.setItemInHand(null);
+                        }
                         return;
                     }
-                    if(canSell(player)) {
-                        LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, full);
-                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
-                        player.setItemInHand(null);
-                    }
                 }
-                else{
-                    player.sendMessage(Parser.color("&#00D4FB▶ &fВведите &#00D4FB/ah sell auto confirm&f, чтобы подтвердить продажу. Полная цена: &#FBA800" + Formatter.formatPrice(priceForOne * itemCount) + "&f, за 1 шт.: &#FBA800" + Formatter.formatPrice(priceForOne)));
-                }
+                player.sendMessage(Parser.color("&#00D4FB▶ &fВведите &#00D4FB/ah sell auto confirm&f, чтобы подтвердить продажу. Полная цена: &#FBA800" + Formatter.formatPrice(priceForOne * itemCount) + "&f, за 1 шт.: &#FBA800" + Formatter.formatPrice(priceForOne)));
+                autoSells.put(player, new AutoSellData(priceForOne, itemStack, full));
             } catch (Exception e) {
 
             }
@@ -94,11 +103,12 @@ public class Sell extends SubCommand {
             number = number.substring(0, number.length() - 1);
         }
         try {
-            int price = Integer.parseInt(number);
+            double rawPrice = Double.parseDouble(number);
             switch (numberType){
-                case K -> price*=1000;
-                case KK, M -> price*=1000000;
+                case K -> rawPrice*=1000;
+                case KK, M -> rawPrice*=1000000;
             }
+            int price = (int) rawPrice;
             ItemStack itemStack = player.getItemInHand();
             if(itemStack == null || itemStack.getType().isAir()){
                 player.sendMessage(Parser.color("&#FB2222▶ &fДля продажи товара &#FB2222возьмите предмет &fв главную руку."));
@@ -142,7 +152,7 @@ public class Sell extends SubCommand {
     }
 
     @Override
-    public List<String> getTabCompletes(String[] args) {
+    public List<String> getTabCompletes(CommandSender sender, String[] args) {
         List<String> completions = new ArrayList<>();
         String lastArg = args[args.length - 1];
         if(args.length == 2){
@@ -150,7 +160,16 @@ public class Sell extends SubCommand {
         }
         else if(args.length == 3){
             if(args[1].equalsIgnoreCase("auto")){
-                completions.add("confirm");
+                Player player = super.requirePlayer(sender);
+                ItemStack itemStack = player.getItemInHand();
+                if(itemStack != null && !itemStack.getType().isAir()){
+                    if(autoSells.containsKey(player)) {
+                        AutoSellData model = autoSells.get(player);
+                        if(model.itemStack.isSimilar(itemStack)) {
+                            completions.add("confirm");
+                        }
+                    }
+                }
             }
             completions.add("full");
         }

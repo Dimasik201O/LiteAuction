@@ -1,6 +1,7 @@
 package org.dimasik.liteauction.frontend.commands.impl;
 
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.backend.utils.ItemNameUtil;
@@ -43,7 +44,7 @@ public class Search extends SubCommand {
     }
 
     @Override
-    public List<String> getTabCompletes(String[] args) {
+    public List<String> getTabCompletes(CommandSender sender, String[] args) {
         if (args.length < 2) {
             return List.of();
         }

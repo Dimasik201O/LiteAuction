@@ -67,7 +67,7 @@ public class ConfirmItemListener implements Listener {
                         }
 
                         ItemStack itemStack = confirmItem.getSellItem().decodeItemStack();
-                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#FEA900▶ &fВы купили &#FEA900%item%&f &#FEA900x" + itemStack.getAmount() + " &fу &#FEA900" + sellItem.getPlayer() + " &fза &#FEA900" + Formatter.formatPrice(price)), itemStack);
+                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#FEA900▶ &fВы купили &#FEA900%item%&f &#FEA900x" + confirmItem.getSellItem().getAmount() + " &fу &#FEA900" + sellItem.getPlayer() + " &fза &#FEA900" + Formatter.formatPrice(price)), itemStack);
                         player.playSound(player.getLocation(), Sound.ENTITY_WANDERING_TRADER_YES, 1f, 1f);
 
                         LiteAuction.getInstance().getRedisManager().publishMessage("update", confirmItem.getSellItem().getId());

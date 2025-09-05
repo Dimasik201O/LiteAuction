@@ -25,6 +25,7 @@ import org.dimasik.liteauction.frontend.listeners.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -133,6 +134,11 @@ public final class LiteAuction extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        Iterator<Map.Entry<UpdateData, Integer>> iterator = items.entrySet().iterator();
+        while(iterator.hasNext()){
+            Map.Entry<UpdateData, Integer> entry = iterator.next();
+            entry.getKey().getInventory().close();
+        }
         if(redisManager != null){
             redisManager.close();
         }

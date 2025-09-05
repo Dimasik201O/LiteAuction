@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.dimasik.liteauction.backend.exceptions.NotAPlayerException;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.Main;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +67,11 @@ public class CommandExecutor implements TabExecutor {
         else {
             SubCommand subCommand = subCommands.get(args[0]);
             if(subCommand != null && (subCommand.getRequiredPermission().isEmpty() || commandSender.hasPermission(subCommand.getRequiredPermission()))){
-                completions.addAll(subCommand.getTabCompletes(args));
+                try {
+                    completions.addAll(subCommand.getTabCompletes(commandSender, args));
+                } catch (NotAPlayerException e) {
+                    completions.add("Exception : NotAPlayerException at executing " + subCommand.getName());
+                }
             }
         }
 
