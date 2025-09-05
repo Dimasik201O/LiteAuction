@@ -51,7 +51,7 @@ public class RemoveItemListener implements Listener {
                         }
 
                         ItemStack itemStack = removeItem.getSellItem().decodeItemStack();
-                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
+                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + removeItem.getSellItem().getAmount() + " &fбыл снят с продажи."), itemStack);
                         LiteAuction.getInstance().getRedisManager().publishMessage("update", removeItem.getSellItem().getId());
                         addItemInventory(player.getInventory(), itemStack.asQuantity(removeItem.getSellItem().getAmount()), player.getLocation());
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(removeItem.getSellItem().getId());

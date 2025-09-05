@@ -41,7 +41,7 @@ public class UnsoldListener implements Listener {
                     if(unsoldItem != null){
                         if(unsoldItem.getPlayer().equalsIgnoreCase(player.getName())){
                             ItemStack itemStack = unsoldItem.decodeItemStack();
-                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
+                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + unsoldItem.getAmount() + " &fбыл снят с продажи."), itemStack);
                             addItemInventory(player.getInventory(), itemStack.asQuantity(unsoldItem.getAmount()), player.getLocation());
                             LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().deleteItem(unsoldItem.getId());
 

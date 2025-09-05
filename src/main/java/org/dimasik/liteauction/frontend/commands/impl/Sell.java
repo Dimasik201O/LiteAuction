@@ -176,7 +176,7 @@ public class Sell extends SubCommand {
         switch (args.length){
             case 2:
                 try{
-                    int cnt = Integer.parseInt(lastArg);
+                    double cnt = Double.parseDouble(lastArg);
                     completions.add(cnt + "k");
                     completions.add(cnt + "kk");
                     completions.add(cnt + "m");
