@@ -20,7 +20,7 @@ public class JoinListener implements Listener {
             List<UnsoldItem> unsoldItems = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(player.getName()).get();
             for(UnsoldItem unsoldItem : unsoldItems){
                 ItemStack itemStack = unsoldItem.decodeItemStack();
-                ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack);
+                ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + unsoldItem.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack);
             }
         }
         catch (Exception ignored){}
