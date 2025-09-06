@@ -18,8 +18,9 @@ public class UnsoldItem {
     private String player;
     private String itemStack;
     private Set<String> tags;
-    private int amount;
     private int price;
+    private int amount;
+    private boolean byOne;
     private long createTime;
 
     public ItemStack decodeItemStack() {

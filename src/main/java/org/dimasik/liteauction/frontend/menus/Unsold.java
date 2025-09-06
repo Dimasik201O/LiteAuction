@@ -63,6 +63,11 @@ public class Unsold implements InventoryHolder {
                 lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F " + String.join("&f, &x&0&0&D&8&F&F", TagUtil.getItemCategories(unsoldItem.getTags()))));
                 lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Удалится через:&x&0&0&D&8&F&F " + Formatter.getTimeUntilDeletion(unsoldItem)));
                 lore.add(Parser.color(" &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C Цена:&x&0&0&D&8&F&F " + Formatter.formatPrice(unsoldItem.getPrice() * unsoldItem.getAmount())));
+                if(unsoldItem.isByOne()){
+                    lore.add(Parser.color(""));
+                    lore.add(Parser.color(" &x&0&0&D&8&F&F● &x&D&5&D&B&D&CДанный товар можно"));
+                    lore.add(Parser.color(" &0.&x&D&5&D&B&D&C  купить &x&0&0&D&8&F&Fтолько полностью&x&D&5&D&B&D&C."));
+                }
                 lore.add(Parser.color(""));
                 lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы забрать предмет"));
                 itemMeta.setLore(lore);

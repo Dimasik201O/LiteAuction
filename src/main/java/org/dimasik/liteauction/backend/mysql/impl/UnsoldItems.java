@@ -23,8 +23,9 @@ public class UnsoldItems {
                         "player VARCHAR(16) NOT NULL, " +
                         "itemstack TEXT NOT NULL, " +
                         "tags TEXT, " +
-                        "amount INT NOT NULL, " +
                         "price INT NOT NULL, " +
+                        "amount INT NOT NULL, " +
+                        "by_one BOOLEAN NOT NULL, " +
                         "create_time BIGINT NOT NULL)";
                 statement.execute(sql);
             } catch (SQLException e) {
@@ -33,19 +34,20 @@ public class UnsoldItems {
         });
     }
 
-    public CompletableFuture<Void> addItem(String player, String itemStack, Set<String> tags, int price, int amount) {
+    public CompletableFuture<Void> addItem(String player, String itemStack, Set<String> tags, int price, int amount, boolean byOne) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "INSERT INTO unsold_items (player, itemstack, tags, amount, price, create_time) " +
-                                 "VALUES (?, ?, ?, ?, ?, ?)")) {
+                         "INSERT INTO unsold_items (player, itemstack, tags, amount, price, by_one, create_time) " +
+                                 "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
 
                 statement.setString(1, player);
                 statement.setString(2, itemStack);
                 statement.setString(3, String.join(",", tags));
                 statement.setInt(4, amount);
                 statement.setInt(5, price);
-                statement.setLong(6, System.currentTimeMillis());
+                statement.setBoolean(6, byOne);
+                statement.setLong(7, System.currentTimeMillis());
 
                 statement.executeUpdate();
             } catch (SQLException e) {
@@ -129,15 +131,16 @@ public class UnsoldItems {
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
                          "UPDATE unsold_items SET player = ?, itemstack = ?, tags = ?, " +
-                                 "amount = ?, price = ?, create_time = ? WHERE id = ?")) {
+                                 "amount = ?, price = ?, by_one = ?, create_time = ? WHERE id = ?")) {
 
                 statement.setString(1, item.getPlayer());
                 statement.setString(2, item.getItemStack());
                 statement.setString(3, String.join(",", item.getTags()));
                 statement.setInt(4, item.getAmount());
                 statement.setInt(5, item.getPrice());
-                statement.setLong(6, item.getCreateTime());
-                statement.setInt(7, item.getId());
+                statement.setBoolean(6, item.isByOne());
+                statement.setLong(7, item.getCreateTime());
+                statement.setInt(8, item.getId());
 
                 statement.executeUpdate();
             } catch (SQLException e) {
@@ -160,6 +163,51 @@ public class UnsoldItems {
         });
     }
 
+    public CompletableFuture<Void> resellItems(String player) {
+        return CompletableFuture.runAsync(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                connection.setAutoCommit(false);
+
+                try (PreparedStatement selectStatement = connection.prepareStatement(
+                        "SELECT * FROM unsold_items WHERE player = ?");
+                     PreparedStatement insertStatement = connection.prepareStatement(
+                             "INSERT INTO sell_items (player, itemstack, tags, price, amount, by_one, create_time) " +
+                                     "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                     PreparedStatement deleteStatement = connection.prepareStatement(
+                             "DELETE FROM unsold_items WHERE id = ?")) {
+
+                    selectStatement.setString(1, player);
+                    try (ResultSet rs = selectStatement.executeQuery()) {
+                        while (rs.next()) {
+                            UnsoldItem unsoldItem = extractUnsoldItemFromResultSet(rs);
+
+                            insertStatement.setString(1, unsoldItem.getPlayer());
+                            insertStatement.setString(2, unsoldItem.getItemStack());
+                            insertStatement.setString(3, String.join(",", unsoldItem.getTags()));
+                            insertStatement.setInt(4, unsoldItem.getPrice());
+                            insertStatement.setInt(5, unsoldItem.getAmount());
+                            insertStatement.setBoolean(6, unsoldItem.isByOne());
+                            insertStatement.setLong(7, System.currentTimeMillis());
+                            insertStatement.addBatch();
+
+                            deleteStatement.setInt(1, unsoldItem.getId());
+                            deleteStatement.addBatch();
+                        }
+
+                        insertStatement.executeBatch();
+                        deleteStatement.executeBatch();
+                        connection.commit();
+                    }
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw e;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     private UnsoldItem extractUnsoldItemFromResultSet(ResultSet rs) throws SQLException {
         Set<String> tags = new HashSet<>();
         String tagsStr = rs.getString("tags");
@@ -172,8 +220,9 @@ public class UnsoldItems {
                 rs.getString("player"),
                 rs.getString("itemstack"),
                 tags,
-                rs.getInt("amount"),
                 rs.getInt("price"),
+                rs.getInt("amount"),
+                rs.getBoolean("by_one"),
                 rs.getLong("create_time")
         );
     }

@@ -403,8 +403,8 @@ public class SellItems {
                 try (PreparedStatement selectStatement = connection.prepareStatement(
                         "SELECT * FROM sell_items WHERE create_time < ?");
                      PreparedStatement insertStatement = connection.prepareStatement(
-                             "INSERT INTO unsold_items (player, itemstack, tags, amount, price, create_time) " +
-                                     "VALUES (?, ?, ?, ?, ?, ?)");
+                             "INSERT INTO unsold_items (player, itemstack, tags, amount, price, by_one, create_time) " +
+                                     "VALUES (?, ?, ?, ?, ?, ?, ?)");
                      PreparedStatement deleteStatement = connection.prepareStatement(
                              "DELETE FROM sell_items WHERE id = ?")) {
 
@@ -414,12 +414,14 @@ public class SellItems {
                             SellItem item = extractSellItemFromResultSet(rs);
                             ItemStack itemStack = item.decodeItemStack();
                             LiteAuction.getInstance().getRedisManager().publishMessage("msg", item.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + item.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
+
                             insertStatement.setString(1, item.getPlayer());
                             insertStatement.setString(2, item.getItemStack());
                             insertStatement.setString(3, String.join(",", item.getTags()));
                             insertStatement.setInt(4, item.getAmount());
                             insertStatement.setInt(5, item.getPrice());
-                            insertStatement.setLong(6, System.currentTimeMillis());
+                            insertStatement.setBoolean(6, item.isByOne());
+                            insertStatement.setLong(7, System.currentTimeMillis());
                             insertStatement.addBatch();
 
                             deleteStatement.setInt(1, item.getId());

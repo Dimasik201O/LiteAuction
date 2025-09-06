@@ -88,8 +88,10 @@ public class Admin extends SubCommand {
                 return;
             }
 
+            boolean byOne = (args.length == 3) || args[4].equalsIgnoreCase("true");
+
             try {
-                LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(target, ItemEncrypt.encodeItem(itemStack), TagUtil.getAllTags(itemStack), price, itemCount);
+                LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(target, ItemEncrypt.encodeItem(itemStack), TagUtil.getAllTags(itemStack), price, itemCount, byOne);
                 ItemHoverUtil.sendHoverItemMessage(player, Parser.color("Предмет %item%&f добавлен в истекшие предметы игроку " + target + " по цене " + (price * itemCount) + " (" + price + " за 1 ед.)"), itemStack);
                 player.setItemInHand(null);
             } catch (IOException e) {
@@ -97,12 +99,34 @@ public class Admin extends SubCommand {
                 Bukkit.getLogger().warning("Ошибка кодирования предмета: " + e);
             }
         }
+        else if(args[1].equalsIgnoreCase("resellItems")){
+            if(args.length < 3){
+                player.sendMessage("Укажите игрока.");
+                return;
+            }
+            String target = args[2];
+
+            LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().resellItems(target).thenAccept(
+                (v) -> {
+                    player.sendMessage("Предметы перевыставлены.");
+                }
+            );
+        }
     }
 
     @Override
     public List<String> getTabCompletes(CommandSender sender, String[] args) {
         if(args.length == 2){
-            return List.of("getTags", "deleteItem", "addUnsoldItemTo");
+            return List.of("getTags", "deleteItem", "addUnsoldItemTo", "resellItems");
+        }
+        else if(args.length == 3){
+            if(args[1].equalsIgnoreCase("resellItems")){
+                return Bukkit
+                    .getOnlinePlayers()
+                    .stream()
+                    .map(Player::getName)
+                    .toList();
+            }
         }
         return List.of();
     }

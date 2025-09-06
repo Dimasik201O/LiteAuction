@@ -17,7 +17,7 @@ import java.nio.file.Files;
 public class UpdateChecker {
     private final JavaPlugin plugin;
     private final File pluginFile;
-    private final String currentVersion = "v1.7.8";
+    private final String currentVersion = "v1.7.9";
     private final String changeLogUrl;
     private final String pluginUrl;
 
