@@ -129,6 +129,10 @@ public class TagUtil {
             }
         }
 
+        if(meta.isUnbreakable()){
+            tags.add("unbreakable");
+        }
+
         return tags;
     }
 

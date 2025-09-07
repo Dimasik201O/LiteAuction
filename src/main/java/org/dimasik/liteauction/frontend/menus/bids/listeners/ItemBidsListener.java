@@ -75,31 +75,25 @@ public class ItemBidsListener extends AbstractListener {
                     List<Integer> slotsList = itemBids.getAvailableBidsSlots();
                     for(int i = 0; i < slotsList.size(); i++){
                         if(slotsList.get(i) == slot){
-                            Optional<Bid> bidOptional = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getHighestBidForItem(itemBids.getBidItem().getId()).get();
-                            if(bidOptional.isEmpty() || bidOptional.get().getPrice() < itemBids.getAvailableBids().get(slotsList.get(i))) {
-                                BidItem bidItem = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(itemBids.getBidItem().getId()).get().get();
-                                bidItem.setCurrentPrice(finalPrice);
-                                if(bidItem.getExpiryTime() - System.currentTimeMillis() < 5000) {
-                                    bidItem.setExpiryTime(System.currentTimeMillis() + 30000);
-                                }
-                                LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().updateItem(bidItem);
-                                LiteAuction.getInstance().getDatabaseManager().getBidsManager().addBid(
-                                        itemBids.getBidItem().getId(),
-                                        player.getName(),
-                                        itemBids.getAvailableBids().get(slotsList.get(i))
-                                );
-                                LiteAuction.getInstance().getRedisManager().publishMessage("update", "bids " + itemBids.getBidItem().getId() + " refresh");
+                            BidItem bidItem = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(itemBids.getBidItem().getId()).get().get();
+                            bidItem.setCurrentPrice(finalPrice);
+                            if(bidItem.getExpiryTime() - System.currentTimeMillis() < 5000) {
+                                bidItem.setExpiryTime(System.currentTimeMillis() + 30000);
                             }
-                            return;
-                        }
-                        Optional<Bid> bidOptional = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getHighestBidForItem(itemBids.getBidItem().getId()).get();
-                        if(bidOptional.isEmpty() || bidOptional.get().getPrice() < itemBids.getAvailableBids().get(slotsList.get(i))) {
+                            LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().updateItem(bidItem);
                             LiteAuction.getInstance().getDatabaseManager().getBidsManager().addBid(
                                     itemBids.getBidItem().getId(),
                                     player.getName(),
                                     itemBids.getAvailableBids().get(slotsList.get(i))
                             );
+                            LiteAuction.getInstance().getRedisManager().publishMessage("update", "bids " + itemBids.getBidItem().getId() + " refresh");
+                            return;
                         }
+                        LiteAuction.getInstance().getDatabaseManager().getBidsManager().addBid(
+                                itemBids.getBidItem().getId(),
+                                player.getName(),
+                                itemBids.getAvailableBids().get(slotsList.get(i))
+                        );
                     }
                 }
             } catch (Exception e) {
