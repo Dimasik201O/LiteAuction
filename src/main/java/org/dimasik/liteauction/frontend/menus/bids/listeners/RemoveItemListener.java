@@ -52,7 +52,7 @@ public class RemoveItemListener extends AbstractListener {
                         ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
                         LiteAuction.getInstance().getRedisManager().publishMessage("update", "market " + removeItem.getBidItem().getId());
                         addItemInventory(player.getInventory(), itemStack, player.getLocation());
-                        LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(removeItem.getBidItem().getId());
+                        LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(removeItem.getBidItem().getId());
 
                         player.closeInventory();
                         break;
