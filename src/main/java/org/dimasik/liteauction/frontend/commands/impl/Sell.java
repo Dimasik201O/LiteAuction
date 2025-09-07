@@ -153,7 +153,7 @@ public class Sell extends SubCommand {
                         }
                         int step = (int) rawStep;
 
-                        if(price / 10 <= step){
+                        if((double) price / 10 <= step){
                             player.sendMessage(Parser.color("&#FB2222▶ &fЦена шага не должна превышать 10% от начальной суммы"));
                             return;
                         }
