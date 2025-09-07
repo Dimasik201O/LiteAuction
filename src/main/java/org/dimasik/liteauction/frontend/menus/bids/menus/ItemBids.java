@@ -40,6 +40,7 @@ public class ItemBids extends AbstractMenu {
             availableBids.clear();
             availableBidsSlots.clear();
             inventory = Bukkit.createInventory(this, 54, "Просмотр лота");
+            bidItem = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(bidItem.getId()).get().get();
             if(true){
                 ItemStack itemStack = new ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE);
                 ItemMeta itemMeta = itemStack.getItemMeta();
@@ -123,12 +124,6 @@ public class ItemBids extends AbstractMenu {
                 lore.add(Parser.color(" &x&0&5&F&B&0&0&n▍&f Текущая цена лота: &x&0&5&F&B&0&0" + Formatter.formatPrice(bidItem.getCurrentPrice())));
                 lore.add(Parser.color(" &x&0&5&F&B&0&0▍"));
                 lore.add(Parser.color(""));
-                if(bidItem.getPlayer().equalsIgnoreCase(viewer.getName())){
-                    lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"));
-                }
-                else{
-                    lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите ЛКМ, чтобы сделать ставку"));
-                }
                 itemMeta.setLore(lore);
                 itemStack.setItemMeta(itemMeta);
                 inventory.setItem(slotsList.get(slot), itemStack);

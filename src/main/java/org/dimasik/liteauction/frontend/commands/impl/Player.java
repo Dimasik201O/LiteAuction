@@ -3,6 +3,9 @@ package org.dimasik.liteauction.frontend.commands.impl;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.dimasik.liteauction.backend.enums.AuctionType;
+import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.frontend.commands.CommandExecutor;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
@@ -18,10 +21,18 @@ public class Player extends SubCommand {
     public void execute(org.bukkit.entity.Player player, Command command, String[] args) {
         String target = args[1];
         if(target.matches("^[a-zA-Z0-9_]+$") && target.length() >= 3 && target.length() <= 16){
-            Main main = new Main(1);
-            main.setPlayer(player);
-            main.setTarget(target);
-            main.compile().open();
+            if(CommandExecutor.getAuctionTypes().getOrDefault(player, AuctionType.MARKET) == AuctionType.MARKET) {
+                org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                main.setPlayer(player);
+                main.setTarget(target);
+                main.setPlayer(player).compile().open();
+            }
+            else {
+                org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                main.setPlayer(player);
+                main.setTarget(target);
+                main.setPlayer(player).compile().open();
+            }
         }
         else{
             leaveUsage(player);

@@ -4,9 +4,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.utils.ItemNameUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.frontend.commands.CommandExecutor;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
@@ -27,9 +29,16 @@ public class Search extends SubCommand {
                 player.sendMessage(Parser.color("&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра."));
                 return;
             }
-            Main main = new Main(1);
-            main.setFilters(TagUtil.getPartialTags(itemStack));
-            main.setPlayer(player).compile().open();
+            if(CommandExecutor.getAuctionTypes().getOrDefault(player, AuctionType.MARKET) == AuctionType.MARKET) {
+                org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                main.setFilters(TagUtil.getPartialTags(itemStack));
+                main.setPlayer(player).compile().open();
+            }
+            else {
+                org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                main.setFilters(TagUtil.getPartialTags(itemStack));
+                main.setPlayer(player).compile().open();
+            }
         }
         else{
             String find = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
@@ -37,9 +46,16 @@ public class Search extends SubCommand {
                 player.sendMessage(Parser.color("&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра."));
                 return;
             }
-            Main main = new Main(1);
-            main.setFilters(ItemNameUtil.escapeTag(find));
-            main.setPlayer(player).compile().open();
+            if(CommandExecutor.getAuctionTypes().getOrDefault(player, AuctionType.MARKET) == AuctionType.MARKET) {
+                org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                main.setFilters(ItemNameUtil.escapeTag(find));
+                main.setPlayer(player).compile().open();
+            }
+            else {
+                org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                main.setFilters(ItemNameUtil.escapeTag(find));
+                main.setPlayer(player).compile().open();
+            }
         }
     }
 
