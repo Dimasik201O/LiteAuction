@@ -179,7 +179,7 @@ public class BidItems {
                     ItemStack itemStack = bidItem.decodeItemStack();
                     List<Bid> bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemId(bidItem.getId()).get();
                     if(bids.isEmpty()){
-                        LiteAuction.getInstance().getRedisManager().publishMessage("msg", bidItem.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
+                        LiteAuction.getInstance().getRedisManager().publishMessage("hover", bidItem.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
                         LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(
                                 bidItem.getPlayer(),
                                 bidItem.getItemStack(),

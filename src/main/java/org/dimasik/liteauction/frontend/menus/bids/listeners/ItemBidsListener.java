@@ -64,7 +64,7 @@ public class ItemBidsListener extends AbstractListener {
                     if(lastBid != null && !lastBid.getPlayer().equalsIgnoreCase(player.getName())){
                         LiteAuction.getEconomyEditor().addBalance(lastBid.getPlayer(), finalPrice - addPrice);
                         LiteAuction.getInstance().getRedisManager().publishMessage(
-                                "msg",
+                                "hover",
                                 lastBid.getPlayer() + " " +
                                 ItemHoverUtil.getHoverItemMessage(
                                         Parser.color("&#00D4FB▶ &fВаша ставка на предмет &6%item%&6 x" + itemStack.getAmount() + " &fу &6" + itemBids.getBidItem().getPlayer() + " &fбыла перебита игроком &6" + player.getName() + "!"),

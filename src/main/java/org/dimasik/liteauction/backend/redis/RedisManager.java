@@ -9,6 +9,8 @@ import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.mysql.models.BidItem;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.ContainerUtil;
+import org.dimasik.liteauction.backend.utils.ItemEncrypt;
+import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 import org.dimasik.liteauction.frontend.menus.bids.menus.ItemBids;
@@ -70,6 +72,15 @@ public class RedisManager {
                         Player player = Bukkit.getPlayer(playerName);
                         if (player != null) {
                             player.sendMessage(msg);
+                        }
+                    } else if (channel.equals(RedisManager.this.channel + "_hover")) {
+                        String[] splitted = message.split(" ");
+                        String msg = String.join(" ", Arrays.copyOfRange(splitted, 2, splitted.length));
+                        String playerName = splitted[0];
+                        String encodedItemStack = splitted[1];
+                        Player player = Bukkit.getPlayer(playerName);
+                        if (player != null) {
+                            ItemHoverUtil.sendHoverItemMessage(player, msg, ItemEncrypt.decodeItem(encodedItemStack));
                         }
                     } else if (channel.equals(RedisManager.this.channel + "_sound")) {
                         String[] splitted = message.split(" ");
@@ -179,7 +190,7 @@ public class RedisManager {
 
         new Thread(() -> {
             try (Jedis jedis = jedisPool.getResource()) {
-                jedis.subscribe(pubSub, channel + "_msg", channel + "_sound", channel + "_update");
+                jedis.subscribe(pubSub, channel + "_msg", channel + "_hover", channel + "_sound", channel + "_update");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
