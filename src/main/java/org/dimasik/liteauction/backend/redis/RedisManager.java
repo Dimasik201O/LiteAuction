@@ -160,11 +160,13 @@ public class RedisManager {
                                             }
                                         }
                                         else if(action.equalsIgnoreCase("refresh")){
-                                            Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                                gui.setForceClose(true);
-                                                gui.compile().open();
-                                                gui.setForceClose(false);
-                                            });
+                                            if(gui.getBidItem().getId() == id) {
+                                                Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                    gui.setForceClose(true);
+                                                    gui.compile().open();
+                                                    gui.setForceClose(false);
+                                                });
+                                            }
                                         }
                                     }
                                 }
