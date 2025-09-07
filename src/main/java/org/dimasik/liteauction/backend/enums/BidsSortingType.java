@@ -1,15 +1,13 @@
 package org.dimasik.liteauction.backend.enums;
 
-public enum SortingType {
+public enum BidsSortingType {
     CHEAPEST_FIRST,
     EXPENSIVE_FIRST,
-    CHEAPEST_PER_UNIT,
-    EXPENSIVE_PER_UNIT,
     NEWEST_FIRST,
     OLDEST_FIRST;
 
-    public SortingType relative(boolean next) {
-        SortingType[] values = SortingType.values();
+    public BidsSortingType relative(boolean next) {
+        BidsSortingType[] values = BidsSortingType.values();
         int currentOrdinal = this.ordinal();
         int nextOrdinal;
 

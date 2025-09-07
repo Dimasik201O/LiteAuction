@@ -17,7 +17,8 @@ import java.nio.file.Files;
 public class UpdateChecker {
     private final JavaPlugin plugin;
     private final File pluginFile;
-    private final String currentVersion = "v1.7.9";
+    private final boolean testMode = false;
+    private final String currentVersion = "v2.0.0";
     private final String changeLogUrl;
     private final String pluginUrl;
 
@@ -32,22 +33,22 @@ public class UpdateChecker {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 String latestVersion = getLatestVersion();
-                plugin.getLogger().info("Проверка наличия обновлений...");
+                plugin.getLogger().info("   [   проверка обновлений   ]   ");
                 if (isNewerVersion(latestVersion, currentVersion)) {
-                    plugin.getLogger().info("Найдена новая версия: " + latestVersion + " (current: " + currentVersion + ")");
-                    plugin.getLogger().info("Скачиваю обновление...");
+                    plugin.getLogger().info("   |   ʜᴀйдᴇʜᴀ ʜᴏʙᴀя ʙᴇᴘᴄия: " + latestVersion + " | тᴇᴋущᴀя: " + currentVersion + (testMode ? " (ᴛᴇsᴛᴍᴏᴅᴇ)" : ""));
+                    plugin.getLogger().info("   |   зᴀгᴘузᴋᴀ пᴏᴄлᴇдʜᴇй ʙᴇᴘᴄии...");
 
                     if (downloadUpdate()) {
-                        plugin.getLogger().info("Обновление скачано. Устанавливаю...");
+                        plugin.getLogger().info("   |   ᴏбʜᴏʙлᴇʜиᴇ ᴄᴋᴀчᴀʜᴏ");
                         installUpdate();
                     } else {
-                        plugin.getLogger().warning("Ошибка скачивания обновления.");
+                        plugin.getLogger().warning("   |   ᴏшибᴋᴀ ᴄᴋᴀчиʙᴀʜия ᴏбʜᴏʙлᴇʜия");
                     }
                 } else {
-                    plugin.getLogger().info("У вас установлена последняя версия (" + currentVersion + ")");
+                    plugin.getLogger().info("   |   у ʙᴀᴄ ужᴇ пᴏᴄлᴇдʜяя ʙᴇᴘᴄия (" + currentVersion + ")");
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("Ошибка обновления плагина: " + e.getMessage());
+                plugin.getLogger().warning("   |   ᴏшибᴋᴀ ᴏбʜᴏʙлᴇʜия: " + e.getMessage());
             }
         });
     }
@@ -64,6 +65,7 @@ public class UpdateChecker {
     }
 
     private boolean isNewerVersion(String newVersion, String currentVersion) {
+        if(testMode) return true;
         if (newVersion == null || currentVersion == null) return false;
         return newVersion.compareTo(currentVersion) > 0;
     }
@@ -78,27 +80,38 @@ public class UpdateChecker {
             fos.close();
             return true;
         } catch (IOException e) {
-            plugin.getLogger().warning("Ошибка при попытке скачать обновление плагина: " + e.getMessage());
+            plugin.getLogger().warning("   |   ᴏшибᴋᴀ ᴄᴋᴀчиʙᴀʜия ᴏбʜᴏʙлᴇʜия: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
     private void installUpdate() {
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
-            File pluginFile = this.pluginFile;
+        try {
             File updateFile = new File(plugin.getDataFolder().getParent(), "LiteAuction-updated.jar");
 
-            try {
-                Files.move(updateFile.toPath(), pluginFile.toPath(),
-                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-                PluginManager pm = plugin.getServer().getPluginManager();
-                pm.disablePlugin(plugin);
-                pm.enablePlugin(pm.loadPlugin(pluginFile));
-            } catch (Exception e) {
-                plugin.getLogger().warning("Ошибка при попытке установить обновление плагина: " + e.getMessage());
-                e.printStackTrace();
+            if (!updateFile.exists()) {
+                plugin.getLogger().warning("   |   пᴏᴄлᴇдʜяя ʙᴇᴘᴄия ʜᴇ ʜᴀйдᴇʜᴀ");
+                return;
             }
-        });
+
+            if(!testMode) {
+                Files.move(
+                        updateFile.toPath(),
+                        pluginFile.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+            }
+            else{
+                Files.delete(updateFile.toPath());
+            }
+
+            plugin.getLogger().info("   |   плᴀгиʜ уᴄпᴇшʜᴏ ᴏбʜᴏʙлᴇʜ");
+            plugin.getLogger().info("   |   пᴇᴘᴇзᴀпуᴄтитᴇ ᴄᴇᴘʙᴇᴘ, чтᴏбы ᴏбʜᴏʙлᴇʜиᴇ пᴘимᴇʜилᴏᴄь");
+        } catch (Exception e) {
+            plugin.getLogger().warning("   |   ᴏшибᴋᴀ уᴄтᴀʜᴏʙᴋи ᴏбʜᴏʙлᴇʜия: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
+
 }

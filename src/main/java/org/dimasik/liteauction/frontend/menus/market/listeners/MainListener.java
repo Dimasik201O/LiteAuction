@@ -1,41 +1,38 @@
-package org.dimasik.liteauction.frontend.listeners;
+package org.dimasik.liteauction.frontend.menus.market.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.enums.SortingType;
+import org.dimasik.liteauction.backend.enums.AuctionType;
+import org.dimasik.liteauction.backend.enums.CategoryType;
+import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
-import org.dimasik.liteauction.frontend.menus.*;
+import org.dimasik.liteauction.frontend.commands.CommandExecutor;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
+import org.dimasik.liteauction.frontend.menus.market.menus.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
-import static org.dimasik.liteauction.LiteAuction.removeClosedUpdates;
-
-public class MainListener implements Listener {
+public class MainListener extends AbstractListener {
     @EventHandler
-    public void on(InventoryClickEvent event){
+    public void onClick(InventoryClickEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof Main){
+        if(inventory.getHolder() instanceof Main main){
             event.setCancelled(true);
             if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
                 return;
             }
-            Main main = (Main) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
             try {
@@ -47,7 +44,6 @@ public class MainListener implements Listener {
                     if(sellItem != null){
                         if(sellItem.getPlayer().equalsIgnoreCase(player.getName())){
                             new RemoveItem(sellItem, main).setPlayer(player).compile().open();
-                            return;
                         }
                         else{
                             if(event.getClick() == ClickType.SWAP_OFFHAND && player.hasPermission("liteauction.admin")){
@@ -145,6 +141,14 @@ public class MainListener implements Listener {
                         newMain.setSortingType(main.getSortingType());
                         newMain.setPlayer(player).compile().open();
                     }
+                } else if(slot == 49){
+                    org.dimasik.liteauction.frontend.menus.bids.menus.Main newMain = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(main.getPage());
+                    newMain.setTarget(main.getPlayer());
+                    newMain.setFilters(main.getFilters());
+                    newMain.setCategoryType(main.getCategoryType());
+                    newMain.setPlayer(player).compile().open();
+                    player.sendMessage(Parser.color("&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Ставки&f."));
+                    CommandExecutor.getAuctionTypes().put(player, AuctionType.BIDS);
                 } else if (slot == 50) {
                     int newPage = main.getPage() + 1;
 
@@ -167,9 +171,19 @@ public class MainListener implements Listener {
                     }
                 }
                 else if (slot == 52) {
+                    MarketSortingType newSortingType;
+                    if(event.isLeftClick()) {
+                        newSortingType = main.getSortingType().relative(true);
+                    }
+                    else if(event.isRightClick()) {
+                        newSortingType = main.getSortingType().relative(false);
+                    }
+                    else{
+                        return;
+                    }
                     int newPage = main.getPage();
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), newSortingType, main.getFilters(), main.getCategoryType()).get();
                     int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
@@ -179,25 +193,26 @@ public class MainListener implements Listener {
                     newMain.setTarget(main.getPlayer());
                     newMain.setFilters(main.getFilters());
                     newMain.setCategoryType(main.getCategoryType());
-                    if(event.isLeftClick()){
-                        newMain.setSortingType(main.getSortingType().relative(true));
-                        newMain.setPlayer(player).compile().open();
-                        if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-                        }
-                    }
-                    else if(event.isRightClick()){
-                        newMain.setSortingType(main.getSortingType().relative(false));
-                        newMain.setPlayer(player).compile().open();
-                        if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-                        }
+                    newMain.setSortingType(newSortingType);
+                    newMain.setPlayer(player).compile().open();
+                    if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
                     }
                 }
                 else if (slot == 53) {
+                    CategoryType newCategoryType;
+                    if(event.isLeftClick()) {
+                        newCategoryType = main.getCategoryType().relative(true);
+                    }
+                    else if(event.isRightClick()) {
+                        newCategoryType = main.getCategoryType().relative(false);
+                    }
+                    else{
+                        return;
+                    }
                     int newPage = main.getPage();
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), newCategoryType).get();
                     int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
@@ -207,33 +222,16 @@ public class MainListener implements Listener {
                     newMain.setTarget(main.getPlayer());
                     newMain.setFilters(main.getFilters());
                     newMain.setSortingType(main.getSortingType());
-                    if(event.isLeftClick()){
-                        newMain.setCategoryType(main.getCategoryType().relative(true));
-                        newMain.setPlayer(player).compile().open();
-                        if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-                        }
-                    }
-                    else if(event.isRightClick()){
-                        newMain.setCategoryType(main.getCategoryType().relative(false));
-                        newMain.setPlayer(player).compile().open();
-                        if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-                        }
+                    newMain.setCategoryType(newCategoryType);
+                    newMain.setPlayer(player).compile().open();
+                    if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
+                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
                     }
                 }
             } catch (Exception e) {
                 player.closeInventory();
                 player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
             }
-        }
-    }
-
-    @EventHandler
-    public void on(InventoryCloseEvent event){
-        Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof Main){
-            removeClosedUpdates();
         }
     }
 }

@@ -8,7 +8,7 @@ import org.dimasik.liteauction.backend.utils.ItemNameUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
-import org.dimasik.liteauction.frontend.menus.Main;
+import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
 import java.util.*;
 

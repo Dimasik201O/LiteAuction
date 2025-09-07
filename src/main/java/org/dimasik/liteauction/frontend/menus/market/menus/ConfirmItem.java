@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.frontend.menus;
+package org.dimasik.liteauction.frontend.menus.market.menus;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,23 +13,18 @@ import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfirmItem implements InventoryHolder {
-    @Getter
+@Getter
+public class ConfirmItem extends AbstractMenu {
     @Setter
-    private boolean forceClose;
-    @Getter
+    private boolean forceClose = false;
     private SellItem sellItem;
-    @Getter
-    private Player viewer;
-    @Getter
     private Main back;
-    @Getter
-    private Inventory inventory;
 
     public ConfirmItem(SellItem sellItem, Main back){
         this.sellItem = sellItem;
@@ -110,14 +105,5 @@ public class ConfirmItem implements InventoryHolder {
     public ConfirmItem setPlayer(Player player){
         this.viewer = player;
         return this;
-    }
-
-    public void open(){
-        viewer.openInventory(inventory);
-    }
-
-    @Override
-    public @NotNull Inventory getInventory() {
-        return inventory;
     }
 }

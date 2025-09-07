@@ -6,37 +6,31 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.listeners.JoinListener;
 import org.dimasik.liteauction.backend.mysql.DatabaseManager;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.redis.RedisManager;
-import org.dimasik.liteauction.backend.redis.UpdateData;
+import org.dimasik.liteauction.backend.utils.ContainerUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.economy.EconomyEditor;
 import org.dimasik.liteauction.economy.impl.StickEco;
 import org.dimasik.liteauction.economy.impl.VaultEco;
 import org.dimasik.liteauction.frontend.commands.CommandExecutor;
 import org.dimasik.liteauction.frontend.commands.impl.*;
-import org.dimasik.liteauction.frontend.listeners.*;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
+import org.dimasik.liteauction.frontend.menus.bids.listeners.ItemBidsListener;
+import org.dimasik.liteauction.frontend.menus.market.listeners.*;
 
 @Getter
 public final class LiteAuction extends JavaPlugin {
     private DatabaseManager databaseManager;
     private RedisManager redisManager;
     private CommandExecutor commandExecutor;
-    @Getter
-    private static final ConcurrentHashMap<UpdateData, Integer> items = new ConcurrentHashMap<>();
     @Getter
     private static ItemStack boughtItem;
     @Getter
@@ -102,13 +96,17 @@ public final class LiteAuction extends JavaPlugin {
 
     private void setupListeners(){
         PluginManager pluginManager = super.getServer().getPluginManager();
-        pluginManager.registerEvents(new MainListener(), this);
-        pluginManager.registerEvents(new RemoveItemListener(), this);
-        pluginManager.registerEvents(new SellListener(), this);
-        pluginManager.registerEvents(new UnsoldListener(), this);
-        pluginManager.registerEvents(new ConfirmItemListener(), this);
-        pluginManager.registerEvents(new CountBuyItemListener(), this);
         pluginManager.registerEvents(new JoinListener(), this);
+        new org.dimasik.liteauction.frontend.menus.market.listeners.MainListener().register();
+        new org.dimasik.liteauction.frontend.menus.bids.listeners.MainListener().register();
+        new org.dimasik.liteauction.frontend.menus.market.listeners.SellListener().register();
+        new org.dimasik.liteauction.frontend.menus.bids.listeners.SellListener().register();
+        new org.dimasik.liteauction.frontend.menus.market.listeners.RemoveItemListener().register();
+        new org.dimasik.liteauction.frontend.menus.bids.listeners.RemoveItemListener().register();
+        new ItemBidsListener().register();
+        new UnsoldListener().register();
+        new ConfirmItemListener().register();
+        new CountBuyItemListener().register();
     }
 
     private void setupBoughtItem(){
@@ -122,22 +120,17 @@ public final class LiteAuction extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> LiteAuction.getInstance().getDatabaseManager().moveExpiredItems(), 0, 50);
     }
 
-    public static void removeClosedUpdates(){
-        for(Map.Entry<UpdateData, Integer> entry : getItems().entrySet()){
-            UpdateData updateData = entry.getKey();
-            if(updateData.getInventory().getViewers().isEmpty()){
-                items.remove(updateData, entry.getValue());
-            }
-        }
-    }
-
     @Override
     public void onDisable() {
         // Plugin shutdown logic
-        Iterator<Map.Entry<UpdateData, Integer>> iterator = items.entrySet().iterator();
-        while(iterator.hasNext()){
-            Map.Entry<UpdateData, Integer> entry = iterator.next();
-            entry.getKey().getInventory().close();
+        for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()){
+            if(ContainerUtil.hasActiveContainer(player)){
+                Inventory inventory = ContainerUtil.getActiveContainer(player);
+                InventoryHolder holder = inventory.getHolder();
+                if(holder instanceof AbstractMenu){
+                    inventory.close();
+                }
+            }
         }
         if(redisManager != null){
             redisManager.close();

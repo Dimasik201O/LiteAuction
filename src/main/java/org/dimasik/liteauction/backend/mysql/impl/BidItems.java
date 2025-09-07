@@ -3,20 +3,23 @@ package org.dimasik.liteauction.backend.mysql.impl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
-import org.dimasik.liteauction.backend.enums.MarketSortingType;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.mysql.models.Bid;
+import org.dimasik.liteauction.backend.mysql.models.BidItem;
+import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-public class SellItems {
+public class BidItems {
     private final HikariDataSource dataSource;
 
-    public SellItems(HikariDataSource dataSource) {
+    public BidItems(HikariDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -24,14 +27,15 @@ public class SellItems {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection();
                  Statement statement = connection.createStatement()) {
-                String sql = "CREATE TABLE IF NOT EXISTS sell_items (" +
+                String sql = "CREATE TABLE IF NOT EXISTS bid_items (" +
                         "id INT AUTO_INCREMENT PRIMARY KEY, " +
                         "player VARCHAR(16) NOT NULL, " +
                         "itemstack TEXT NOT NULL, " +
                         "tags TEXT, " +
-                        "price INT NOT NULL, " +
-                        "amount INT NOT NULL, " +
-                        "by_one BOOLEAN NOT NULL, " +
+                        "start_price INT NOT NULL, " +
+                        "current_price INT NOT NULL, " +
+                        "step INT NOT NULL, " +
+                        "expiry_time BIGINT NOT NULL, " +
                         "create_time BIGINT NOT NULL)";
                 statement.execute(sql);
             } catch (SQLException e) {
@@ -40,32 +44,36 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<Integer> addItem(String player, String itemStack, Set<String> tags, int price, int amount, boolean byOne) {
+    public CompletableFuture<Integer> addItem(String player, String itemStack, Set<String> tags,
+                                                 int startPrice, int step, long expiryTime) {
         return CompletableFuture.supplyAsync(() -> {
             long createTime = System.currentTimeMillis();
+            int currentPrice = startPrice;
+
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "INSERT INTO sell_items (player, itemstack, tags, price, amount, by_one, create_time) " +
-                                 "VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+                         "INSERT INTO bid_items (player, itemstack, tags, start_price, current_price, step, expiry_time, create_time) " +
+                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
 
                 statement.setString(1, player);
                 statement.setString(2, itemStack);
                 statement.setString(3, String.join(",", tags));
-                statement.setInt(4, price);
-                statement.setInt(5, amount);
-                statement.setBoolean(6, byOne);
-                statement.setLong(7, createTime);
+                statement.setInt(4, startPrice);
+                statement.setInt(5, currentPrice);
+                statement.setInt(6, step);
+                statement.setLong(7, expiryTime);
+                statement.setLong(8, createTime);
 
                 int affectedRows = statement.executeUpdate();
                 if (affectedRows == 0) {
-                    throw new SQLException("Creating item failed, no rows affected.");
+                    throw new SQLException("Creating bid item failed, no rows affected.");
                 }
 
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         return generatedKeys.getInt(1);
                     }
-                    throw new SQLException("Creating item failed, no ID obtained.");
+                    throw new SQLException("Creating bid item failed, no ID obtained.");
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -73,32 +81,31 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getAllItems() {
-        return CompletableFuture.supplyAsync(() -> {
-            List<SellItem> items = new ArrayList<>();
+    public CompletableFuture<Void> updateCurrentPrice(int itemId, int newPrice) {
+        return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement();
-                 ResultSet rs = statement.executeQuery("SELECT * FROM sell_items")) {
-                while (rs.next()) {
-                    items.add(extractSellItemFromResultSet(rs));
-                }
-                return items;
+                 PreparedStatement statement = connection.prepareStatement(
+                         "UPDATE bid_items SET current_price = ? WHERE id = ?")) {
+
+                statement.setInt(1, newPrice);
+                statement.setInt(2, itemId);
+                statement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    public CompletableFuture<Optional<SellItem>> getItemById(int id) {
+    public CompletableFuture<Optional<Integer>> getCurrentPrice(int itemId) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE id = ?")) {
+                         "SELECT current_price FROM bid_items WHERE id = ?")) {
 
-                statement.setInt(1, id);
+                statement.setInt(1, itemId);
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
-                        return Optional.of(extractSellItemFromResultSet(rs));
+                        return Optional.of(rs.getInt("current_price"));
                     }
                     return Optional.empty();
                 }
@@ -108,16 +115,53 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getPlayerItems(String player) {
+    public CompletableFuture<Optional<BidItem>> getItem(int id) {
         return CompletableFuture.supplyAsync(() -> {
-            List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE player = ? ORDER BY create_time DESC")) {
-                statement.setString(1, player);
+                         "SELECT * FROM bid_items WHERE id = ?")) {
+
+                statement.setInt(1, id);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return Optional.of(extractBidItemFromResultSet(rs));
+                    }
+                    return Optional.empty();
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<BidItem>> getAllItems() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<BidItem> items = new ArrayList<>();
+            try (Connection connection = dataSource.getConnection();
+                 Statement statement = connection.createStatement();
+                 ResultSet rs = statement.executeQuery("SELECT * FROM bid_items")) {
+                while (rs.next()) {
+                    items.add(extractBidItemFromResultSet(rs));
+                }
+                return items;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<BidItem>> getActiveItems() {
+        return CompletableFuture.supplyAsync(() -> {
+            List<BidItem> items = new ArrayList<>();
+            long currentTime = System.currentTimeMillis();
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT * FROM bid_items WHERE expiry_time > ?")) {
+
+                statement.setLong(1, currentTime);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
-                        items.add(extractSellItemFromResultSet(rs));
+                        items.add(extractBidItemFromResultSet(rs));
                     }
                     return items;
                 }
@@ -127,19 +171,59 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getExpiredPlayerItems(String player) {
+    public CompletableFuture<Void> moveExpiredItems(){
+        return CompletableFuture.runAsync(() -> {
+            try {
+                List<BidItem> items = getExpiredItems().get();
+                for(BidItem bidItem : items){
+                    ItemStack itemStack = bidItem.decodeItemStack();
+                    List<Bid> bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemId(bidItem.getId()).get();
+                    if(bids.isEmpty()){
+                        LiteAuction.getInstance().getRedisManager().publishMessage("msg", bidItem.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
+                        LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(
+                                bidItem.getPlayer(),
+                                bidItem.getItemStack(),
+                                bidItem.getTags(),
+                                (bidItem.getCurrentPrice() / itemStack.getAmount()) * itemStack.getAmount(),
+                                itemStack.getAmount(),
+                                true
+                        );
+                    }
+                    else {
+                        Bid lastBid = bids.get(bids.size() - 1);
+                        LiteAuction.getEconomyEditor().addBalance(lastBid.getPlayer(), lastBid.getPrice());
+                        LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(
+                                lastBid.getPlayer(),
+                                bidItem.getItemStack(),
+                                bidItem.getTags(),
+                                (bidItem.getCurrentPrice() / itemStack.getAmount()) * itemStack.getAmount(),
+                                itemStack.getAmount(),
+                                true
+                        );
+                        LiteAuction.getInstance().getRedisManager().publishMessage("msg", lastBid.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВы выкупили лот игрока &6" + bidItem.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice()) + "&f. Заберите его из меню просроченных предметов."));
+                        LiteAuction.getInstance().getRedisManager().publishMessage("msg", bidItem.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВаш лот был продан игроку &#00D4FB" + lastBid.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice())));                    }
+                    LiteAuction.getInstance().getRedisManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
+                }
+                deleteExpiredItems();
+            }
+            catch (InterruptedException | ExecutionException e){
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<BidItem>> getExpiredItems() {
         return CompletableFuture.supplyAsync(() -> {
-            List<SellItem> items = new ArrayList<>();
-            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+            List<BidItem> items = new ArrayList<>();
+            long currentTime = System.currentTimeMillis();
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE player = ? AND create_time < ?")) {
+                         "SELECT * FROM bid_items WHERE expiry_time <= ?")) {
 
-                statement.setString(1, player);
-                statement.setLong(2, twelveHoursAgo);
+                statement.setLong(1, currentTime);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
-                        items.add(extractSellItemFromResultSet(rs));
+                        items.add(extractBidItemFromResultSet(rs));
                     }
                     return items;
                 }
@@ -149,24 +233,18 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getItems(MarketSortingType sortingType, Set<String> filters) {
+    public CompletableFuture<List<BidItem>> getPlayerItems(String player) {
         return CompletableFuture.supplyAsync(() -> {
-            List<SellItem> items = new ArrayList<>();
-            try (Connection connection = dataSource.getConnection()) {
-                String sql = buildQuery(sortingType, filters);
-                try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                    if (filters != null && !filters.isEmpty()) {
-                        int paramIndex = 1;
-                        for (String filter : filters) {
-                            statement.setString(paramIndex++, "%" + filter + "%");
-                        }
+            List<BidItem> items = new ArrayList<>();
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT * FROM bid_items WHERE player = ? ORDER BY create_time DESC")) {
+                statement.setString(1, player);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        items.add(extractBidItemFromResultSet(rs));
                     }
-                    try (ResultSet rs = statement.executeQuery()) {
-                        while (rs.next()) {
-                            items.add(extractSellItemFromResultSet(rs));
-                        }
-                        return items;
-                    }
+                    return items;
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -174,11 +252,11 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getItems(MarketSortingType sortingType,
-                                                      Set<String> additionalFilters,
-                                                      CategoryType categoryFilter) {
+    public CompletableFuture<List<BidItem>> getItems(BidsSortingType sortingType,
+                                                     Set<String> additionalFilters,
+                                                     CategoryType categoryFilter) {
         return CompletableFuture.supplyAsync(() -> {
-            List<SellItem> items = new ArrayList<>();
+            List<BidItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection()) {
                 String sql = buildQuery(sortingType, additionalFilters, categoryFilter);
                 try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -198,7 +276,7 @@ public class SellItems {
 
                     try (ResultSet rs = statement.executeQuery()) {
                         while (rs.next()) {
-                            items.add(extractSellItemFromResultSet(rs));
+                            items.add(extractBidItemFromResultSet(rs));
                         }
                         return items;
                     }
@@ -209,15 +287,15 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getItems(String owner,
-                                                             MarketSortingType sortingType,
-                                                             Set<String> additionalFilters,
-                                                             CategoryType categoryFilter) {
-        if(owner == null){
+    public CompletableFuture<List<BidItem>> getItems(String owner,
+                                                     BidsSortingType sortingType,
+                                                     Set<String> additionalFilters,
+                                                     CategoryType categoryFilter) {
+        if (owner == null) {
             return getItems(sortingType, additionalFilters, categoryFilter);
         }
         return CompletableFuture.supplyAsync(() -> {
-            List<SellItem> items = new ArrayList<>();
+            List<BidItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection()) {
                 String sql = buildOwnerQuery(owner, sortingType, additionalFilters, categoryFilter);
                 try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -239,7 +317,7 @@ public class SellItems {
 
                     try (ResultSet rs = statement.executeQuery()) {
                         while (rs.next()) {
-                            items.add(extractSellItemFromResultSet(rs));
+                            items.add(extractBidItemFromResultSet(rs));
                         }
                         return items;
                     }
@@ -250,10 +328,10 @@ public class SellItems {
         });
     }
 
-    private String buildQuery(MarketSortingType sortingType,
+    private String buildQuery(BidsSortingType sortingType,
                               Set<String> additionalFilters,
                               CategoryType categoryFilter) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM sell_items");
+        StringBuilder sql = new StringBuilder("SELECT * FROM bid_items");
         List<String> conditions = new ArrayList<>();
 
         if (categoryFilter != CategoryType.ALL) {
@@ -293,10 +371,10 @@ public class SellItems {
     }
 
     private String buildOwnerQuery(String owner,
-                                   MarketSortingType sortingType,
+                                   BidsSortingType sortingType,
                                    Set<String> additionalFilters,
                                    CategoryType categoryFilter) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM sell_items WHERE player = ?");
+        StringBuilder sql = new StringBuilder("SELECT * FROM bid_items WHERE player = ? AND expiry_time > " + System.currentTimeMillis());
 
         if (categoryFilter != CategoryType.ALL) {
             sql.append(" AND (");
@@ -325,55 +403,34 @@ public class SellItems {
         return sql.toString();
     }
 
-    private String getOrderByClause(MarketSortingType sortingType) {
+    private String getOrderByClause(BidsSortingType sortingType) {
         return " ORDER BY " + switch (sortingType) {
-            case CHEAPEST_FIRST -> "(price * amount) ASC";
-            case EXPENSIVE_FIRST -> "(price * amount) DESC";
-            case CHEAPEST_PER_UNIT -> "price ASC";
-            case EXPENSIVE_PER_UNIT -> "price DESC";
+            case CHEAPEST_FIRST -> "current_price ASC";
+            case EXPENSIVE_FIRST -> "current_price DESC";
             case NEWEST_FIRST -> "create_time DESC";
             case OLDEST_FIRST -> "create_time ASC";
             default -> "id ASC";
         };
     }
 
-    public CompletableFuture<Void> updateItem(SellItem item) {
+    public CompletableFuture<Void> updateItem(BidItem item) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "UPDATE sell_items SET player = ?, itemstack = ?, tags = ?, " +
-                                 "price = ?, amount = ?, by_one = ?, create_time = ? WHERE id = ?")) {
+                         "UPDATE bid_items SET player = ?, itemstack = ?, tags = ?, " +
+                                 "start_price = ?, current_price = ?, step = ?, expiry_time = ?, create_time = ? WHERE id = ?")) {
 
                 statement.setString(1, item.getPlayer());
                 statement.setString(2, item.getItemStack());
                 statement.setString(3, String.join(",", item.getTags()));
-                statement.setInt(4, item.getPrice());
-                statement.setInt(5, item.getAmount());
-                statement.setBoolean(6, item.isByOne());
-                statement.setLong(7, item.getCreateTime());
-                statement.setInt(8, item.getId());
+                statement.setInt(4, item.getStartPrice());
+                statement.setInt(5, item.getCurrentPrice());
+                statement.setInt(6, item.getStep());
+                statement.setLong(7, item.getExpiryTime());
+                statement.setLong(8, item.getCreateTime());
+                statement.setInt(9, item.getId());
 
                 statement.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    public CompletableFuture<Optional<SellItem>> getItem(int id) {
-        return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = dataSource.getConnection();
-                 PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE id = ?")) {
-
-                statement.setInt(1, id);
-
-                try (ResultSet rs = statement.executeQuery()) {
-                    if (rs.next()) {
-                        return Optional.of(extractSellItemFromResultSet(rs));
-                    }
-                    return Optional.empty();
-                }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -384,7 +441,7 @@ public class SellItems {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "DELETE FROM sell_items WHERE id = ?")) {
+                         "DELETE FROM bid_items WHERE id = ?")) {
 
                 statement.setInt(1, id);
                 statement.executeUpdate();
@@ -394,108 +451,37 @@ public class SellItems {
         });
     }
 
-    public CompletableFuture<Void> moveExpiredItems() {
+    public CompletableFuture<Void> deleteExpiredItems() {
         return CompletableFuture.runAsync(() -> {
-            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
-            try (Connection connection = dataSource.getConnection()) {
-                connection.setAutoCommit(false);
-                try (PreparedStatement selectStatement = connection.prepareStatement(
-                        "SELECT * FROM sell_items WHERE create_time < ?");
-                     PreparedStatement insertStatement = connection.prepareStatement(
-                             "INSERT INTO unsold_items (player, itemstack, tags, amount, price, by_one, create_time) " +
-                                     "VALUES (?, ?, ?, ?, ?, ?, ?)");
-                     PreparedStatement deleteStatement = connection.prepareStatement(
-                             "DELETE FROM sell_items WHERE id = ?")) {
+            long currentTime = System.currentTimeMillis();
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "DELETE FROM bid_items WHERE expiry_time <= ?")) {
 
-                    selectStatement.setLong(1, twelveHoursAgo);
-                    try (ResultSet rs = selectStatement.executeQuery()) {
-                        while (rs.next()) {
-                            SellItem item = extractSellItemFromResultSet(rs);
-                            ItemStack itemStack = item.decodeItemStack();
-                            LiteAuction.getInstance().getRedisManager().publishMessage("msg", item.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + item.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
-
-                            insertStatement.setString(1, item.getPlayer());
-                            insertStatement.setString(2, item.getItemStack());
-                            insertStatement.setString(3, String.join(",", item.getTags()));
-                            insertStatement.setInt(4, item.getAmount());
-                            insertStatement.setInt(5, item.getPrice());
-                            insertStatement.setBoolean(6, item.isByOne());
-                            insertStatement.setLong(7, System.currentTimeMillis());
-                            insertStatement.addBatch();
-
-                            deleteStatement.setInt(1, item.getId());
-                            deleteStatement.addBatch();
-                        }
-
-                        insertStatement.executeBatch();
-                        deleteStatement.executeBatch();
-                        connection.commit();
-                    }
-                } catch (SQLException e) {
-                    connection.rollback();
-                    throw e;
-                }
+                statement.setLong(1, currentTime);
+                statement.executeUpdate();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         });
     }
 
-    private String buildQuery(MarketSortingType sortingType, Set<String> filters) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM sell_items");
-
-        if (filters != null && !filters.isEmpty()) {
-            sql.append(" WHERE ");
-            for (int i = 0; i < filters.size(); i++) {
-                if (i > 0) {
-                    sql.append(" AND ");
-                }
-                sql.append("tags LIKE ?");
-            }
-        }
-
-        sql.append(" ORDER BY ");
-        switch (sortingType) {
-            case CHEAPEST_FIRST:
-                sql.append("(price * amount) ASC");
-                break;
-            case EXPENSIVE_FIRST:
-                sql.append("(price * amount) DESC");
-                break;
-            case CHEAPEST_PER_UNIT:
-                sql.append("price ASC");
-                break;
-            case EXPENSIVE_PER_UNIT:
-                sql.append("price DESC");
-                break;
-            case NEWEST_FIRST:
-                sql.append("create_time DESC");
-                break;
-            case OLDEST_FIRST:
-                sql.append("create_time ASC");
-                break;
-            default:
-                sql.append("id ASC");
-        }
-
-        return sql.toString();
-    }
-
-    private SellItem extractSellItemFromResultSet(ResultSet rs) throws SQLException {
+    private BidItem extractBidItemFromResultSet(ResultSet rs) throws SQLException {
         Set<String> tags = new HashSet<>();
         String tagsStr = rs.getString("tags");
         if (tagsStr != null && !tagsStr.isEmpty()) {
             tags.addAll(Arrays.asList(tagsStr.split(",")));
         }
 
-        return new SellItem(
+        return new BidItem(
                 rs.getInt("id"),
                 rs.getString("player"),
                 rs.getString("itemstack"),
                 tags,
-                rs.getInt("price"),
-                rs.getInt("amount"),
-                rs.getBoolean("by_one"),
+                rs.getInt("start_price"),
+                rs.getInt("current_price"),
+                rs.getInt("step"),
+                rs.getLong("expiry_time"),
                 rs.getLong("create_time")
         );
     }

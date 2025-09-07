@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.frontend.menus;
+package org.dimasik.liteauction.frontend.menus.market.menus;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,34 +10,27 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
-import org.dimasik.liteauction.backend.redis.UpdateData;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Unsold implements InventoryHolder {
-    @Getter
+@Getter
+public class Unsold extends AbstractMenu {
     @Setter
-    private boolean forceClose;
+    private boolean forceClose = false;
     @Setter
-    @Getter
     private int page;
-    @Getter
-    private Main back;
-    @Getter
+    private AbstractMenu back;
     private HashMap<Integer, UnsoldItem> items = new HashMap<>();
-    @Getter
-    private Player viewer;
-    private Inventory inventory;
 
-    public Unsold(int page, Main back){
+    public Unsold(int page, AbstractMenu back){
         this.page = page;
         this.back = back;
     }
@@ -127,14 +120,5 @@ public class Unsold implements InventoryHolder {
     public Unsold setPlayer(Player player){
         this.viewer = player;
         return this;
-    }
-
-    public void open(){
-        viewer.openInventory(inventory);
-    }
-
-    @Override
-    public @NotNull Inventory getInventory() {
-        return inventory;
     }
 }

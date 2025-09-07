@@ -1,10 +1,13 @@
 package org.dimasik.liteauction.backend.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@Getter
 public enum CategoryType {
     ALL("Все подряд", new HashSet<>()),
     TOOLS("Инструменты", new HashSet<>(Arrays.asList("pickaxe", "axe", "shovel", "hoe", "flint_and_steel"))),
@@ -32,14 +35,6 @@ public enum CategoryType {
     CategoryType(String displayName, Set<String> tags) {
         this.displayName = displayName;
         this.tags = tags;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public Set<String> getTags() {
-        return tags;
     }
 
     public static CategoryType fromDisplayName(String displayName) {

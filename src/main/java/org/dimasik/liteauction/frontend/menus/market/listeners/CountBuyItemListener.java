@@ -1,10 +1,9 @@
-package org.dimasik.liteauction.frontend.listeners;
+package org.dimasik.liteauction.frontend.menus.market.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -14,24 +13,23 @@ import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.frontend.menus.CountBuyItem;
-import org.dimasik.liteauction.frontend.menus.Main;
-import org.dimasik.liteauction.frontend.menus.RemoveItem;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
+import org.dimasik.liteauction.frontend.menus.market.menus.CountBuyItem;
+import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
 import java.util.Optional;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
-public class CountBuyItemListener implements Listener {
+public class CountBuyItemListener extends AbstractListener {
     @EventHandler
-    public void on(InventoryClickEvent event){
+    public void onClick(InventoryClickEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof CountBuyItem) {
+        if(inventory.getHolder() instanceof CountBuyItem countBuyItem) {
             event.setCancelled(true);
             if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
                 return;
             }
-            CountBuyItem countBuyItem = (CountBuyItem) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
             try {
@@ -107,7 +105,7 @@ public class CountBuyItemListener implements Listener {
 
                     addItemInventory(player.getInventory(), itemStack.asQuantity(countBuyItem.getCount()), player.getLocation());
                     if(countBuyItem.getCount() == sellItem.getAmount()) {
-                        LiteAuction.getInstance().getRedisManager().publishMessage("update", countBuyItem.getSellItem().getId());
+                        LiteAuction.getInstance().getRedisManager().publishMessage("update", "market " + sellItem.getId());
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(sellItem.getId());
                     }
                     else{
@@ -158,8 +156,7 @@ public class CountBuyItemListener implements Listener {
     @EventHandler
     public void on(InventoryCloseEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof CountBuyItem) {
-            CountBuyItem countBuyItem = (CountBuyItem) inventory.getHolder();
+        if(inventory.getHolder() instanceof CountBuyItem countBuyItem) {
             if(countBuyItem.isForceClose()){
                 return;
             }

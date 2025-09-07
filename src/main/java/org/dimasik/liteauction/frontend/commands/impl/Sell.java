@@ -1,6 +1,5 @@
 package org.dimasik.liteauction.frontend.commands.impl;
 
-import org.bukkit.ChatColor;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.Command;
@@ -11,8 +10,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.NumberType;
-import org.dimasik.liteauction.backend.enums.SortingType;
-import org.dimasik.liteauction.backend.mysql.DatabaseManager;
+import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.*;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
@@ -23,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Sell extends SubCommand {
     private final HashMap<Player, AutoSellData> autoSells = new HashMap<>();
@@ -58,7 +58,7 @@ public class Sell extends SubCommand {
             }
 
             try {
-                List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(SortingType.CHEAPEST_PER_UNIT, TagUtil.getPartialTags(itemStack)).get();
+                List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(MarketSortingType.CHEAPEST_PER_UNIT, TagUtil.getPartialTags(itemStack)).get();
                 int priceForOne = ConfigManager.getDEFAULT_AUTO_PRICE();
                 if(!sellItems.isEmpty()){
                     priceForOne = sellItems.get(0).getPrice();
@@ -129,6 +129,56 @@ public class Sell extends SubCommand {
             }
 
             try {
+                if(!full && args.length > 2){
+                    try{
+                        NumberType stepType = NumberType.DEFAULT;
+                        String stepNumber = args[2];
+                        if(args[2].endsWith("kk")){
+                            stepType = NumberType.KK;
+                            stepNumber = stepNumber.substring(0, stepNumber.length() - 2);
+                        }
+                        else if(args[2].endsWith("m")){
+                            stepType = NumberType.M;
+                            stepNumber = stepNumber.substring(0, stepNumber.length() - 1);
+                        }
+                        else if(args[2].endsWith("k")){
+                            stepType = NumberType.K;
+                            stepNumber = stepNumber.substring(0, stepNumber.length() - 1);
+                        }
+
+                        double rawStep = Double.parseDouble(stepNumber);
+                        switch (stepType){
+                            case K -> rawStep*=1000;
+                            case KK, M -> rawStep*=1000000;
+                        }
+                        int step = (int) rawStep;
+
+                        if(price / 10 <= step){
+                            player.sendMessage(Parser.color("&#FB2222▶ &fЦена шага не должна превышать 10% от начальной суммы"));
+                            return;
+                        }
+
+                        long translatedTime = args.length > 3 ? parseTimeToSeconds(args[3]) : 86400L;
+                        if(translatedTime == -1){
+                            leaveUsage(player);
+                            return;
+                        }
+                        if(translatedTime < 300 || translatedTime > 86400){
+                            player.sendMessage(Parser.color("&#FB2222▶ &fВремя продажи предмета должна находиться в пределах &#FB22225мин...1д.&f."));
+                            return;
+                        }
+
+                        if(canSell(player)) {
+                            LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price, step, (translatedTime * 1000) + System.currentTimeMillis());
+                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount()), itemStack);
+                            player.setItemInHand(null);
+                        }
+                    }
+                    catch (NumberFormatException e){
+                        leaveUsage(player);
+                    }
+                    return;
+                }
                 int itemCount = itemStack.getAmount();
                 if((price / itemCount) * itemCount < 1){
                     leaveUsage(player);
@@ -138,6 +188,7 @@ public class Sell extends SubCommand {
                     leaveUsage(player);
                     return;
                 }
+
                 if(canSell(player)) {
                     LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price / itemCount, itemCount, full);
                     ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
@@ -155,26 +206,9 @@ public class Sell extends SubCommand {
     public List<String> getTabCompletes(CommandSender sender, String[] args) {
         List<String> completions = new ArrayList<>();
         String lastArg = args[args.length - 1];
-        if(args.length == 2){
-            completions.add("auto");
-        }
-        else if(args.length == 3){
-            if(args[1].equalsIgnoreCase("auto")){
-                Player player = super.requirePlayer(sender);
-                ItemStack itemStack = player.getItemInHand();
-                if(itemStack != null && !itemStack.getType().isAir()){
-                    if(autoSells.containsKey(player)) {
-                        AutoSellData model = autoSells.get(player);
-                        if(model.itemStack.isSimilar(itemStack)) {
-                            completions.add("confirm");
-                        }
-                    }
-                }
-            }
-            completions.add("full");
-        }
         switch (args.length){
             case 2:
+                completions.add("auto");
                 try{
                     int cnt = Integer.parseInt(lastArg);
                     completions.add(cnt + "k");
@@ -190,6 +224,39 @@ public class Sell extends SubCommand {
 
                     }
                 }
+                break;
+            case 3:
+                if(args[1].equalsIgnoreCase("auto")){
+                    completions.add("full");
+                    Player player = super.requirePlayer(sender);
+                    ItemStack itemStack = player.getItemInHand();
+                    if(itemStack != null && !itemStack.getType().isAir()){
+                        if(autoSells.containsKey(player)) {
+                            AutoSellData model = autoSells.get(player);
+                            if(model.itemStack.isSimilar(itemStack)) {
+                                completions.add("confirm");
+                            }
+                        }
+                    }
+                }
+                else {
+                    try {
+                        int cnt = Integer.parseInt(lastArg);
+                        completions.add(cnt + "k");
+                        completions.add(cnt + "kk");
+                        completions.add(cnt + "m");
+                    } catch (NumberFormatException ignore) {
+                        try {
+                            double cnt = Double.parseDouble(lastArg);
+                            completions.add(cnt + "k");
+                            completions.add(cnt + "kk");
+                            completions.add(cnt + "m");
+                        } catch (NumberFormatException ignored) {
+                            completions.add("full");
+                        }
+                    }
+                }
+                break;
         }
         return completions;
     }
@@ -228,5 +295,55 @@ public class Sell extends SubCommand {
             return false;
         }
         return true;
+    }
+
+    public static long parseTimeToSeconds(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return -1;
+        }
+
+        input = input.trim().toLowerCase();
+        boolean hasTimeSymbol = input.matches(".*[дdhчмm].*");
+        if (!hasTimeSymbol) {
+            try {
+                return Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+
+        long totalSeconds = 0;
+        boolean validFormat = false;
+        Pattern pattern = Pattern.compile("(\\d+)([дdhчмm])");
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            try {
+                long value = Integer.parseInt(matcher.group(1));
+                String symbol = matcher.group(2);
+
+                switch (symbol) {
+                    case "д":
+                    case "d":
+                        totalSeconds += value * 24 * 60 * 60;
+                        break;
+                    case "ч":
+                    case "h":
+                        totalSeconds += value * 60 * 60;
+                        break;
+                    case "м":
+                    case "m":
+                        totalSeconds += value * 60;
+                        break;
+                }
+                validFormat = true;
+            } catch (NumberFormatException e) {
+                return -1;
+
+            }
+        }
+        if (!validFormat) {
+            return -1;
+        }
+        return totalSeconds;
     }
 }

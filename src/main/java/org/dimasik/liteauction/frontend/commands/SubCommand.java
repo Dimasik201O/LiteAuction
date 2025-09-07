@@ -36,9 +36,11 @@ public abstract class SubCommand {
         player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah &f — открыть меню аукциона"));
         player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell <цена> &f— выставить товар на Рынок"));
         player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell <цена> full &f— выставить товар (весь лот)"));
+        player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell <цена> <шаг> [время] &f- выставить товар (Ставки)"));
         player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell auto &f— продать товар (рыночная цена)"));
         player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah search [название] &f— найти предметы на аукционе"));
-        player.sendMessage(Parser.color(" &#00D4FB▍&#00D4FB /ah player <никнейм> &f— все товары на рынке"));
+        player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah player <никнейм> &f— все товары на игрока"));
+        player.sendMessage(Parser.color(" &#00D4FB▍&#00D4FB /ah sound &f— переключить слышимость звуков аукциона"));
         player.sendMessage(Parser.color(""));
     }
 

@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.frontend.menus;
+package org.dimasik.liteauction.frontend.menus.market.menus;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,20 +11,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RemoveItem implements InventoryHolder {
-    @Getter
+@Getter
+public class RemoveItem extends AbstractMenu {
+    @Setter
+    private boolean forceClose = false;
     private SellItem sellItem;
-    @Getter
-    private Player viewer;
-    @Getter
     private Main back;
-    @Getter
-    private Inventory inventory;
 
     public RemoveItem(SellItem sellItem, Main back){
         this.sellItem = sellItem;
@@ -96,19 +94,5 @@ public class RemoveItem implements InventoryHolder {
             throw new RuntimeException(e);
         }
         return this;
-    }
-
-    public RemoveItem setPlayer(Player player){
-        this.viewer = player;
-        return this;
-    }
-
-    public void open(){
-        viewer.openInventory(inventory);
-    }
-
-    @Override
-    public @NotNull Inventory getInventory() {
-        return inventory;
     }
 }

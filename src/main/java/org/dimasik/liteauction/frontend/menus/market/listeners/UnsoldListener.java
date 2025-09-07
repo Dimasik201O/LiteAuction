@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.frontend.listeners;
+package org.dimasik.liteauction.frontend.menus.market.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -13,23 +13,21 @@ import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.frontend.menus.Main;
-import org.dimasik.liteauction.frontend.menus.Sell;
-import org.dimasik.liteauction.frontend.menus.Unsold;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
+import org.dimasik.liteauction.frontend.menus.market.menus.Main;
+import org.dimasik.liteauction.frontend.menus.market.menus.Unsold;
 
 import java.util.List;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
-import static org.dimasik.liteauction.LiteAuction.removeClosedUpdates;
 
-public class UnsoldListener implements Listener {
-
+public class UnsoldListener extends AbstractListener {
     @EventHandler
-    public void on(InventoryClickEvent event){
+    public void onClick(InventoryClickEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof Unsold) {
+        if(inventory.getHolder() instanceof Unsold unsold) {
             event.setCancelled(true);
-            Unsold unsold = (Unsold) inventory.getHolder();
             if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
                 return;
             }
@@ -60,9 +58,7 @@ public class UnsoldListener implements Listener {
                     }
                 }
                 else if(slot == 45){
-                    Main main = unsold.getBack();
-                    main.compile().open();
-
+                    player.closeInventory();
                 } else if (slot == 48) {
                     int newPage = unsold.getPage() - 1;
 
@@ -108,13 +104,12 @@ public class UnsoldListener implements Listener {
     @EventHandler
     public void on(InventoryCloseEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof Unsold){
-            Unsold unsold = (Unsold) inventory.getHolder();
+        if(inventory.getHolder() instanceof Unsold unsold){
             if(unsold.isForceClose()){
                 return;
             }
             Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
-                Main main = unsold.getBack();
+                AbstractMenu main = unsold.getBack();
                 if(main.getViewer() != null) {
                     main.compile().open();
                 }

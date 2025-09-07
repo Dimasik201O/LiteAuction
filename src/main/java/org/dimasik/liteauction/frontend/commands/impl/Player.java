@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
-import org.dimasik.liteauction.frontend.menus.Main;
+import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
 import java.util.ArrayList;
 import java.util.List;

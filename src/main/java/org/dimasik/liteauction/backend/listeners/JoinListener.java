@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.frontend.listeners;
+package org.dimasik.liteauction.backend.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

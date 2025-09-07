@@ -2,21 +2,23 @@ package org.dimasik.liteauction.backend.mysql;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.dimasik.liteauction.backend.config.ConfigManager;
+import lombok.Getter;
+import org.dimasik.liteauction.backend.mysql.impl.BidItems;
+import org.dimasik.liteauction.backend.mysql.impl.Bids;
 import org.dimasik.liteauction.backend.mysql.impl.SellItems;
 import org.dimasik.liteauction.backend.mysql.impl.Sounds;
 import org.dimasik.liteauction.backend.mysql.impl.UnsoldItems;
 
 import java.util.concurrent.CompletableFuture;
 
+@Getter
 public class DatabaseManager {
     private final HikariDataSource dataSource;
-    @lombok.Getter
     private final SellItems sellItemsManager;
-    @lombok.Getter
     private final UnsoldItems unsoldItemsManager;
-    @lombok.Getter
     private final Sounds soundsManager;
+    private final BidItems bidItemsManager;
+    private final Bids bidsManager;
 
     public DatabaseManager(String host, String username, String password, String database) {
         HikariConfig config = new HikariConfig();
@@ -32,19 +34,24 @@ public class DatabaseManager {
         this.sellItemsManager = new SellItems(dataSource);
         this.unsoldItemsManager = new UnsoldItems(dataSource);
         this.soundsManager = new Sounds(dataSource);
+        this.bidItemsManager = new BidItems(dataSource);
+        this.bidsManager = new Bids(dataSource);
     }
 
     public CompletableFuture<Void> initialize() {
         return CompletableFuture.allOf(
                 sellItemsManager.createTable(),
                 unsoldItemsManager.createTable(),
-                soundsManager.createTable()
+                soundsManager.createTable(),
+                bidItemsManager.createTable(),
+                bidsManager.createTable()
         );
     }
 
     public void moveExpiredItems() {
         sellItemsManager.moveExpiredItems();
         unsoldItemsManager.deleteExpiredItems();
+        bidItemsManager.moveExpiredItems();
     }
 
     public void close() {

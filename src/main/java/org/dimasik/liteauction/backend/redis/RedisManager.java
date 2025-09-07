@@ -3,7 +3,16 @@ package org.dimasik.liteauction.backend.redis;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.mysql.models.BidItem;
+import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.utils.ContainerUtil;
+import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
+import org.dimasik.liteauction.frontend.menus.bids.menus.ItemBids;
+import org.dimasik.liteauction.frontend.menus.market.menus.*;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.JedisPool;
@@ -76,18 +85,93 @@ public class RedisManager {
                         }
                     }
                     else if (channel.equals(RedisManager.this.channel + "_update")) {
-                        int id = Integer.parseInt(message);
-                        for(Map.Entry<UpdateData, Integer> entry : LiteAuction.getItems().entrySet()){
-                            if(entry.getValue() == id) {
-                                UpdateData updateData = entry.getKey();
-                                updateData.getInventory().setItem(updateData.getSlot(), LiteAuction.getBoughtItem().clone());
-                                LiteAuction.getItems().remove(updateData, id);
+                        String[] splitted = message.split(" ");
+                        int id = Integer.parseInt(splitted[1]);
+                        if(splitted[0].equalsIgnoreCase("market")){
+                            for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()){
+                                if(ContainerUtil.hasActiveContainer(player)){
+                                    Inventory inventory = ContainerUtil.getActiveContainer(player);
+                                    InventoryHolder holder = inventory.getHolder();
+                                    if(holder instanceof Sell gui){
+                                        if(
+                                                gui
+                                                        .getItems()
+                                                        .values()
+                                                        .stream()
+                                                        .anyMatch(i -> i.getId() == id)
+                                        ){
+                                            Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                gui.setForceClose(true);
+                                                gui.compile().open();
+                                                gui.setForceClose(false);
+                                            });
+                                        }
+                                    }
+                                    else if(holder instanceof Main gui){
+                                        for(Map.Entry<Integer, SellItem> entry : gui.getItems().entrySet()){
+                                            if(entry.getValue().getId() == id){
+                                                Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                    inventory.setItem(entry.getKey(), LiteAuction.getBoughtItem().clone());
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(splitted[0].equalsIgnoreCase("bids")){
+                            String action = splitted[2];
+                            for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+                                if (ContainerUtil.hasActiveContainer(player)) {
+                                    Inventory inventory = ContainerUtil.getActiveContainer(player);
+                                    InventoryHolder holder = inventory.getHolder();
+                                    if(holder instanceof org.dimasik.liteauction.frontend.menus.bids.menus.Sell gui){
+                                        if(
+                                                gui
+                                                        .getItems()
+                                                        .values()
+                                                        .stream()
+                                                        .anyMatch(i -> i.getId() == id)
+                                        ){
+                                            Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                gui.setForceClose(true);
+                                                gui.compile().open();
+                                                gui.setForceClose(false);
+                                            });
+                                        }
+                                    }
+                                    else if(holder instanceof org.dimasik.liteauction.frontend.menus.bids.menus.Main gui){
+                                        if(action.equalsIgnoreCase("delete")){
+                                            for(Map.Entry<Integer, BidItem> entry : gui.getItems().entrySet()){
+                                                if(entry.getValue().getId() == id){
+                                                    Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                        inventory.setItem(entry.getKey(), LiteAuction.getBoughtItem().clone());
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if(holder instanceof ItemBids gui){
+                                        if(action.equalsIgnoreCase("delete")){
+                                            if(gui.getBidItem().getId() == id){
+                                                Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                    inventory.setItem(4, LiteAuction.getBoughtItem().clone());
+                                                });
+                                            }
+                                        }
+                                        else if(action.equalsIgnoreCase("refresh")){
+                                            Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                                                gui.setForceClose(true);
+                                                gui.compile().open();
+                                                gui.setForceClose(false);
+                                            });
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                } catch (Exception ignore) { }
             }
         };
 

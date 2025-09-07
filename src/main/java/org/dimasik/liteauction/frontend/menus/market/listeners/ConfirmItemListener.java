@@ -1,10 +1,9 @@
-package org.dimasik.liteauction.frontend.listeners;
+package org.dimasik.liteauction.frontend.menus.market.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -14,25 +13,23 @@ import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.frontend.menus.ConfirmItem;
-import org.dimasik.liteauction.frontend.menus.CountBuyItem;
-import org.dimasik.liteauction.frontend.menus.Main;
-import org.dimasik.liteauction.frontend.menus.RemoveItem;
+import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
+import org.dimasik.liteauction.frontend.menus.market.menus.ConfirmItem;
+import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
 import java.util.Optional;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
-public class ConfirmItemListener implements Listener {
+public class ConfirmItemListener extends AbstractListener {
     @EventHandler
-    public void on(InventoryClickEvent event){
+    public void onClick(InventoryClickEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof ConfirmItem) {
+        if(inventory.getHolder() instanceof ConfirmItem confirmItem) {
             event.setCancelled(true);
             if(event.getClickedInventory() == null || event.getClickedInventory() != inventory){
                 return;
             }
-            ConfirmItem confirmItem = (ConfirmItem) inventory.getHolder();
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
             try {
@@ -61,8 +58,7 @@ public class ConfirmItemListener implements Listener {
                         if(money < price){
                             player.sendMessage(Parser.color("&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."));
                             player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
-                            Main main = confirmItem.getBack();
-                            main.compile().open();
+                            player.closeInventory();
                             return;
                         }
 
@@ -70,7 +66,7 @@ public class ConfirmItemListener implements Listener {
                         ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#FEA900▶ &fВы купили &#FEA900%item%&f &#FEA900x" + confirmItem.getSellItem().getAmount() + " &fу &#FEA900" + sellItem.getPlayer() + " &fза &#FEA900" + Formatter.formatPrice(price)), itemStack);
                         player.playSound(player.getLocation(), Sound.ENTITY_WANDERING_TRADER_YES, 1f, 1f);
 
-                        LiteAuction.getInstance().getRedisManager().publishMessage("update", confirmItem.getSellItem().getId());
+                        LiteAuction.getInstance().getRedisManager().publishMessage("update", "market " + confirmItem.getSellItem().getId());
                         LiteAuction.getInstance().getRedisManager().publishMessage("msg", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + sellItem.getAmount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
                         LiteAuction.getInstance().getRedisManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
 
@@ -104,8 +100,7 @@ public class ConfirmItemListener implements Listener {
     @EventHandler
     public void on(InventoryCloseEvent event){
         Inventory inventory = event.getView().getTopInventory();
-        if(inventory.getHolder() instanceof ConfirmItem) {
-            ConfirmItem confirmItem = (ConfirmItem) inventory.getHolder();
+        if(inventory.getHolder() instanceof ConfirmItem confirmItem) {
             if(confirmItem.isForceClose()){
                 return;
             }

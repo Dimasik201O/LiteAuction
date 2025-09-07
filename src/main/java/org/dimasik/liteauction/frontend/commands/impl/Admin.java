@@ -15,7 +15,10 @@ import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -112,12 +115,55 @@ public class Admin extends SubCommand {
                 }
             );
         }
+        else if (args[1].equalsIgnoreCase("changelog")) {
+            if (args.length < 4) {
+                player.sendMessage("Использование: /ah admin changelog [с какой версии] [по какую версию]");
+                return;
+            }
+
+            String fromVersion = args[2];
+            String toVersion = args[3];
+
+            Bukkit.getScheduler().runTaskAsynchronously(LiteAuction.getInstance(), () -> {
+                try {
+                    URL url = new URL("https://raw.githubusercontent.com/Dimasik201O/LiteAuction/master/change.log");
+                    List<String> lines = new ArrayList<>();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            lines.add(line);
+                        }
+                    }
+
+                    List<String> changelog = extractChangelog(lines, fromVersion, toVersion);
+
+                    if (changelog.isEmpty()) {
+                        player.sendMessage("Нет изменений между " + fromVersion + " и " + toVersion);
+                    } else {
+                        player.sendMessage(Parser.color("&#00D4FB▶ &f▶ Ченджлог &#00D4FB" + fromVersion + " &f→ &#00D4FB" + toVersion + "&f:"));
+                        for (String change : changelog) {
+                            if(change.startsWith("[!]")) {
+                                player.sendMessage(Parser.color(" &7" + change));
+                            }
+                            else{
+                                player.sendMessage(Parser.color("&#FF2222▶ " + change));
+                            }
+                        }
+                    }
+
+                } catch (IOException e) {
+                    player.sendMessage("Ошибка загрузки ченджлога. Смотри консоль.");
+                    Bukkit.getLogger().warning("Ошибка чтения ченджлога: " + e);
+                }
+            });
+        }
+
     }
 
     @Override
     public List<String> getTabCompletes(CommandSender sender, String[] args) {
         if(args.length == 2){
-            return List.of("getTags", "deleteItem", "addUnsoldItemTo", "resellItems");
+            return List.of("getTags", "deleteItem", "addUnsoldItemTo", "resellItems", "changelog");
         }
         else if(args.length == 3){
             if(args[1].equalsIgnoreCase("resellItems")){
@@ -177,4 +223,27 @@ public class Admin extends SubCommand {
 
         player.spigot().sendMessage(message.create());
     }
+
+    private List<String> extractChangelog(List<String> lines, String from, String to) {
+        List<String> result = new ArrayList<>();
+        boolean inRange = false;
+
+        for (String line : lines) {
+            if (line.startsWith("[v")) {
+                if (line.contains(from) && !inRange) {
+                    inRange = true;
+                }
+                if (inRange) {
+                    result.add(line);
+                }
+                if (line.contains(to)) {
+                    break;
+                }
+            } else if (inRange && line.startsWith("[!]")) {
+                result.add(line);
+            }
+        }
+        return result;
+    }
+
 }
