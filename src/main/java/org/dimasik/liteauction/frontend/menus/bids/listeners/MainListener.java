@@ -11,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
@@ -119,6 +120,14 @@ public class MainListener extends AbstractListener {
                         newMain.setPlayer(player).compile().open();
                     }
                 } else if(slot == 49){
+                    int newPage = main.getPage();
+
+                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), ConfigManager.getDefaultMarketSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+
+                    newPage = Math.min(pages, newPage);
+                    newPage = Math.max(1, newPage);
+
                     org.dimasik.liteauction.frontend.menus.market.menus.Main newMain = new org.dimasik.liteauction.frontend.menus.market.menus.Main(main.getPage());
                     newMain.setTarget(main.getPlayer());
                     newMain.setFilters(main.getFilters());

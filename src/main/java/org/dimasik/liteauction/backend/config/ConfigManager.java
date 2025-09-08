@@ -5,6 +5,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.enums.BidsSortingType;
+import org.dimasik.liteauction.backend.enums.MarketSortingType;
 
 import java.io.File;
 import java.util.HashMap;
@@ -28,12 +30,18 @@ public class ConfigManager {
     private static String REDIS_PASSWORD;
     @Getter
     private static String REDIS_CHANNEL;
+
     @Getter
     private static boolean IS_HEAD;
     @Getter
     private static int DEFAULT_AUTO_PRICE;
     @Getter
     private static String ECONOMY_EDITOR;
+
+    @Getter
+    private static MarketSortingType defaultMarketSortingType = MarketSortingType.CHEAPEST_FIRST;
+    @Getter
+    private static BidsSortingType defaultBidsSortingType = BidsSortingType.CHEAPEST_FIRST;
 
     @Getter
     private static Map<String, String> CUSTOM_TAGS = new HashMap<>();
