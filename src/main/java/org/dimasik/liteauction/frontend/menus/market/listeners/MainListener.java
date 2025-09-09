@@ -16,7 +16,9 @@ import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
+import org.dimasik.liteauction.backend.mysql.impl.GuiDatas;
 import org.dimasik.liteauction.backend.mysql.models.BidItem;
+import org.dimasik.liteauction.backend.mysql.models.GuiData;
 import org.dimasik.liteauction.backend.mysql.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
@@ -158,7 +160,6 @@ public class MainListener extends AbstractListener {
                     newMain.setCategoryType(main.getCategoryType());
                     newMain.setPlayer(player).compile().open();
                     player.sendMessage(Parser.color("&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Ставки&f."));
-                    CommandExecutor.getAuctionTypes().put(player, AuctionType.BIDS);
                 } else if (slot == 50) {
                     int newPage = main.getPage() + 1;
 
@@ -242,6 +243,22 @@ public class MainListener extends AbstractListener {
                 player.closeInventory();
                 player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
             }
+        }
+    }
+
+    @EventHandler
+    public void on(InventoryCloseEvent event){
+        Inventory inventory = event.getView().getTopInventory();
+        if(inventory.getHolder() instanceof Main main){
+            Player player = (Player) event.getPlayer();
+            try {
+                GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                guiData.setCategoryType(main.getCategoryType());
+                guiData.setMarketSortingType(main.getSortingType());
+                guiData.setAuctionType(AuctionType.MARKET);
+                LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().saveOrUpdateGuiData(guiData);
+            }
+            catch (Exception ignored) {}
         }
     }
 }

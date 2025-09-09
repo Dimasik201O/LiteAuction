@@ -4,7 +4,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.enums.AuctionType;
+import org.dimasik.liteauction.backend.mysql.models.GuiData;
 import org.dimasik.liteauction.backend.utils.ItemNameUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
@@ -29,15 +31,26 @@ public class Search extends SubCommand {
                 player.sendMessage(Parser.color("&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра."));
                 return;
             }
-            if(CommandExecutor.getAuctionTypes().getOrDefault(player, AuctionType.MARKET) == AuctionType.MARKET) {
-                org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
-                main.setFilters(TagUtil.getPartialTags(itemStack));
-                main.setPlayer(player).compile().open();
-            }
-            else {
-                org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
-                main.setFilters(TagUtil.getPartialTags(itemStack));
-                main.setPlayer(player).compile().open();
+            try {
+                GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                if(guiData.getAuctionType() == AuctionType.MARKET) {
+                    org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                    main.setPlayer(player);
+                    main.setSortingType(guiData.getMarketSortingType());
+                    main.setCategoryType(guiData.getCategoryType());
+                    main.setFilters(TagUtil.getPartialTags(itemStack));
+                    main.compile().open();
+                }
+                else {
+                    org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                    main.setPlayer(player);
+                    main.setSortingType(guiData.getBidsSortingType());
+                    main.setCategoryType(guiData.getCategoryType());
+                    main.compile().open();
+                    main.setFilters(TagUtil.getPartialTags(itemStack));
+                }
+            } catch (Exception e) {
+                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
             }
         }
         else{
@@ -46,15 +59,26 @@ public class Search extends SubCommand {
                 player.sendMessage(Parser.color("&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра."));
                 return;
             }
-            if(CommandExecutor.getAuctionTypes().getOrDefault(player, AuctionType.MARKET) == AuctionType.MARKET) {
-                org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
-                main.setFilters(ItemNameUtil.escapeTag(find));
-                main.setPlayer(player).compile().open();
-            }
-            else {
-                org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
-                main.setFilters(ItemNameUtil.escapeTag(find));
-                main.setPlayer(player).compile().open();
+            try {
+                GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                if(guiData.getAuctionType() == AuctionType.MARKET) {
+                    org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                    main.setPlayer(player);
+                    main.setSortingType(guiData.getMarketSortingType());
+                    main.setCategoryType(guiData.getCategoryType());
+                    main.setFilters(ItemNameUtil.escapeTag(find));
+                    main.compile().open();
+                }
+                else {
+                    org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                    main.setPlayer(player);
+                    main.setSortingType(guiData.getBidsSortingType());
+                    main.setCategoryType(guiData.getCategoryType());
+                    main.setFilters(ItemNameUtil.escapeTag(find));
+                    main.compile().open();
+                }
+            } catch (Exception e) {
+                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
             }
         }
     }

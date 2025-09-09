@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import org.dimasik.liteauction.backend.mysql.impl.BidItems;
 import org.dimasik.liteauction.backend.mysql.impl.Bids;
+import org.dimasik.liteauction.backend.mysql.impl.GuiDatas;
 import org.dimasik.liteauction.backend.mysql.impl.SellItems;
 import org.dimasik.liteauction.backend.mysql.impl.Sounds;
 import org.dimasik.liteauction.backend.mysql.impl.UnsoldItems;
@@ -19,6 +20,7 @@ public class DatabaseManager {
     private final Sounds soundsManager;
     private final BidItems bidItemsManager;
     private final Bids bidsManager;
+    private final GuiDatas guiDatasManager;
 
     public DatabaseManager(String host, String username, String password, String database) {
         HikariConfig config = new HikariConfig();
@@ -36,6 +38,7 @@ public class DatabaseManager {
         this.soundsManager = new Sounds(dataSource);
         this.bidItemsManager = new BidItems(dataSource);
         this.bidsManager = new Bids(dataSource);
+        this.guiDatasManager = new GuiDatas(dataSource);
     }
 
     public CompletableFuture<Void> initialize() {
@@ -44,7 +47,8 @@ public class DatabaseManager {
                 unsoldItemsManager.createTable(),
                 soundsManager.createTable(),
                 bidItemsManager.createTable(),
-                bidsManager.createTable()
+                bidsManager.createTable(),
+                guiDatasManager.createTable()
         );
     }
 

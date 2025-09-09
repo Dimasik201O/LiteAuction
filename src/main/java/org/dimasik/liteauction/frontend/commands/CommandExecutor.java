@@ -5,8 +5,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.exceptions.NotAPlayerException;
+import org.dimasik.liteauction.backend.mysql.models.GuiData;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +21,6 @@ import java.util.List;
 @Getter
 public class CommandExecutor implements TabExecutor {
     private final HashMap<String, SubCommand> subCommands = new HashMap<>();
-    @Getter
-    private static final HashMap<Player, AuctionType> auctionTypes = new HashMap<>();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
@@ -28,11 +28,24 @@ public class CommandExecutor implements TabExecutor {
             return true;
         }
         if(args.length < 1){
-            if(auctionTypes.getOrDefault(player, AuctionType.MARKET) == AuctionType.MARKET) {
-                new org.dimasik.liteauction.frontend.menus.market.menus.Main(1).setPlayer(player).compile().open();
-            }
-            else {
-                new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1).setPlayer(player).compile().open();
+            try {
+                GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                if(guiData.getAuctionType() == AuctionType.MARKET) {
+                    org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                    main.setPlayer(player);
+                    main.setSortingType(guiData.getMarketSortingType());
+                    main.setCategoryType(guiData.getCategoryType());
+                    main.compile().open();
+                }
+                else {
+                    org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                    main.setPlayer(player);
+                    main.setSortingType(guiData.getBidsSortingType());
+                    main.setCategoryType(guiData.getCategoryType());
+                    main.compile().open();
+                }
+            } catch (Exception e) {
+                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
             }
             return true;
         }
