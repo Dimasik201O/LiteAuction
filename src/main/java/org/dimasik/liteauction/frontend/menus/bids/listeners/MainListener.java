@@ -122,9 +122,12 @@ public class MainListener extends AbstractListener {
                         newMain.setPlayer(player).compile().open();
                     }
                 } else if(slot == 49){
+                    GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                    MarketSortingType marketSortingType = guiData.getMarketSortingType();
+
                     int newPage = main.getPage();
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), ConfigManager.getDefaultMarketSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), marketSortingType, main.getFilters(), main.getCategoryType()).get();
                     int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
@@ -134,6 +137,7 @@ public class MainListener extends AbstractListener {
                     newMain.setTarget(main.getPlayer());
                     newMain.setFilters(main.getFilters());
                     newMain.setCategoryType(main.getCategoryType());
+                    newMain.setSortingType(marketSortingType);
                     newMain.setPlayer(player).compile().open();
                     player.sendMessage(Parser.color("&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Торги&f."));
                 } else if (slot == 50) {

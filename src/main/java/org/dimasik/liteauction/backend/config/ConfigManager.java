@@ -39,11 +39,6 @@ public class ConfigManager {
     private static String ECONOMY_EDITOR;
 
     @Getter
-    private static MarketSortingType defaultMarketSortingType = MarketSortingType.CHEAPEST_FIRST;
-    @Getter
-    private static BidsSortingType defaultBidsSortingType = BidsSortingType.CHEAPEST_FIRST;
-
-    @Getter
     private static Map<String, String> CUSTOM_TAGS = new HashMap<>();
 
     private static FileConfiguration config;

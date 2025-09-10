@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
+import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.mysql.impl.GuiDatas;
@@ -146,9 +147,12 @@ public class MainListener extends AbstractListener {
                         newMain.setPlayer(player).compile().open();
                     }
                 } else if(slot == 49){
+                    GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                    BidsSortingType bidsSortingType = guiData.getBidsSortingType();
+
                     int newPage = main.getPage();
 
-                    List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItems(main.getPlayer(), ConfigManager.getDefaultBidsSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItems(main.getPlayer(), bidsSortingType, main.getFilters(), main.getCategoryType()).get();
                     int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
@@ -158,6 +162,7 @@ public class MainListener extends AbstractListener {
                     newMain.setTarget(main.getPlayer());
                     newMain.setFilters(main.getFilters());
                     newMain.setCategoryType(main.getCategoryType());
+                    newMain.setSortingType(bidsSortingType);
                     newMain.setPlayer(player).compile().open();
                     player.sendMessage(Parser.color("&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Ставки&f."));
                 } else if (slot == 50) {
