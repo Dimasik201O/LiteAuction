@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.backend.mysql.models;
+package org.dimasik.liteauction.backend.storage.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.backend.mysql.tables;
+package org.dimasik.liteauction.backend.storage.tables;
 
 import com.zaxxer.hikari.HikariDataSource;
 

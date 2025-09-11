@@ -1,8 +1,10 @@
-package org.dimasik.liteauction.backend.mysql.tables.impl;
+package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
-import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
+import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
+import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 
 import java.sql.*;
 import java.util.*;
@@ -26,6 +28,9 @@ public class UnsoldItems extends AbstractTable {
                         "amount INT NOT NULL, " +
                         "by_one BOOLEAN NOT NULL, " +
                         "create_time BIGINT NOT NULL)";
+
+                sql = LiteAuction.getInstance().getDatabaseManager().editQuery(sql);
+
                 statement.execute(sql);
             } catch (SQLException e) {
                 throw new RuntimeException(e);

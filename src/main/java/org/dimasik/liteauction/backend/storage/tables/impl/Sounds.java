@@ -1,7 +1,8 @@
-package org.dimasik.liteauction.backend.mysql.tables.impl;
+package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
 
 import java.sql.*;
 import java.util.concurrent.CompletableFuture;
@@ -17,7 +18,7 @@ public class Sounds extends AbstractTable {
                  Statement statement = connection.createStatement()) {
                 String sql = "CREATE TABLE IF NOT EXISTS sounds (" +
                         "player VARCHAR(16) PRIMARY KEY, " +
-                        "toggle TINYINT(1) NOT NULL DEFAULT TRUE)";
+                        "toggle BOOLEAN NOT NULL DEFAULT TRUE)";
                 statement.execute(sql);
             } catch (SQLException e) {
                 throw new RuntimeException(e);

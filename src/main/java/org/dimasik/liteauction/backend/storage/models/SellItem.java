@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.backend.mysql.models;
+package org.dimasik.liteauction.backend.storage.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,18 +9,17 @@ import org.dimasik.liteauction.backend.utils.ItemEncrypt;
 import java.io.IOException;
 import java.util.Set;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
-public class BidItem {
-    private int id;
+public class SellItem {
+    private final int id;
     private String player;
     private String itemStack;
     private Set<String> tags;
-    private int startPrice;
-    private int currentPrice;
-    private int step;
-    private long expiryTime;
+    private int price;
+    private int amount;
+    private boolean byOne;
     private long createTime;
 
     public ItemStack decodeItemStack() {

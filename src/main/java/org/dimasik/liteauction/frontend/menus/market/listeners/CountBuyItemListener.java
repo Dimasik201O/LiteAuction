@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;

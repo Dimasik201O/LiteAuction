@@ -1,4 +1,4 @@
-package org.dimasik.liteauction.backend.mysql.models;
+package org.dimasik.liteauction.backend.storage.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,6 @@ import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Data

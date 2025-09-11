@@ -1,8 +1,10 @@
-package org.dimasik.liteauction.backend.mysql.tables.impl;
+package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
-import org.dimasik.liteauction.backend.mysql.models.Bid;
+import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
+import org.dimasik.liteauction.backend.storage.models.Bid;
 
 import java.sql.*;
 import java.util.*;
@@ -23,6 +25,9 @@ public class Bids extends AbstractTable {
                         "player VARCHAR(16) NOT NULL, " +
                         "price INT NOT NULL, " +
                         "FOREIGN KEY (item_id) REFERENCES bid_items(id) ON DELETE CASCADE)";
+
+                sql = LiteAuction.getInstance().getDatabaseManager().editQuery(sql);
+
                 statement.execute(sql);
             } catch (SQLException e) {
                 throw new RuntimeException(e);

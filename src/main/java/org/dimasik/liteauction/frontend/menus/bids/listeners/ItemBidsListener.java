@@ -9,15 +9,14 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.mysql.models.Bid;
-import org.dimasik.liteauction.backend.mysql.models.BidItem;
+import org.dimasik.liteauction.backend.storage.models.Bid;
+import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
 import org.dimasik.liteauction.frontend.menus.bids.menus.ItemBids;
 import org.dimasik.liteauction.frontend.menus.bids.menus.Main;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 

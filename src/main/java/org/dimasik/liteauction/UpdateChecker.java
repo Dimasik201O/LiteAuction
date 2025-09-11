@@ -18,7 +18,7 @@ public class UpdateChecker {
     private final JavaPlugin plugin;
     private final File pluginFile;
     private final boolean testMode = false;
-    private final String currentVersion = "v2.2.4";
+    private final String currentVersion = "v2.3.0";
     private final String changeLogUrl;
     private final String pluginUrl;
 
@@ -33,7 +33,7 @@ public class UpdateChecker {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 String latestVersion = getLatestVersion();
-                plugin.getLogger().info("   [   проверка обновлений   ]   ");
+                plugin.getLogger().info("   [   пᴘᴏʙᴇᴘᴋᴀ ᴏбʜᴏʙлᴇʜий   ]   ");
                 if (isNewerVersion(latestVersion, currentVersion)) {
                     plugin.getLogger().info("   |   ʜᴀйдᴇʜᴀ ʜᴏʙᴀя ʙᴇᴘᴄия: " + latestVersion + " | тᴇᴋущᴀя: " + currentVersion + (testMode ? " (ᴛᴇsᴛᴍᴏᴅᴇ)" : ""));
                     plugin.getLogger().info("   |   зᴀгᴘузᴋᴀ пᴏᴄлᴇдʜᴇй ʙᴇᴘᴄии...");

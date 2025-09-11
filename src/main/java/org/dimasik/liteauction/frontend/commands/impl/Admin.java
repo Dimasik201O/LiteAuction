@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.ItemEncrypt;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;

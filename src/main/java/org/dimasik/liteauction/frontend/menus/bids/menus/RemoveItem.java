@@ -6,8 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.dimasik.liteauction.backend.mysql.models.BidItem;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 

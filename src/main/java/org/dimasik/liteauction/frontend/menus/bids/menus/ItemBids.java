@@ -7,8 +7,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.mysql.models.Bid;
-import org.dimasik.liteauction.backend.mysql.models.BidItem;
+import org.dimasik.liteauction.backend.storage.models.Bid;
+import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
@@ -180,8 +180,7 @@ public class ItemBids extends AbstractMenu {
                 inventory.setItem(53, itemStack);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            // throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
         return this;
     }

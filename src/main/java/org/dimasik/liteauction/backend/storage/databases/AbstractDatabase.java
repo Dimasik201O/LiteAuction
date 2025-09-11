@@ -1,9 +1,10 @@
-package org.dimasik.liteauction.backend.mysql.databases;
+package org.dimasik.liteauction.backend.storage.databases;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
-import org.dimasik.liteauction.backend.mysql.tables.impl.*;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.storage.tables.impl.*;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -31,8 +32,8 @@ public abstract class AbstractDatabase {
         this.guiDatasManager = new GuiDatas(dataSource);
     }
 
-    public void createTables(){
-        CompletableFuture.allOf(
+    public CompletableFuture<Void> createTables(){
+        return CompletableFuture.allOf(
                 sellItemsManager.createTable(),
                 unsoldItemsManager.createTable(),
                 soundsManager.createTable(),
@@ -50,5 +51,9 @@ public abstract class AbstractDatabase {
 
     public void close() {
         dataSource.close();
+    }
+
+    public String editQuery(String sql){
+        return sql;
     }
 }

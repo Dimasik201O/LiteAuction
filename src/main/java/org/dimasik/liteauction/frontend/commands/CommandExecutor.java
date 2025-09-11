@@ -8,9 +8,8 @@ import org.bukkit.entity.Player;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.exceptions.NotAPlayerException;
-import org.dimasik.liteauction.backend.mysql.models.GuiData;
+import org.dimasik.liteauction.backend.storage.models.GuiData;
 import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +44,7 @@ public class CommandExecutor implements TabExecutor {
                     main.compile().open();
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
             }
             return true;

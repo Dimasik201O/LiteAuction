@@ -1,12 +1,14 @@
-package org.dimasik.liteauction.backend.mysql.tables.impl;
+package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
-import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
-import org.dimasik.liteauction.backend.mysql.models.GuiData;
+import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
+import org.dimasik.liteauction.backend.storage.models.GuiData;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -31,6 +33,9 @@ public class GuiDatas extends AbstractTable {
                         "market_sorting_type VARCHAR(30), " +
                         "bids_sorting_type VARCHAR(30), " +
                         "additional_filters TEXT)";
+
+                sql = LiteAuction.getInstance().getDatabaseManager().editQuery(sql);
+
                 statement.execute(sql);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -41,15 +46,13 @@ public class GuiDatas extends AbstractTable {
     public CompletableFuture<GuiData> getOrDefault(String player) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                // Пытаемся получить существующие данные
                 Optional<GuiData> existingData = getGuiDataByPlayer(player).join();
 
                 if (existingData.isPresent()) {
                     return existingData.get();
                 } else {
-                    // Создаем новый GuiData с значениями по умолчанию
                     GuiData defaultGuiData = new GuiData(
-                            0, // id будет сгенерирован базой данных
+                            0,
                             player,
                             AuctionType.MARKET,
                             CategoryType.ALL,
@@ -58,10 +61,8 @@ public class GuiDatas extends AbstractTable {
                             new HashSet<>()
                     );
 
-                    // Сохраняем в базу данных
                     saveGuiData(defaultGuiData).join();
 
-                    // Получаем сохраненный объект с реальным ID
                     return getGuiDataByPlayer(player).join().orElse(defaultGuiData);
                 }
             } catch (Exception e) {
@@ -81,7 +82,6 @@ public class GuiDatas extends AbstractTable {
                 setGuiDataParameters(statement, guiData);
                 statement.executeUpdate();
 
-                // Получаем сгенерированный ID
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
                         guiData.setId(generatedKeys.getInt(1));
@@ -96,7 +96,6 @@ public class GuiDatas extends AbstractTable {
     public CompletableFuture<Void> saveOrUpdateGuiData(GuiData guiData) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                // Проверяем, существует ли уже запись для этого игрока
                 Optional<GuiData> existingData = getGuiDataByPlayer(guiData.getPlayer()).join();
 
                 if (existingData.isPresent()) {

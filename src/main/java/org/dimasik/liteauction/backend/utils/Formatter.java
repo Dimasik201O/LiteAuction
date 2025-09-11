@@ -1,8 +1,8 @@
 package org.dimasik.liteauction.backend.utils;
 
-import org.dimasik.liteauction.backend.mysql.models.BidItem;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
-import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
+import org.dimasik.liteauction.backend.storage.models.BidItem;
+import org.dimasik.liteauction.backend.storage.models.SellItem;
+import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 
 public class Formatter {
     public static final String CURRENCY_SYMBOL = "¤";

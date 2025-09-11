@@ -1,13 +1,14 @@
-package org.dimasik.liteauction.backend.mysql.tables.impl;
+package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
-import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
-import org.dimasik.liteauction.backend.mysql.models.Bid;
-import org.dimasik.liteauction.backend.mysql.models.BidItem;
+import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
+import org.dimasik.liteauction.backend.storage.models.Bid;
+import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
@@ -36,6 +37,9 @@ public class BidItems extends AbstractTable {
                         "step INT NOT NULL, " +
                         "expiry_time BIGINT NOT NULL, " +
                         "create_time BIGINT NOT NULL)";
+
+                sql = LiteAuction.getInstance().getDatabaseManager().editQuery(sql);
+
                 statement.execute(sql);
             } catch (SQLException e) {
                 throw new RuntimeException(e);

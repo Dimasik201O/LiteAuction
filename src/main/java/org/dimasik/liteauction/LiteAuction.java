@@ -12,8 +12,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
 import org.dimasik.liteauction.backend.listeners.JoinListener;
-import org.dimasik.liteauction.backend.mysql.databases.impl.MysqlManager;
+import org.dimasik.liteauction.backend.storage.databases.AbstractDatabase;
+import org.dimasik.liteauction.backend.storage.databases.impl.*;
 import org.dimasik.liteauction.backend.redis.RedisManager;
 import org.dimasik.liteauction.backend.utils.ContainerUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
@@ -28,7 +30,7 @@ import org.dimasik.liteauction.frontend.menus.market.listeners.*;
 
 @Getter
 public final class LiteAuction extends JavaPlugin {
-    private MysqlManager databaseManager;
+    private AbstractDatabase databaseManager;
     private RedisManager redisManager;
     private CommandExecutor commandExecutor;
     @Getter
@@ -45,6 +47,7 @@ public final class LiteAuction extends JavaPlugin {
 
         new UpdateChecker(this, super.getFile()).checkForUpdates();
 
+        super.getLogger().info("   [   зᴀгᴘʏзᴋᴀ ᴋᴏʜфигуᴘᴀции   ]   ");
         setupConfig();
         setupDatabase();
         setupEconomy();
@@ -59,12 +62,29 @@ public final class LiteAuction extends JavaPlugin {
     private void setupConfig(){
         saveDefaultConfig();
         FileConfiguration config = getConfig();
-        ConfigManager.init(config);
+        try {
+            ConfigManager.init(config);
+            super.getLogger().info("   |   ᴋᴏʜȹигуᴘᴀция уᴄпᴇшʜᴏ зᴀгᴘʏжᴇʜᴀ");
+        }
+        catch (UnsupportedConfigurationException e){
+            super.getLogger().warning("   |   ᴏшибᴋᴀ зᴀгᴘузᴋи ᴋᴏʜфигуᴘᴀции: " + e.getMessage());
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
     }
 
     private void setupDatabase(){
-        databaseManager = new MysqlManager(ConfigManager.getMYSQL_HOST(), ConfigManager.getMYSQL_USER(), ConfigManager.getMYSQL_PASSWORD(), ConfigManager.getMYSQL_DATABASE());
-        databaseManager.getSellItemsManager().moveExpiredItems();
+        switch (ConfigManager.getDATABASE_TYPE().toLowerCase()){
+            case "mysql" -> databaseManager = new Mysql(
+                    ConfigManager.getGLOBAL_HOST(),
+                    ConfigManager.getGLOBAL_USER(),
+                    ConfigManager.getGLOBAL_PASSWORD(),
+                    ConfigManager.getGLOBAL_DATABASE()
+            );
+            case "sqlite" -> databaseManager = new SQLite(
+                    ConfigManager.getLOCAL_FILE()
+            );
+        }
+        databaseManager.createTables().join();
 
         redisManager = new RedisManager(ConfigManager.getREDIS_HOST(), ConfigManager.getREDIS_PORT(), ConfigManager.getREDIS_PASSWORD(), ConfigManager.getREDIS_CHANNEL());
     }

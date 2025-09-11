@@ -3,24 +3,24 @@ package org.dimasik.liteauction.backend.config;
 import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.enums.BidsSortingType;
-import org.dimasik.liteauction.backend.enums.MarketSortingType;
+import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigManager {
     @Getter
-    private static String MYSQL_HOST;
+    private static String DATABASE_TYPE;
     @Getter
-    private static String MYSQL_USER;
+    private static String GLOBAL_HOST;
     @Getter
-    private static String MYSQL_PASSWORD;
+    private static String GLOBAL_USER;
     @Getter
-    private static String MYSQL_DATABASE;
+    private static String GLOBAL_PASSWORD;
+    @Getter
+    private static String GLOBAL_DATABASE;
+    @Getter
+    private static String LOCAL_FILE;
 
     @Getter
     private static String REDIS_HOST;
@@ -48,11 +48,21 @@ public class ConfigManager {
         loadConfig();
     }
 
-    public static void loadConfig() {
-        MYSQL_HOST = config.getString("mysql.host", "localhost");
-        MYSQL_USER = config.getString("mysql.user", "root");
-        MYSQL_PASSWORD = config.getString("mysql.password", "сайнес гпт кодер");
-        MYSQL_DATABASE = config.getString("mysql.database", "lite_auction");
+    public static void loadConfig() throws UnsupportedConfigurationException {
+        DATABASE_TYPE = config.getString("database.type", "MySQL");
+        if(
+                !DATABASE_TYPE.equalsIgnoreCase("MySQL") &&
+                !DATABASE_TYPE.equalsIgnoreCase("SQLite")
+        ){
+            throw new UnsupportedConfigurationException("Тип базы данных не существует!");
+        }
+
+        GLOBAL_HOST = config.getString("database.global.host", "localhost");
+        GLOBAL_USER = config.getString("database.global.user", "root");
+        GLOBAL_PASSWORD = config.getString("database.global.password", "сайнес гпт кодер");
+        GLOBAL_DATABASE = config.getString("database.global.database", "lite_auction");
+
+        LOCAL_FILE = config.getString("database.local.name", "database.db");
 
         REDIS_HOST = config.getString("redis.host", "localhost");
         REDIS_PORT = config.getInt("redis.port", 6379);
@@ -61,9 +71,10 @@ public class ConfigManager {
 
         IS_HEAD = config.getBoolean("isHead", true);
         DEFAULT_AUTO_PRICE = config.getInt("default-auto-price", 500);
+
         ECONOMY_EDITOR = config.getString("economy-editor", "StickEco");
         if(!ECONOMY_EDITOR.equalsIgnoreCase("StickEco") && !ECONOMY_EDITOR.equalsIgnoreCase("Vault")){
-            ECONOMY_EDITOR = "StickEco";
+            throw new UnsupportedConfigurationException("Тип экономики не существует!");
         }
 
         loadCustomTags();

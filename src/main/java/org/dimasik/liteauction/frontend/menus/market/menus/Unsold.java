@@ -5,17 +5,14 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
+import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.TagUtil;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;

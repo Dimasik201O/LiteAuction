@@ -1,10 +1,9 @@
-package org.dimasik.liteauction.backend.mysql.models;
+package org.dimasik.liteauction.backend.storage.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
-import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.utils.ItemEncrypt;
 
 import java.io.IOException;
@@ -13,7 +12,7 @@ import java.util.Set;
 @Setter
 @Getter
 @AllArgsConstructor
-public class SellItem {
+public class UnsoldItem {
     private final int id;
     private String player;
     private String itemStack;

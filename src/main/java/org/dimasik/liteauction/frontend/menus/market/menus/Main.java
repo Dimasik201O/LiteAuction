@@ -9,7 +9,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.backend.utils.Formatter;
 import org.dimasik.liteauction.backend.utils.TagUtil;

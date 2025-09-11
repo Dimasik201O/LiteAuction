@@ -11,7 +11,7 @@ import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.NumberType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
-import org.dimasik.liteauction.backend.mysql.models.SellItem;
+import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.*;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 import org.dimasik.liteauction.frontend.commands.models.AutoSellData;
