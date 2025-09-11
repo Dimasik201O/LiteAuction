@@ -412,6 +412,7 @@ public class SellItems {
                         while (rs.next()) {
                             SellItem item = extractSellItemFromResultSet(rs);
                             ItemStack itemStack = item.decodeItemStack();
+                            LiteAuction.getInstance().getRedisManager().publishMessage("update", "market " + item.getId());
                             LiteAuction.getInstance().getRedisManager().publishMessage("hover", item.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + item.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
 
                             insertStatement.setString(1, item.getPlayer());

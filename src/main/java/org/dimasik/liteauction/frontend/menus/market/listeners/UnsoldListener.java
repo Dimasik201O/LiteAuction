@@ -10,6 +10,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.mysql.DatabaseManager;
 import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
 import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
@@ -19,6 +20,7 @@ import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 import org.dimasik.liteauction.frontend.menus.market.menus.Unsold;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
@@ -38,6 +40,12 @@ public class UnsoldListener extends AbstractListener {
                     UnsoldItem unsoldItem = unsold.getItems().get(slot);
                     if(unsoldItem != null){
                         if(unsoldItem.getPlayer().equalsIgnoreCase(player.getName())){
+                            Optional<UnsoldItem> unsoldItemOptional = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getItemById(unsoldItem.getId()).get();
+                            if(unsoldItemOptional.isEmpty()){
+                                player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                                return;
+                            }
+
                             ItemStack itemStack = unsoldItem.decodeItemStack();
                             ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + unsoldItem.getAmount() + " &fбыл снят с продажи."), itemStack);
                             addItemInventory(player.getInventory(), itemStack.asQuantity(unsoldItem.getAmount()), player.getLocation());

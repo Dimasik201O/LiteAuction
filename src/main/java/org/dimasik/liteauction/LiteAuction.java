@@ -117,7 +117,7 @@ public final class LiteAuction extends JavaPlugin {
     }
 
     public void startRunnable(){
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> LiteAuction.getInstance().getDatabaseManager().moveExpiredItems(), 0, 50);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> LiteAuction.getInstance().getDatabaseManager().moveExpiredItems(), 0, 20);
     }
 
     @Override
