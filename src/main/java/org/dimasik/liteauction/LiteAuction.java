@@ -13,7 +13,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.listeners.JoinListener;
-import org.dimasik.liteauction.backend.mysql.DatabaseManager;
+import org.dimasik.liteauction.backend.mysql.databases.impl.MysqlManager;
 import org.dimasik.liteauction.backend.redis.RedisManager;
 import org.dimasik.liteauction.backend.utils.ContainerUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
@@ -28,7 +28,7 @@ import org.dimasik.liteauction.frontend.menus.market.listeners.*;
 
 @Getter
 public final class LiteAuction extends JavaPlugin {
-    private DatabaseManager databaseManager;
+    private MysqlManager databaseManager;
     private RedisManager redisManager;
     private CommandExecutor commandExecutor;
     @Getter
@@ -63,8 +63,7 @@ public final class LiteAuction extends JavaPlugin {
     }
 
     private void setupDatabase(){
-        databaseManager = new DatabaseManager(ConfigManager.getMYSQL_HOST(), ConfigManager.getMYSQL_USER(), ConfigManager.getMYSQL_PASSWORD(), ConfigManager.getMYSQL_DATABASE());
-        databaseManager.initialize().join();
+        databaseManager = new MysqlManager(ConfigManager.getMYSQL_HOST(), ConfigManager.getMYSQL_USER(), ConfigManager.getMYSQL_PASSWORD(), ConfigManager.getMYSQL_DATABASE());
         databaseManager.getSellItemsManager().moveExpiredItems();
 
         redisManager = new RedisManager(ConfigManager.getREDIS_HOST(), ConfigManager.getREDIS_PORT(), ConfigManager.getREDIS_PASSWORD(), ConfigManager.getREDIS_CHANNEL());

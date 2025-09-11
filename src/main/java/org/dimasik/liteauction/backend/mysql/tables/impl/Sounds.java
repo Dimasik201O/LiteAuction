@@ -1,15 +1,14 @@
-package org.dimasik.liteauction.backend.mysql.impl;
+package org.dimasik.liteauction.backend.mysql.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
+
 import java.sql.*;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class Sounds {
-    private final HikariDataSource dataSource;
-
+public class Sounds extends AbstractTable {
     public Sounds(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
+        super(dataSource);
     }
 
     public CompletableFuture<Void> createTable() {

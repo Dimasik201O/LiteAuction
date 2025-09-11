@@ -1,17 +1,16 @@
-package org.dimasik.liteauction.backend.mysql.impl;
+package org.dimasik.liteauction.backend.mysql.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
 import org.dimasik.liteauction.backend.mysql.models.UnsoldItem;
 
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class UnsoldItems {
-    private final HikariDataSource dataSource;
-
+public class UnsoldItems extends AbstractTable {
     public UnsoldItems(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
+        super(dataSource);
     }
 
     public CompletableFuture<Void> createTable() {

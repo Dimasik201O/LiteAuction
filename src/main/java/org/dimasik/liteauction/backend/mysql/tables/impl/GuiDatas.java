@@ -1,10 +1,11 @@
-package org.dimasik.liteauction.backend.mysql.impl;
+package org.dimasik.liteauction.backend.mysql.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
+import org.dimasik.liteauction.backend.mysql.tables.AbstractTable;
 import org.dimasik.liteauction.backend.mysql.models.GuiData;
 
 import java.sql.*;
@@ -13,11 +14,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-public class GuiDatas {
-    private final HikariDataSource dataSource;
-
+public class GuiDatas extends AbstractTable {
     public GuiDatas(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
+        super(dataSource);
     }
 
     public CompletableFuture<Void> createTable() {
