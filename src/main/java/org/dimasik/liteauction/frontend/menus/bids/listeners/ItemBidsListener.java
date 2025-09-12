@@ -62,7 +62,7 @@ public class ItemBidsListener extends AbstractListener {
                     LiteAuction.getEconomyEditor().subtractBalance(player.getName(), finalPrice - addPrice);
                     if(lastBid != null && !lastBid.getPlayer().equalsIgnoreCase(player.getName())){
                         LiteAuction.getEconomyEditor().addBalance(lastBid.getPlayer(), finalPrice - addPrice);
-                        LiteAuction.getInstance().getRedisManager().publishMessage(
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage(
                                 "hover",
                                 lastBid.getPlayer() + " " +
                                 ItemHoverUtil.getHoverItemMessage(
@@ -85,7 +85,7 @@ public class ItemBidsListener extends AbstractListener {
                                     player.getName(),
                                     itemBids.getAvailableBids().get(slotsList.get(i))
                             );
-                            LiteAuction.getInstance().getRedisManager().publishMessage("update", "bids " + itemBids.getBidItem().getId() + " refresh");
+                            LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + itemBids.getBidItem().getId() + " refresh");
                             return;
                         }
                         LiteAuction.getInstance().getDatabaseManager().getBidsManager().addBid(

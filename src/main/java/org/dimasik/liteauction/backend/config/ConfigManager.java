@@ -23,6 +23,9 @@ public class ConfigManager {
     private static String LOCAL_FILE;
 
     @Getter
+    private static String COMMUNICATION_TYPE;
+
+    @Getter
     private static String REDIS_HOST;
     @Getter
     private static int REDIS_PORT;
@@ -30,6 +33,37 @@ public class ConfigManager {
     private static String REDIS_PASSWORD;
     @Getter
     private static String REDIS_CHANNEL;
+
+    @Getter
+    private static String RABBITMQ_HOST;
+    @Getter
+    private static int RABBITMQ_PORT;
+    @Getter
+    private static String RABBITMQ_VHOST;
+    @Getter
+    private static String RABBITMQ_USER;
+    @Getter
+    private static String RABBITMQ_PASSWORD;
+    @Getter
+    private static String RABBITMQ_CHANNEL;
+
+    @Getter
+    private static String[] NATS_HOST;
+    @Getter
+    private static String NATS_USER;
+    @Getter
+    private static String NATS_PASSWORD;
+    @Getter
+    private static String NATS_CHANNEL;
+
+    @Getter
+    private static String WEBSOCKET_HOST;
+    @Getter
+    private static int WEBSOCKET_PORT;
+    @Getter
+    private static String WEBSOCKET_PASSWORD;
+    @Getter
+    private static String WEBSOCKET_CHANNEL;
 
     @Getter
     private static boolean IS_HEAD;
@@ -64,16 +98,47 @@ public class ConfigManager {
 
         LOCAL_FILE = config.getString("database.local.name", "database.db");
 
-        REDIS_HOST = config.getString("redis.host", "localhost");
-        REDIS_PORT = config.getInt("redis.port", 6379);
-        REDIS_PASSWORD = config.getString("redis.password", "сайнес гпт кодер");
-        REDIS_CHANNEL = config.getString("redis.channel", "auction");
+        COMMUNICATION_TYPE = config.getString("communication.type", "Redis");
+        if(
+                !COMMUNICATION_TYPE.equalsIgnoreCase("Redis") &&
+                !COMMUNICATION_TYPE.equalsIgnoreCase("RabbitMQ") &&
+                !COMMUNICATION_TYPE.equalsIgnoreCase("Nats") &&
+                !COMMUNICATION_TYPE.equalsIgnoreCase("WebSocket") &&
+                !COMMUNICATION_TYPE.equalsIgnoreCase("Local")
+        ){
+            throw new UnsupportedConfigurationException("Тип коммуникации не существует!");
+        }
+
+        REDIS_HOST = config.getString("communication.redis.host", "localhost");
+        REDIS_PORT = config.getInt("communication.redis.port", 6379);
+        REDIS_PASSWORD = config.getString("communication.redis.password", "сайнес гпт кодер");
+        REDIS_CHANNEL = config.getString("communication.redis.channel", "auction");
+
+        RABBITMQ_HOST = config.getString("communication.rabbitmq.host", "localhost");
+        RABBITMQ_PORT = config.getInt("communication.rabbitmq.port", 5672);
+        RABBITMQ_VHOST = config.getString("communication.rabbitmq.vhost", "/");
+        RABBITMQ_USER = config.getString("communication.rabbitmq.user", "root");
+        RABBITMQ_PASSWORD = config.getString("communication.global.password", "сайнес гпт кодер");
+        RABBITMQ_CHANNEL = config.getString("communication.global.channel", "auction");
+
+        NATS_HOST = config.getStringList("communication.nats.host").toArray(new String[]{});
+        NATS_USER = config.getString("communication.nats.port", "root");
+        NATS_PASSWORD = config.getString("communication.nats.password", "сайнес гпт кодер");
+        NATS_CHANNEL = config.getString("communication.nats.channel", "auction");
+
+        WEBSOCKET_HOST = config.getString("communication.websocket.host", "localhost");
+        WEBSOCKET_PORT = config.getInt("communication.websocket.port", 6379);
+        WEBSOCKET_PASSWORD = config.getString("communication.websocket.password", "сайнес гпт кодер");
+        WEBSOCKET_CHANNEL = config.getString("communication.websocket.channel", "auction");
 
         IS_HEAD = config.getBoolean("isHead", true);
         DEFAULT_AUTO_PRICE = config.getInt("default-auto-price", 500);
 
         ECONOMY_EDITOR = config.getString("economy-editor", "StickEco");
-        if(!ECONOMY_EDITOR.equalsIgnoreCase("StickEco") && !ECONOMY_EDITOR.equalsIgnoreCase("Vault")){
+        if(
+                !ECONOMY_EDITOR.equalsIgnoreCase("StickEco") &&
+                !ECONOMY_EDITOR.equalsIgnoreCase("Vault")
+        ){
             throw new UnsupportedConfigurationException("Тип экономики не существует!");
         }
 

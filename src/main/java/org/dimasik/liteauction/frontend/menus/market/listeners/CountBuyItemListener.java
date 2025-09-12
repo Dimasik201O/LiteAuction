@@ -97,15 +97,15 @@ public class CountBuyItemListener extends AbstractListener {
                         player.playSound(player.getLocation(), Sound.ENTITY_WANDERING_TRADER_YES, 1f, 1f);
                     }
 
-                    LiteAuction.getInstance().getRedisManager().publishMessage("hover", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + countBuyItem.getCount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
-                    LiteAuction.getInstance().getRedisManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
+                    LiteAuction.getInstance().getCommunicationManager().publishMessage("hover", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + countBuyItem.getCount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
+                    LiteAuction.getInstance().getCommunicationManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
 
                     LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer().toLowerCase(), price);
                     LiteAuction.getEconomyEditor().subtractBalance(player.getName().toLowerCase(), price);
 
                     addItemInventory(player.getInventory(), itemStack.asQuantity(countBuyItem.getCount()), player.getLocation());
                     if(countBuyItem.getCount() == sellItem.getAmount()) {
-                        LiteAuction.getInstance().getRedisManager().publishMessage("update", "market " + sellItem.getId());
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + sellItem.getId());
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(sellItem.getId());
                     }
                     else{

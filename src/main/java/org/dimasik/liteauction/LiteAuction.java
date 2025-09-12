@@ -11,12 +11,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dimasik.liteauction.backend.communication.AbstractCommunication;
+import org.dimasik.liteauction.backend.communication.impl.*;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
 import org.dimasik.liteauction.backend.listeners.JoinListener;
 import org.dimasik.liteauction.backend.storage.databases.AbstractDatabase;
 import org.dimasik.liteauction.backend.storage.databases.impl.*;
-import org.dimasik.liteauction.backend.redis.RedisManager;
 import org.dimasik.liteauction.backend.utils.ContainerUtil;
 import org.dimasik.liteauction.backend.utils.Parser;
 import org.dimasik.liteauction.economy.EconomyEditor;
@@ -31,7 +32,7 @@ import org.dimasik.liteauction.frontend.menus.market.listeners.*;
 @Getter
 public final class LiteAuction extends JavaPlugin {
     private AbstractDatabase databaseManager;
-    private RedisManager redisManager;
+    private AbstractCommunication communicationManager;
     private CommandExecutor commandExecutor;
     @Getter
     private static ItemStack boughtItem;
@@ -86,7 +87,35 @@ public final class LiteAuction extends JavaPlugin {
         }
         databaseManager.createTables().join();
 
-        redisManager = new RedisManager(ConfigManager.getREDIS_HOST(), ConfigManager.getREDIS_PORT(), ConfigManager.getREDIS_PASSWORD(), ConfigManager.getREDIS_CHANNEL());
+        switch (ConfigManager.getCOMMUNICATION_TYPE().toLowerCase()){
+            case "redis" -> communicationManager = new Redis(
+                    ConfigManager.getREDIS_HOST(),
+                    ConfigManager.getREDIS_PORT(),
+                    ConfigManager.getREDIS_PASSWORD(),
+                    ConfigManager.getREDIS_CHANNEL()
+            );
+            case "rabbitmq" -> communicationManager = new RabbitMQ(
+                    ConfigManager.getRABBITMQ_HOST(),
+                    ConfigManager.getRABBITMQ_PORT(),
+                    ConfigManager.getRABBITMQ_USER(),
+                    ConfigManager.getRABBITMQ_PASSWORD(),
+                    ConfigManager.getRABBITMQ_VHOST(),
+                    ConfigManager.getRABBITMQ_CHANNEL()
+            );
+            case "nats" -> communicationManager = new Nats(
+                    ConfigManager.getNATS_HOST(),
+                    ConfigManager.getNATS_USER(),
+                    ConfigManager.getNATS_PASSWORD(),
+                    ConfigManager.getNATS_CHANNEL()
+            );
+            case "websocket" -> communicationManager = new WebSocket(
+                    ConfigManager.getWEBSOCKET_HOST(),
+                    ConfigManager.getWEBSOCKET_PORT(),
+                    ConfigManager.getWEBSOCKET_PASSWORD(),
+                    ConfigManager.getWEBSOCKET_CHANNEL()
+            );
+            case "local" -> communicationManager = new Local();
+        }
     }
 
     private void setupEconomy(){
@@ -151,8 +180,8 @@ public final class LiteAuction extends JavaPlugin {
                 }
             }
         }
-        if(redisManager != null){
-            redisManager.close();
+        if(communicationManager != null){
+            communicationManager.close();
         }
     }
 

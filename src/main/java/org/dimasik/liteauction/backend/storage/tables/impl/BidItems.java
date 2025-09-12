@@ -182,7 +182,7 @@ public class BidItems extends AbstractTable {
                     ItemStack itemStack = bidItem.decodeItemStack();
                     List<Bid> bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemId(bidItem.getId()).get();
                     if(bids.isEmpty()){
-                        LiteAuction.getInstance().getRedisManager().publishMessage("hover", bidItem.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("hover", bidItem.getPlayer() + " " + ItemHoverUtil.getHoverItemMessage(Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack));
                         LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(
                                 bidItem.getPlayer(),
                                 bidItem.getItemStack(),
@@ -203,9 +203,9 @@ public class BidItems extends AbstractTable {
                                 itemStack.getAmount(),
                                 true
                         );
-                        LiteAuction.getInstance().getRedisManager().publishMessage("msg", lastBid.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВы выкупили лот игрока &6" + bidItem.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice()) + "&f. Заберите его из меню просроченных предметов."));
-                        LiteAuction.getInstance().getRedisManager().publishMessage("msg", bidItem.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВаш лот был продан игроку &#00D4FB" + lastBid.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice())));                    }
-                    LiteAuction.getInstance().getRedisManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("msg", lastBid.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВы выкупили лот игрока &6" + bidItem.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice()) + "&f. Заберите его из меню просроченных предметов."));
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("msg", bidItem.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВаш лот был продан игроку &#00D4FB" + lastBid.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice())));                    }
+                    LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
                 }
                 deleteExpiredItems();
             }

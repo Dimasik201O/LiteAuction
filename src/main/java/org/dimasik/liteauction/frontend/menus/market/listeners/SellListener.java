@@ -64,7 +64,7 @@ public class SellListener extends AbstractListener {
                             Sell newSell = new Sell(newPage, sell.getBack());
                             newSell.setPlayer(player).compile().open();
 
-                            LiteAuction.getInstance().getRedisManager().publishMessage("update", "market " + sellItem.getId());
+                            LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + sellItem.getId());
                         }
                     }
                 }
