@@ -32,7 +32,7 @@ public class SQLite extends AbstractDatabase {
 
     @Override
     public String editQuery(String sql){
-        String dbType = ConfigManager.getDATABASE_TYPE();
+        String dbType = ConfigManager.getString("settings/database.yml", "database.type", "Redis");
         if (dbType.equalsIgnoreCase("SQLite")) {
             sql = sql.replaceAll("INT AUTO_INCREMENT PRIMARY KEY", "INTEGER PRIMARY KEY")
                     .replaceAll("INT NOT NULL", "INTEGER NOT NULL");

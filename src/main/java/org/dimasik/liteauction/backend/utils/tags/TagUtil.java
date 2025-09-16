@@ -1,5 +1,6 @@
-package org.dimasik.liteauction.backend.utils;
+package org.dimasik.liteauction.backend.utils.tags;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,14 +15,12 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Base64;
 import java.lang.reflect.Field;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 
-import java.util.UUID;
-
+@UtilityClass
 public class TagUtil {
     public static HashSet<String> getAllTags(ItemStack item) {
         HashSet<String> tags = new HashSet<>();

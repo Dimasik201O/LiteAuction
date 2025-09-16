@@ -4,7 +4,6 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -18,8 +17,8 @@ import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationExcept
 import org.dimasik.liteauction.backend.listeners.JoinListener;
 import org.dimasik.liteauction.backend.storage.databases.AbstractDatabase;
 import org.dimasik.liteauction.backend.storage.databases.impl.*;
-import org.dimasik.liteauction.backend.utils.ContainerUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.nms.ContainerUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.economy.EconomyEditor;
 import org.dimasik.liteauction.economy.impl.StickEco;
 import org.dimasik.liteauction.economy.impl.VaultEco;
@@ -28,6 +27,8 @@ import org.dimasik.liteauction.frontend.commands.impl.*;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 import org.dimasik.liteauction.frontend.menus.bids.listeners.ItemBidsListener;
 import org.dimasik.liteauction.frontend.menus.market.listeners.*;
+
+import java.io.File;
 
 @Getter
 public final class LiteAuction extends JavaPlugin {
@@ -55,17 +56,32 @@ public final class LiteAuction extends JavaPlugin {
         setupCommand();
         setupListeners();
         setupBoughtItem();
-        if(ConfigManager.isIS_HEAD()) {
+        if(ConfigManager.getBoolean("settings/database.yml", "isHead", true)) {
             startRunnable();
         }
     }
 
     private void setupConfig(){
-        saveDefaultConfig();
-        FileConfiguration config = getConfig();
+        String[] files = {
+                "config.yml",
+                "settings/database.yml",
+                "settings/settings.yml",
+                "design/commands/sell.yml",
+                "design/commands/search.yml",
+                "design/commands/main.yml",
+                "design/commands/sound.yml",
+                "design/menus/main.yml",
+                "design/menus/market/main.yml",
+        };
+        for(String filePath : files) {
+            File file = new File(super.getDataFolder(), filePath);
+            if (!file.exists()) {
+                super.saveResource(filePath, false);
+            }
+        }
         try {
-            ConfigManager.init(config);
-            super.getLogger().info("   |   ᴋᴏʜȹигуᴘᴀция уᴄпᴇшʜᴏ зᴀгᴘʏжᴇʜᴀ");
+            ConfigManager.init(this);
+            super.getLogger().info("   |   ᴋᴏʜфигуᴘᴀция уᴄпᴇшʜᴏ зᴀгᴘʏжᴇʜᴀ");
         }
         catch (UnsupportedConfigurationException e){
             super.getLogger().warning("   |   ᴏшибᴋᴀ зᴀгᴘузᴋи ᴋᴏʜфигуᴘᴀции: " + e.getMessage());
@@ -74,47 +90,49 @@ public final class LiteAuction extends JavaPlugin {
     }
 
     private void setupDatabase(){
-        switch (ConfigManager.getDATABASE_TYPE().toLowerCase()){
+        switch (ConfigManager.getString("settings/database.yml", "database.type", "Redis").toLowerCase()){
             case "mysql" -> databaseManager = new Mysql(
-                    ConfigManager.getGLOBAL_HOST(),
-                    ConfigManager.getGLOBAL_USER(),
-                    ConfigManager.getGLOBAL_PASSWORD(),
-                    ConfigManager.getGLOBAL_DATABASE()
+                    ConfigManager.getString("settings/database.yml", "database.global.host", "localhost"),
+                    ConfigManager.getString("settings/database.yml", "database.global.user", "root"),
+                    ConfigManager.getString("settings/database.yml", "database.global.password", "сайнес гпт кодер"),
+                    ConfigManager.getString("settings/database.yml", "database.global.database", "lite_auction")
             );
             case "sqlite" -> databaseManager = new SQLite(
-                    ConfigManager.getLOCAL_FILE()
+                    ConfigManager.getString("settings/database.yml", "database.local.file", "database.db")
             );
+            case "default" -> throw new UnsupportedConfigurationException("Тип базы данных не существует!");
         }
         databaseManager.createTables().join();
 
-        switch (ConfigManager.getCOMMUNICATION_TYPE().toLowerCase()){
+        switch (ConfigManager.getString("settings/database.yml", "communication.type", "Redis").toLowerCase()){
             case "redis" -> communicationManager = new Redis(
-                    ConfigManager.getREDIS_HOST(),
-                    ConfigManager.getREDIS_PORT(),
-                    ConfigManager.getREDIS_PASSWORD(),
-                    ConfigManager.getREDIS_CHANNEL()
+                    ConfigManager.getString("settings/database.yml", "communication.redis.host", "localhost"),
+                    ConfigManager.getInt("settings/database.yml", "communication.redis.port", 6379),
+                    ConfigManager.getString("settings/database.yml", "communication.redis.password", "сайнес гпт кодер"),
+                    ConfigManager.getString("settings/database.yml", "communication.redis.channel", "auction")
             );
             case "rabbitmq" -> communicationManager = new RabbitMQ(
-                    ConfigManager.getRABBITMQ_HOST(),
-                    ConfigManager.getRABBITMQ_PORT(),
-                    ConfigManager.getRABBITMQ_USER(),
-                    ConfigManager.getRABBITMQ_PASSWORD(),
-                    ConfigManager.getRABBITMQ_VHOST(),
-                    ConfigManager.getRABBITMQ_CHANNEL()
+                    ConfigManager.getString("settings/database.yml", "communication.rabbitmq.host", "localhost"),
+                    ConfigManager.getInt("settings/database.yml", "communication.rabbitmq.port", 5672),
+                    ConfigManager.getString("settings/database.yml", "communication.rabbitmq.user", "root"),
+                    ConfigManager.getString("settings/database.yml", "communication.rabbitmq.password", "сайнес гпт кодер"),
+                    ConfigManager.getString("settings/database.yml", "communication.rabbitmq.vhost", "/"),
+                    ConfigManager.getString("settings/database.yml", "communication.rabbitmq.channel", "auction")
             );
             case "nats" -> communicationManager = new Nats(
-                    ConfigManager.getNATS_HOST(),
-                    ConfigManager.getNATS_USER(),
-                    ConfigManager.getNATS_PASSWORD(),
-                    ConfigManager.getNATS_CHANNEL()
+                    ConfigManager.getStringList("settings/database.yml", "communication.nats.host").toArray(new String[]{}),
+                    ConfigManager.getString("settings/database.yml", "communication.nats.user", "root"),
+                    ConfigManager.getString("settings/database.yml", "communication.nats.password", "сайнес гпт кодер"),
+                    ConfigManager.getString("settings/database.yml", "communication.nats.channel", "auction")
             );
             case "websocket" -> communicationManager = new WebSocket(
-                    ConfigManager.getWEBSOCKET_HOST(),
-                    ConfigManager.getWEBSOCKET_PORT(),
-                    ConfigManager.getWEBSOCKET_PASSWORD(),
-                    ConfigManager.getWEBSOCKET_CHANNEL()
+                    ConfigManager.getString("settings/database.yml", "communication.websocket.host", "localhost"),
+                    ConfigManager.getInt("settings/database.yml", "communication.websocket.port", 6379),
+                    ConfigManager.getString("settings/database.yml", "communication.websocket.password", "сайнес гпт кодер"),
+                    ConfigManager.getString("settings/database.yml", "communication.websocket.channel", "auction")
             );
             case "local" -> communicationManager = new Local();
+            case "default" -> throw new UnsupportedConfigurationException("Метод коммуникации не существует!");
         }
     }
 

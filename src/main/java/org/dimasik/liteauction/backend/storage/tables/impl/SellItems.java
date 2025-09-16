@@ -3,13 +3,12 @@ package org.dimasik.liteauction.backend.storage.tables.impl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
-import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 
 import java.sql.*;
 import java.util.*;

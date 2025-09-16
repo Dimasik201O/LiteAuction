@@ -2,7 +2,6 @@ package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
 import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 

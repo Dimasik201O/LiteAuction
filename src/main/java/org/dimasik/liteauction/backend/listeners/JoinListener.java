@@ -7,8 +7,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
-import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 
 import java.util.List;
 

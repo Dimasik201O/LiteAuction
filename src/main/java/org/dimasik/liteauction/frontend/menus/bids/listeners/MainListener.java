@@ -16,7 +16,7 @@ import org.dimasik.liteauction.backend.storage.models.Bid;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.storage.models.GuiData;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
 import org.dimasik.liteauction.frontend.menus.bids.menus.ItemBids;
 import org.dimasik.liteauction.frontend.menus.bids.menus.Main;

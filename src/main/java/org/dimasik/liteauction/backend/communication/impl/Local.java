@@ -9,6 +9,6 @@ public class Local extends AbstractCommunication {
 
     @Override
     public void publishMessage(String channel, String message) {
-        super.onMessage(channel, message);
+        super.onMessage(super.channel + "_" + channel, message);
     }
 }

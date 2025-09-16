@@ -8,13 +8,12 @@ import org.bukkit.inventory.InventoryHolder;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
-import org.dimasik.liteauction.backend.utils.ContainerUtil;
+import org.dimasik.liteauction.backend.utils.nms.ContainerUtil;
 import org.dimasik.liteauction.backend.utils.ItemEncrypt;
-import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
 import org.dimasik.liteauction.frontend.menus.bids.menus.ItemBids;
 import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 import org.dimasik.liteauction.frontend.menus.market.menus.Sell;
-import redis.clients.jedis.Jedis;
 
 import java.util.Arrays;
 import java.util.Map;

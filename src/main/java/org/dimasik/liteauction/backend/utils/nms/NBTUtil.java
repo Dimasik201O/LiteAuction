@@ -1,9 +1,11 @@
-package org.dimasik.liteauction.backend.utils;
+package org.dimasik.liteauction.backend.utils.nms;
 
+import lombok.experimental.UtilityClass;
 import net.minecraft.server.v1_16_R3.NBTTagCompound;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
+@UtilityClass
 public class NBTUtil {
     public static String getNBTAsString(ItemStack itemStack) {
         if (itemStack == null || itemStack.getType().isAir()) {

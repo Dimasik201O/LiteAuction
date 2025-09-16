@@ -10,9 +10,9 @@ import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.ItemEncrypt;
-import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
+import org.dimasik.liteauction.backend.utils.tags.TagUtil;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 
 import java.io.BufferedReader;

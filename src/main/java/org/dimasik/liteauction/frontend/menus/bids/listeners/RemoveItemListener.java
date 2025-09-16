@@ -9,8 +9,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
-import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractListener;
 import org.dimasik.liteauction.frontend.menus.bids.menus.Main;
 import org.dimasik.liteauction.frontend.menus.bids.menus.RemoveItem;
@@ -49,7 +49,7 @@ public class RemoveItemListener extends AbstractListener {
 
                         ItemStack itemStack = removeItem.getBidItem().decodeItemStack();
                         ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
-                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + removeItem.getBidItem().getId());
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItemOptional.get().getId() + " delete");
                         addItemInventory(player.getInventory(), itemStack, player.getLocation());
                         LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(removeItem.getBidItem().getId());
 

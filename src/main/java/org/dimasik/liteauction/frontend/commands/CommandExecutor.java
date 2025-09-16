@@ -6,10 +6,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.exceptions.NotAPlayerException;
 import org.dimasik.liteauction.backend.storage.models.GuiData;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +46,9 @@ public class CommandExecutor implements TabExecutor {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
+                player.sendMessage(Parser.color(
+                        ConfigManager.getString("design/commands/main.yml", "error", "&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия.")
+                ));
             }
             return true;
         }
@@ -53,16 +56,11 @@ public class CommandExecutor implements TabExecutor {
         String subCommandKey = args[0].toLowerCase();
         SubCommand subCommand = subCommands.get(subCommandKey);
         if(subCommand == null || (!subCommand.getRequiredPermission().isEmpty() && !player.hasPermission(subCommand.getRequiredPermission()))){
-            player.sendMessage(Parser.color(" &#00D4FBПомощь по системе аукциона:"));
-            player.sendMessage(Parser.color(""));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah &f — открыть меню аукциона"));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell <цена> &f— выставить товар на Рынок"));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell <цена> full &f— выставить товар (весь лот)"));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell <цена> <шаг> [время] &f- выставить товар (Ставки)"));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah sell auto &f— продать товар (рыночная цена)"));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah search [название] &f— найти предметы на аукционе"));
-            player.sendMessage(Parser.color(" &#00D4FB&n▍&#00D4FB /ah player <никнейм> &f— все товары на игрока"));
-            player.sendMessage(Parser.color(" &#00D4FB▍&#00D4FB /ah sound &f— переключить слышимость звуков аукциона"));
+            ConfigManager
+                    .getStringList("design/commands/main.yml", "usage-message")
+                    .stream()
+                    .map(Parser::color)
+                    .forEach(player::sendMessage);
             return true;
         }
 

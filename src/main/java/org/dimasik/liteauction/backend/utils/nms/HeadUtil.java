@@ -1,16 +1,16 @@
-package org.dimasik.liteauction.backend.utils;
+package org.dimasik.liteauction.backend.utils.nms;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import lombok.experimental.UtilityClass;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import java.lang.reflect.Field;
-import java.util.Base64;
 import java.util.UUID;
 
+@UtilityClass
 public class HeadUtil {
-
     public static ItemStack setTexture(ItemStack head, String base64) {
         if (base64.isEmpty()) {
             return head;

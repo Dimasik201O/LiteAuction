@@ -3,15 +3,14 @@ package org.dimasik.liteauction.backend.storage.tables.impl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
-import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
 import org.dimasik.liteauction.backend.storage.models.Bid;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
-import org.dimasik.liteauction.backend.utils.Formatter;
-import org.dimasik.liteauction.backend.utils.ItemHoverUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.format.Formatter;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 
 import java.sql.*;
 import java.util.*;
@@ -204,7 +203,8 @@ public class BidItems extends AbstractTable {
                                 true
                         );
                         LiteAuction.getInstance().getCommunicationManager().publishMessage("msg", lastBid.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВы выкупили лот игрока &6" + bidItem.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice()) + "&f. Заберите его из меню просроченных предметов."));
-                        LiteAuction.getInstance().getCommunicationManager().publishMessage("msg", bidItem.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВаш лот был продан игроку &#00D4FB" + lastBid.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice())));                    }
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("msg", bidItem.getPlayer() + " " + Parser.color("&#00D4FB▶ &fВаш лот был продан игроку &#00D4FB" + lastBid.getPlayer() + " &fза &#FEC800" + Formatter.formatPrice(lastBid.getPrice())));
+                    }
                     LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
                 }
                 deleteExpiredItems();

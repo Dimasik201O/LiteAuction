@@ -1,17 +1,20 @@
-package org.dimasik.liteauction.backend.utils;
+package org.dimasik.liteauction.backend.utils.tags;
 
+import lombok.experimental.UtilityClass;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Item;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.dimasik.liteauction.backend.utils.ItemEncrypt;
+import org.dimasik.liteauction.backend.utils.nms.NBTUtil;
 
 import java.io.IOException;
 
 import static org.dimasik.liteauction.backend.utils.ItemNameUtil.getLocalizedItemName;
 
+@UtilityClass
 public class ItemHoverUtil {
     public static void sendHoverItemMessage(Player player, String message, ItemStack hoverItem) {
         String[] parts = message.split("%item%", 2);

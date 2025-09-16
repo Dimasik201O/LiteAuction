@@ -3,7 +3,6 @@ package org.dimasik.liteauction.backend.storage.databases;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
-import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.tables.impl.*;
 
 import java.util.concurrent.CompletableFuture;

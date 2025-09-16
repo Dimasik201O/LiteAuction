@@ -1,5 +1,6 @@
 package org.dimasik.liteauction.backend.utils;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
@@ -9,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+@UtilityClass
 public class ItemEncrypt {
 
     public static String encodeItem(ItemStack item) throws IOException {

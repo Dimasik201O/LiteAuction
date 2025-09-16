@@ -116,12 +116,4 @@ public class WebSocket extends AbstractCommunication {
             webSocketClient.close();
         }
     }
-
-    public boolean isConnected() {
-        return webSocketClient != null && webSocketClient.isOpen();
-    }
-
-    public boolean isAuthenticated() {
-        return authenticated;
-    }
 }

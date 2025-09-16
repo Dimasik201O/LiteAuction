@@ -1,12 +1,19 @@
 package org.dimasik.liteauction.backend.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum MarketSortingType {
-    CHEAPEST_FIRST,
-    EXPENSIVE_FIRST,
-    CHEAPEST_PER_UNIT,
-    EXPENSIVE_PER_UNIT,
-    NEWEST_FIRST,
-    OLDEST_FIRST;
+    CHEAPEST_FIRST("Сначала дешевые"),
+    EXPENSIVE_FIRST("Сначала дорогие"),
+    CHEAPEST_PER_UNIT("Сначала дешевые за ед. товара"),
+    EXPENSIVE_PER_UNIT("Сначала дорогие за ед. товара"),
+    NEWEST_FIRST("Сначала новые"),
+    OLDEST_FIRST("Сначала старые");
+
+    private final String displayName;
 
     public MarketSortingType relative(boolean next) {
         MarketSortingType[] values = MarketSortingType.values();

@@ -4,9 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.storage.models.GuiData;
-import org.dimasik.liteauction.backend.utils.Parser;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 
 import java.util.ArrayList;
@@ -40,7 +41,9 @@ public class Player extends SubCommand {
                     main.compile().open();
                 }
             } catch (Exception e) {
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
+                player.sendMessage(Parser.color(
+                        ConfigManager.getString("design/commands/main.yml", "error", "&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия.")
+                ));
             }
         }
         else{

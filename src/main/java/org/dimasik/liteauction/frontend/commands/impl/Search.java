@@ -5,11 +5,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.enums.AuctionType;
 import org.dimasik.liteauction.backend.storage.models.GuiData;
 import org.dimasik.liteauction.backend.utils.ItemNameUtil;
-import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
+import org.dimasik.liteauction.backend.utils.tags.TagUtil;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 
 import java.util.*;
@@ -26,7 +27,9 @@ public class Search extends SubCommand {
         if(args.length < 2) {
             ItemStack itemStack = player.getItemInHand() == null || player.getItemInHand().getType().isAir() ? player.getInventory().getItemInOffHand() : player.getItemInHand();
             if(itemStack == null || itemStack.getType().isAir()){
-                player.sendMessage(Parser.color("&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра."));
+                player.sendMessage(Parser.color(
+                        ConfigManager.getString("design/commands/search.yml", "air-search", "&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра.")
+                ));
                 return;
             }
             try {
@@ -48,13 +51,17 @@ public class Search extends SubCommand {
                     main.setFilters(TagUtil.getPartialTags(itemStack));
                 }
             } catch (Exception e) {
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
+                player.sendMessage(Parser.color(
+                        ConfigManager.getString("design/commands/main.yml", "error", "&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия.")
+                ));
             }
         }
         else{
             String find = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
             if(!ItemNameUtil.containsTag(find)){
-                player.sendMessage(Parser.color("&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра."));
+                player.sendMessage(Parser.color(
+                        ConfigManager.getString("design/commands/search.yml", "air-search", "&#FB2222▶ &fПо вашему запросу не найдено ни одного фильтра.")
+                ));
                 return;
             }
             try {
@@ -76,7 +83,9 @@ public class Search extends SubCommand {
                     main.compile().open();
                 }
             } catch (Exception e) {
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
+                player.sendMessage(Parser.color(
+                        ConfigManager.getString("design/commands/main.yml", "error", "&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия.")
+                ));
             }
         }
     }

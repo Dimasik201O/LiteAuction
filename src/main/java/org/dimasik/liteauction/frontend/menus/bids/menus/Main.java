@@ -10,9 +10,9 @@ import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.enums.BidsSortingType;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
-import org.dimasik.liteauction.backend.utils.Formatter;
-import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.backend.utils.format.Formatter;
+import org.dimasik.liteauction.backend.utils.format.Parser;
+import org.dimasik.liteauction.backend.utils.tags.TagUtil;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 
 import java.util.ArrayList;

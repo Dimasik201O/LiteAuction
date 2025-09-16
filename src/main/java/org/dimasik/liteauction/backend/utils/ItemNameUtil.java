@@ -1,13 +1,13 @@
 package org.dimasik.liteauction.backend.utils;
 
 import lombok.Getter;
+import lombok.experimental.UtilityClass;
 import org.bukkit.Material;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,6 +15,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.logging.Level;
 
+@UtilityClass
 public class ItemNameUtil {
 
     private static JSONObject translations;

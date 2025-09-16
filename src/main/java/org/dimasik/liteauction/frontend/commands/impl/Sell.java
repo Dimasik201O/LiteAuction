@@ -9,10 +9,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.Pair;
+import org.dimasik.liteauction.backend.config.utils.PlaceholderUtils;
 import org.dimasik.liteauction.backend.enums.NumberType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.*;
+import org.dimasik.liteauction.backend.utils.format.Formatter;
+import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
+import org.dimasik.liteauction.backend.utils.tags.TagUtil;
 import org.dimasik.liteauction.frontend.commands.SubCommand;
 import org.dimasik.liteauction.frontend.commands.models.AutoSellData;
 
@@ -40,7 +45,13 @@ public class Sell extends SubCommand {
         if(number.equalsIgnoreCase("auto")){
             ItemStack itemStack = player.getItemInHand();
             if(itemStack == null || itemStack.getType().isAir()){
-                player.sendMessage(Parser.color("&#FB2222▶ &fДля продажи товара &#FB2222возьмите предмет &fв главную руку."));
+                player.sendMessage(
+                        PlaceholderUtils.replace(
+                                player,
+                                ConfigManager.getString("design/commands/sell.yml", "air-sell", "&#FB2222▶ &fДля продажи товара &#FB2222возьмите предмет &fв главную руку."),
+                                true
+                        )
+                );
                 return;
             }
             if(itemStack.getType().toString().endsWith("SHULKER_BOX")) {
@@ -50,7 +61,13 @@ public class Sell extends SubCommand {
                     if (blockState instanceof ShulkerBox) {
                         ShulkerBox shulkerBoxState = (ShulkerBox) blockState;
                         if (!shulkerBoxState.getInventory().isEmpty()) {
-                            player.sendMessage(Parser.color("&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."));
+                            player.sendMessage(
+                                    PlaceholderUtils.replace(
+                                            player,
+                                            ConfigManager.getString("design/commands/sell.yml", "not-empty-shulker", "&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."),
+                                            true
+                                    )
+                            );
                             return;
                         }
                     }
@@ -59,7 +76,7 @@ public class Sell extends SubCommand {
 
             try {
                 List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(MarketSortingType.CHEAPEST_PER_UNIT, TagUtil.getPartialTags(itemStack)).get();
-                int priceForOne = ConfigManager.getDEFAULT_AUTO_PRICE();
+                int priceForOne = ConfigManager.getInt("settings/settings.yml", "default-auto-price", 500);
                 if(!sellItems.isEmpty()){
                     priceForOne = sellItems.get(0).getPrice();
                 }
@@ -71,19 +88,46 @@ public class Sell extends SubCommand {
                     if(model.price == priceForOne && model.itemStack.isSimilar(itemStack)) {
                         boolean isFull = model.full;
                         autoSells.remove(player);
-                        if ((priceForOne / itemCount) * itemCount > 1000000000) {
+                        if (
+                                (priceForOne / itemCount) * itemCount > ConfigManager.getInt("settings/settings.yml", "price.max", 1000000000) ||
+                                (priceForOne / itemCount) * itemCount < ConfigManager.getInt("settings/settings.yml", "price.min", 1)
+                        ) {
                             leaveUsage(player);
                             return;
                         }
                         if (canSell(player)) {
                             LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, isFull);
-                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
+                            ItemHoverUtil.sendHoverItemMessage(player,
+                                    PlaceholderUtils.replace(
+                                            player,
+                                            ConfigManager.getString("design/commands/sell.yml", "success-sell.market", "&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx%amount%"),
+                                            true,
+                                            new Pair<>("%amount%", String.valueOf(itemCount)),
+                                            new Pair<>("%price%", String.valueOf(priceForOne)),
+                                            new Pair<>("%full_price%", String.valueOf(priceForOne * itemCount)),
+                                            new Pair<>("%format:price%", Formatter.formatPrice(priceForOne)),
+                                            new Pair<>("%format:full_price%", Formatter.formatPrice(priceForOne * itemCount))
+                                    ),
+                                    itemStack
+                            );
                             player.setItemInHand(null);
                         }
                         return;
                     }
                 }
-                player.sendMessage(Parser.color("&#00D4FB▶ &fВведите &#00D4FB/ah sell auto confirm&f, чтобы подтвердить продажу. Полная цена: &#FBA800" + Formatter.formatPrice(priceForOne * itemCount) + "&f, за 1 шт.: &#FBA800" + Formatter.formatPrice(priceForOne)));
+                ItemHoverUtil.sendHoverItemMessage(player,
+                        PlaceholderUtils.replace(
+                                player,
+                                ConfigManager.getString("design/commands/sell.yml", "confirm-sell", "&#00D4FB▶ &fВведите &#00D4FB/ah sell auto confirm&f, чтобы подтвердить продажу. Полная цена: &#FBA800%format:full_price%&f, за 1 шт.: &#FBA800%format:price%"),
+                                true,
+                                new Pair<>("%amount%", String.valueOf(itemCount)),
+                                new Pair<>("%price%", String.valueOf(priceForOne)),
+                                new Pair<>("%full_price%", String.valueOf(priceForOne * itemCount)),
+                                new Pair<>("%format:price%", Formatter.formatPrice(priceForOne)),
+                                new Pair<>("%format:full_price%", Formatter.formatPrice(priceForOne * itemCount))
+                        ),
+                        itemStack
+                );
                 autoSells.put(player, new AutoSellData(priceForOne, itemStack, full));
             } catch (Exception e) {
 
@@ -111,7 +155,13 @@ public class Sell extends SubCommand {
             int price = (int) rawPrice;
             ItemStack itemStack = player.getItemInHand();
             if(itemStack == null || itemStack.getType().isAir()){
-                player.sendMessage(Parser.color("&#FB2222▶ &fДля продажи товара &#FB2222возьмите предмет &fв главную руку."));
+                player.sendMessage(
+                        PlaceholderUtils.replace(
+                                player,
+                                ConfigManager.getString("design/commands/sell.yml", "air-sell", "&#FB2222▶ &fДля продажи товара &#FB2222возьмите предмет &fв главную руку."),
+                                true
+                        )
+                );
                 return;
             }
             if(itemStack.getType().toString().endsWith("SHULKER_BOX")) {
@@ -121,7 +171,13 @@ public class Sell extends SubCommand {
                     if (blockState instanceof ShulkerBox) {
                         ShulkerBox shulkerBoxState = (ShulkerBox) blockState;
                         if (!shulkerBoxState.getInventory().isEmpty()) {
-                            player.sendMessage(Parser.color("&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."));
+                            player.sendMessage(
+                                    PlaceholderUtils.replace(
+                                            player,
+                                            ConfigManager.getString("design/commands/sell.yml", "not-empty-shulker", "&#00D5FB▶ &#D2D7D8Нельзя продавать шалкер с предметами."),
+                                            true
+                                    )
+                            );
                             return;
                         }
                     }
@@ -153,24 +209,44 @@ public class Sell extends SubCommand {
                         }
                         int step = (int) rawStep;
 
-                        if((double) price / 10 <= step){
-                            player.sendMessage(Parser.color("&#FB2222▶ &fЦена шага не должна превышать 10% от начальной суммы"));
+                        if((double) price * ConfigManager.getDouble("settings/settings.yml", "bids-step-percent", 0.1) <= step){
+                            player.sendMessage(
+                                    PlaceholderUtils.replace(
+                                            player,
+                                            ConfigManager.getString("design/commands/sell.yml", "bids-step-limit", "&#FB2222▶ &fЦена шага не должна превышать 10% от начальной суммы"),
+                                            true
+                                    )
+                            );
                             return;
                         }
 
-                        long translatedTime = args.length > 3 ? parseTimeToSeconds(args[3]) : 86400L;
+                        long translatedTime = args.length > 3 ? parseTimeToSeconds(args[3]) : ConfigManager.getInt("settings/settings.yml", "bids-time.default", 86400);
                         if(translatedTime == -1){
                             leaveUsage(player);
                             return;
                         }
-                        if(translatedTime < 300 || translatedTime > 86400){
-                            player.sendMessage(Parser.color("&#FB2222▶ &fВремя продажи предмета должна находиться в пределах &#FB22225мин...1д.&f."));
+                        if(translatedTime < ConfigManager.getInt("settings/settings.yml", "bids-time.min", 300) || translatedTime > ConfigManager.getInt("settings/settings.yml", "bids-time.max", 86400)){
+                            player.sendMessage(
+                                    PlaceholderUtils.replace(
+                                            player,
+                                            ConfigManager.getString("design/commands/sell.yml", "bids-time-limit", "&#FB2222▶ &fВремя продажи предмета должна находиться в пределах &#FB22225мин...1д.&f."),
+                                            true
+                                    )
+                            );
                             return;
                         }
 
                         if(canSell(player)) {
                             LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.clone()), TagUtil.getAllTags(itemStack), price, step, (translatedTime * 1000) + System.currentTimeMillis());
-                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount()), itemStack);
+                            ItemHoverUtil.sendHoverItemMessage(player,
+                                    PlaceholderUtils.replace(
+                                            player,
+                                            ConfigManager.getString("design/commands/sell.yml", "success-sell.bids", "&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx%amount%"),
+                                            true,
+                                            new Pair<>("%amount%", String.valueOf(itemStack.getAmount()))
+                                    ),
+                                    itemStack
+                            );
                             player.setItemInHand(null);
                         }
                     }
@@ -180,22 +256,39 @@ public class Sell extends SubCommand {
                     return;
                 }
                 int itemCount = itemStack.getAmount();
-                if((price / itemCount) * itemCount < 1){
-                    leaveUsage(player);
-                    return;
-                }
-                else if((price / itemCount) * itemCount > 1000000000){
+                if(
+                        (price / itemCount) * itemCount > ConfigManager.getInt("settings/settings.yml", "price.max", 1000000000) ||
+                        (price / itemCount) * itemCount < ConfigManager.getInt("settings/settings.yml", "price.min", 1)
+                ){
                     leaveUsage(player);
                     return;
                 }
 
                 if(canSell(player)) {
                     LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price / itemCount, itemCount, full);
-                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx" + itemCount), itemStack);
+                    ItemHoverUtil.sendHoverItemMessage(player,
+                            PlaceholderUtils.replace(
+                                    player,
+                                    ConfigManager.getString("design/commands/sell.yml", "success-sell.market", "&#00D4FB▶ &fВы успешно выставили на продажу &#9AF5FB%item%&f &#9AF5FBx%amount%"),
+                                    true,
+                                    new Pair<>("%amount%", String.valueOf(itemCount)),
+                                    new Pair<>("%price%", String.valueOf(price)),
+                                    new Pair<>("%full_price%", String.valueOf(price * itemCount)),
+                                    new Pair<>("%format:price%", Formatter.formatPrice(price)),
+                                    new Pair<>("%format:full_price%", Formatter.formatPrice(price * itemCount))
+                            ),
+                            itemStack
+                    );
                     player.setItemInHand(null);
                 }
             } catch (IOException e) {
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри кодировании предмета."));
+                player.sendMessage(
+                        PlaceholderUtils.replace(
+                                player,
+                                ConfigManager.getString("design/commands/sell.yml", "error", "&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри кодировании предмета."),
+                                true
+                        )
+                );
             }
         } catch (NumberFormatException e) {
             leaveUsage(player);
@@ -290,8 +383,16 @@ public class Sell extends SubCommand {
     }
 
     private boolean canSell(Player player){
-        if(getItemsInAuction(player.getName()) >= getPlayerSlots(player, 250)){
-            player.sendMessage(Parser.color("&#FB2222▶ &fВы не можете больше выставлять товары на аукцион."));
+        int auctionItems = getItemsInAuction(player.getName());
+        if(auctionItems >= getPlayerSlots(player, 250)){
+            player.sendMessage(
+                    PlaceholderUtils.replace(
+                            player,
+                            ConfigManager.getString("design/commands/sell.yml", "sell-limit", "&#FB2222▶ &fВы не можете больше выставлять товары на аукцион."),
+                            true,
+                            new Pair<>("items_count", String.valueOf(auctionItems))
+                    )
+            );
             return false;
         }
         return true;

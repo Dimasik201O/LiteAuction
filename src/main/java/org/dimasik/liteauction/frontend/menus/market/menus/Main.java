@@ -4,15 +4,23 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.Pair;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
+import org.dimasik.liteauction.backend.config.utils.PlaceholderUtils;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
+import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
-import org.dimasik.liteauction.backend.utils.Parser;
-import org.dimasik.liteauction.backend.utils.Formatter;
-import org.dimasik.liteauction.backend.utils.TagUtil;
+import org.dimasik.liteauction.backend.utils.format.Parser;
+import org.dimasik.liteauction.backend.utils.format.Formatter;
+import org.dimasik.liteauction.backend.utils.tags.TagUtil;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
 
 import java.util.*;
@@ -41,12 +49,22 @@ public class Main extends AbstractMenu {
     public Main compile(){
         try {
             items.clear();
-            int slot = 0;
+            List<Integer> slots = ConfigUtils.getSlots("design/menus/market/main.yml", "active-items.slot");
+            int slotIndex = 0;
             List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType).get();
-            int startIndex = 45 * (page - 1);
-            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
-            inventory = Bukkit.createInventory(this, 54, Parser.color("&0Аукцион (" + page + "/" + pages + ")"));
-            for(int i = startIndex; i < items.size() && slot < 45; i++) {
+            int slotsCount = slots.size();
+            int startIndex = slotsCount * (page - 1);
+            int pages = items.size() / slotsCount + (items.size() % slotsCount == 0 ? 0 : 1);
+            inventory = ConfigUtils.buildInventory(this, "design/menus/market/main.yml", "inventory-type",
+                    PlaceholderUtils.replace(
+                            ConfigManager.getString("design/menus/market/main.yml", "gui-title", "&0Аукцион (%current_page%/%pages_amount%)"),
+                            true,
+                            new Pair<>("%current_page%", String.valueOf(page)),
+                            new Pair<>("%pages_amount%", String.valueOf(pages))
+                    )
+            );
+            for(int i = startIndex; i < items.size() && slotIndex < slotsCount; i++) {
+                int slot = slots.get(slotIndex);
                 SellItem sellItem = items.get(i);
                 this.items.put(slot, sellItem);
                 ItemStack itemStack = sellItem.decodeItemStack();
@@ -55,181 +73,120 @@ public class Main extends AbstractMenu {
                 if(itemMeta != null && itemMeta.getLore() != null){
                     lore = itemMeta.getLore();
                 }
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F " + String.join("&f, &x&0&0&D&8&F&F", TagUtil.getItemCategories(sellItem.getTags()))));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Продавец:&x&0&0&D&8&F&F " + sellItem.getPlayer()));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Истекает через:&x&0&0&D&8&F&F " + Formatter.getTimeUntilExpiration(sellItem)));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Цена:&x&0&0&D&8&F&F " + Formatter.formatPrice(sellItem.getPrice() * sellItem.getAmount())));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C Цена за 1 ед.:&x&0&0&D&8&F&F " + Formatter.formatPrice(sellItem.getPrice())));
+                lore.addAll(ConfigManager.getStringList("design/menus/market/main.yml", "active-items.lore.main").stream().map(s -> PlaceholderUtils.replace(
+                        s,
+                        true,
+                        new Pair<>("%categories%", String.join(ConfigManager.getString("design/menus/main.yml", "category-splitter", "&f, &x&0&0&D&8&F&F"), TagUtil.getItemCategories(sellItem.getTags()))),
+                        new Pair<>("%seller%", sellItem.getPlayer()),
+                        new Pair<>("%expirytime%", Formatter.getTimeUntilExpiration(sellItem)),
+                        new Pair<>("%price%", String.valueOf(sellItem.getPrice())),
+                        new Pair<>("%full_price%", String.valueOf(sellItem.getPrice() * sellItem.getAmount())),
+                        new Pair<>("%format:price%", Formatter.formatPrice(sellItem.getPrice())),
+                        new Pair<>("%format:full_price%", Formatter.formatPrice(sellItem.getPrice() * sellItem.getAmount()))
+                )).toList());
                 if(sellItem.isByOne()){
-                    lore.add(Parser.color(""));
-                    lore.add(Parser.color(" &x&0&0&D&8&F&F● &x&D&5&D&B&D&CДанный товар можно"));
-                    lore.add(Parser.color(" &0.&x&D&5&D&B&D&C  купить &x&0&0&D&8&F&Fтолько полностью&x&D&5&D&B&D&C."));
+                    lore.addAll(ConfigManager.getStringList("design/menus/market/main.yml", "active-items.lore.by-one").stream().map(s -> PlaceholderUtils.replace(
+                            s,
+                            true
+                    )).toList());
                 }
-                lore.add(Parser.color(""));
                 if(sellItem.getPlayer().equalsIgnoreCase(viewer.getName())){
-                    lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"));
+                    lore.addAll(ConfigManager.getStringList("design/menus/market/main.yml", "active-items.lore.seller").stream().map(s -> PlaceholderUtils.replace(
+                            s,
+                            true
+                    )).toList());
                 }
                 else{
-                    lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите ЛКМ, чтобы купить полностью"));
+                    lore.addAll(ConfigManager.getStringList("design/menus/market/main.yml", "active-items.lore.buy").stream().map(s -> PlaceholderUtils.replace(
+                            s,
+                            true
+                    )).toList());
                     if(!sellItem.isByOne()) {
-                        lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите ПКМ, чтобы купить поштучно"));
+                        lore.addAll(ConfigManager.getStringList("design/menus/market/main.yml", "active-items.lore.buy-by-one").stream().map(s -> PlaceholderUtils.replace(
+                                s,
+                                true
+                        )).toList());
                     }
                 }
                 itemMeta.setLore(lore);
                 itemStack.setItemMeta(itemMeta);
                 itemStack.setAmount(sellItem.getAmount());
                 inventory.setItem(slot, itemStack);
-                slot++;
+                slotIndex++;
             }
 
             if(true){
-                ItemStack itemStack = new ItemStack(Material.ENDER_CHEST);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F ❏ Товары на продаже ❏"));
-                List<String> lore = new ArrayList<>();
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C В этом разделе можно узнать,"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C какие товары &x&0&0&D&8&F&Fсейчас на продаже&f."));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color("   &6Товаров на продаже:&x&0&0&D&8&F&F " + LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(viewer.getName()).get().size()));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы открыть"));
-                itemMeta.setLore(lore);
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(45, itemStack);
+                int item_count = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(viewer.getName()).get().size();
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "on-sell-items",
+                        "&x&0&0&D&8&F&F ❏ Товары на продаже ❏",
+                        new Pair<>("%item_count%", String.valueOf(item_count))
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.CHEST);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F ❏ Просроченные товары ❏"));
-                List<String> lore = new ArrayList<>();
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C В этом разделе можно узнать,"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C какие ваши товары больше"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l▍&x&0&0&D&8&F&F не продаются &x&D&5&D&B&D&Cна аукционе."));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color("   &6Неактивных предметов:&x&0&0&D&8&F&F " + LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(viewer.getName()).get().size()));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы открыть"));
-                itemMeta.setLore(lore);
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(46, itemStack);
+                int item_count = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(viewer.getName()).get().size();
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "unsold-items",
+                        "&x&0&0&D&8&F&F ❏ Просроченные товары ❏",
+                        new Pair<>("%item_count%", String.valueOf(item_count))
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.EMERALD);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F⇵ &x&D&5&D&B&D&CОбновить аукцион"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(47, itemStack);
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "update",
+                        "&x&0&0&D&8&F&F⇵ &x&D&5&D&B&D&CОбновить аукцион"
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.GRAY_DYE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F◀ Предыдущая страница"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(48, itemStack);
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "prev-page",
+                        "&x&0&0&D&8&F&F◀ Предыдущая страница"
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.NETHER_STAR);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F Помощь по аукциону"));
-                List<String> lore = new ArrayList<>();
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &f&m                                      &f "));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&9&C&F&9&F&F              Аукцион"));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&D&5&D&B&D&C Вы выставляете свои вещи,"));
-                lore.add(Parser.color(" &x&D&5&D&B&D&C а другие игроки режима"));
-                lore.add(Parser.color(" &x&D&5&D&B&D&C покупают их у вас."));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &f&m                                      &f "));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы выбрать режим: &x&0&0&D&8&F&FСтавки"));
-                itemMeta.setLore(lore);
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(49, itemStack);
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "switch",
+                        "&x&0&0&D&8&F&F Помощь по аукциону"
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.LIME_DYE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&6Следующая страница ▶"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(50, itemStack);
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "next-page",
+                        "&6Следующая страница ▶"
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.PAPER);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F Помощь по системе аукциона:"));
-                List<String> lore = new ArrayList<>();
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы выставлять предметы на продажу,"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C нужно просто написать команду:"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah sell <цена>"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Если вы хотите выставить предметы"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C без поштучной возможности покупки:"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah sell <цена> full"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы найти нужный предмет"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C по названию, пропишите команду:"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah search <название>"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы найти все товары игрока,"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C пропишите команду:"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah player <никнейм>"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы переключить звуковые"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C уведомления, пропишите команду:"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah sound"));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l▍"));
-                lore.add(Parser.color(""));
-                itemMeta.setLore(lore);
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(51, itemStack);
+                Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
+                        "design/menus/market/main.yml",
+                        "help",
+                        "&x&0&0&D&8&F&F Помощь по системе аукциона:"
+                );
+                inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
                 ItemStack itemStack = new ItemStack(Material.HOPPER);
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F Сортировка"));
                 List<String> lore = new ArrayList<>();
-                if(sortingType == MarketSortingType.CHEAPEST_FIRST){
-                    lore.add(Parser.color("&o&6&6✔&6 &6Сначала дешевые"));
-                }
-                else{
-                    lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&CСначала дешевые"));
-                }
-                if(sortingType == MarketSortingType.EXPENSIVE_FIRST){
-                    lore.add(Parser.color("&o&6&6✔&6 &6Сначала дорогие"));
-                }
-                else{
-                    lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&CСначала дорогие"));
-                }
-                if(sortingType == MarketSortingType.CHEAPEST_PER_UNIT){
-                    lore.add(Parser.color("&o&6&6✔&6 &6Сначала дешевые за ед. товара"));
-                }
-                else{
-                    lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&CСначала дешевые за ед. товара"));
-                }
-                if(sortingType == MarketSortingType.EXPENSIVE_PER_UNIT){
-                    lore.add(Parser.color("&o&6&6✔&6 &6Сначала дорогие за ед. товара"));
-                }
-                else{
-                    lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&CСначала дорогие за ед. товара"));
-                }
-                if(sortingType == MarketSortingType.NEWEST_FIRST){
-                    lore.add(Parser.color("&o&6&6✔&6 &6Сначала новые"));
-                }
-                else{
-                    lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&CСначала новые"));
-                }
-                if(sortingType == MarketSortingType.OLDEST_FIRST){
-                    lore.add(Parser.color("&o&6&6✔&6 &6Сначала старые"));
-                }
-                else{
-                    lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&CСначала старые"));
+                for(MarketSortingType sortingType : MarketSortingType.values()){
+                    if(this.sortingType == sortingType){
+                        lore.add(Parser.color("&o&6&6✔&6 &6" + sortingType.getDisplayName()));
+                    }
+                    else{
+                        lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&C" + sortingType.getDisplayName()));
+                    }
                 }
                 itemMeta.setLore(lore);
                 itemStack.setItemMeta(itemMeta);

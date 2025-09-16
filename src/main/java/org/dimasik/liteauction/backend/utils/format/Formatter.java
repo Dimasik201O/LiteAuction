@@ -1,11 +1,14 @@
-package org.dimasik.liteauction.backend.utils;
+package org.dimasik.liteauction.backend.utils.format;
 
+import lombok.experimental.UtilityClass;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 
+@UtilityClass
 public class Formatter {
-    public static final String CURRENCY_SYMBOL = "¤";
+    public static final String CURRENCY_SYMBOL = ConfigManager.getString("settings/settings.yml", "currency-symbol", "¤");
 
     public static String formatPrice(int price) {
         if (price == 0) {
