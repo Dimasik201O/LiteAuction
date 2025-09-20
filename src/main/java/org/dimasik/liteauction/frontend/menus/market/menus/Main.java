@@ -176,21 +176,49 @@ public class Main extends AbstractMenu {
                 inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.HOPPER);
+                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                        "design/menus/market/main.yml",
+                        "sorting.material",
+                        "HOPPER"
+                )));
                 ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F Сортировка"));
+                itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
+                        "design/menus/market/main.yml",
+                        "sorting.displayname",
+                        "&x&0&0&D&8&F&F Сортировка"
+                )));
                 List<String> lore = new ArrayList<>();
                 for(MarketSortingType sortingType : MarketSortingType.values()){
                     if(this.sortingType == sortingType){
-                        lore.add(Parser.color("&o&6&6✔&6 &6" + sortingType.getDisplayName()));
+                        lore.add(Parser.color(ConfigManager.getString(
+                                "design/menus/market/main.yml",
+                                "sorting.prefix.selected",
+                                "&o&6&6✔&6 &6"
+                        ) + sortingType.getDisplayName()));
                     }
                     else{
-                        lore.add(Parser.color("&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&C" + sortingType.getDisplayName()));
+                        lore.add(Parser.color(Parser.color(ConfigManager.getString(
+                                "design/menus/market/main.yml",
+                                "sorting.prefix.unselected",
+                                "&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&C"
+                        ) + sortingType.getDisplayName())));
                     }
                 }
                 itemMeta.setLore(lore);
+                if(ConfigManager.getBoolean(
+                        "design/menus/market/main.yml",
+                        "sorting.glow",
+                        false
+                )){
+                    itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
                 itemStack.setItemMeta(itemMeta);
-                inventory.setItem(52, itemStack);
+                inventory.setItem(ConfigManager.getInt(
+                        "design/menus/market/main.yml",
+                        "sorting.slot",
+                        52
+                ), itemStack);
             }
             if(true){
                 ItemStack itemStack = new ItemStack(Material.CHEST_MINECART);

@@ -178,10 +178,11 @@ help:
 # кнопка сортировки
 sorting:
   slot: 52
-  material: PAPER
+  material: HOPPER
   # отвечает за то, что предмет будет переливаться
   glow: false
-  displayname: "&x&0&0&D&8&F&F Помощь по системе аукциона:"
+  displayname: "&x&0&0&D&8&F&F Сортировка"
+  # префикс перед типом сортировки
   prefix:
     selected: "&o&6&6✔&6 &6"
     unselected: "&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&C"
