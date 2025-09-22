@@ -2,9 +2,11 @@ package org.dimasik.liteauction.backend.storage.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.backend.utils.ItemEncrypt;
+import org.dimasik.liteauction.frontend.commands.impl.Sell;
 
 import java.io.IOException;
 import java.util.Set;
@@ -21,6 +23,7 @@ public class SellItem {
     private int amount;
     private boolean byOne;
     private long createTime;
+    public boolean fake;
 
     public ItemStack decodeItemStack() {
         try {
@@ -36,5 +39,19 @@ public class SellItem {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public SellItem clone(){
+        return new SellItem(
+                id,
+                player,
+                itemStack,
+                tags,
+                price,
+                amount,
+                byOne,
+                createTime,
+                fake
+        );
     }
 }

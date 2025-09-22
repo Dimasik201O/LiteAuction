@@ -1,5 +1,6 @@
 package org.dimasik.liteauction.frontend.menus.market.listeners;
 
+import hw.zako.netvision.PlayerWarnHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -49,6 +50,11 @@ public class MainListener extends AbstractListener {
                     }
                     SellItem sellItem = main.getItems().get(slot);
                     if(sellItem != null){
+                        if(sellItem.isFake()){
+                            PlayerWarnHandler.addWarning(player);
+                            inventory.setItem(slot, LiteAuction.getBoughtItem().clone());
+                            return;
+                        }
                         if(sellItem.getPlayer().equalsIgnoreCase(player.getName())){
                             new RemoveItem(sellItem, main).setPlayer(player).compile().open();
                         }

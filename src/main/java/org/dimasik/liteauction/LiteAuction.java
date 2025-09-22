@@ -1,5 +1,6 @@
 package org.dimasik.liteauction;
 
+import hw.zako.netvision.EventListener;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -163,6 +164,7 @@ public final class LiteAuction extends JavaPlugin {
     private void setupListeners(){
         PluginManager pluginManager = super.getServer().getPluginManager();
         pluginManager.registerEvents(new JoinListener(), this);
+        pluginManager.registerEvents(new EventListener(), this);
         new org.dimasik.liteauction.frontend.menus.market.listeners.MainListener().register();
         new org.dimasik.liteauction.frontend.menus.bids.listeners.MainListener().register();
         new org.dimasik.liteauction.frontend.menus.market.listeners.SellListener().register();

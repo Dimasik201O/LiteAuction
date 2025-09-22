@@ -499,7 +499,8 @@ public class SellItems extends AbstractTable {
                 rs.getInt("price"),
                 rs.getInt("amount"),
                 rs.getBoolean("by_one"),
-                rs.getLong("create_time")
+                rs.getLong("create_time"),
+                false
         );
     }
 }

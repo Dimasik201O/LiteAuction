@@ -1,5 +1,6 @@
 package org.dimasik.liteauction.frontend.menus.market.menus;
 
+import hw.zako.netvision.ItemInjector;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -55,6 +56,9 @@ public class Main extends AbstractMenu {
             int slotsCount = slots.size();
             int startIndex = slotsCount * (page - 1);
             int pages = items.size() / slotsCount + (items.size() % slotsCount == 0 ? 0 : 1);
+            if(sortingType == MarketSortingType.NEWEST_FIRST) {
+                int res = ItemInjector.injectItem(items, page, slots.size());
+            }
             inventory = ConfigUtils.buildInventory(this, "design/menus/market/main.yml", "inventory-type",
                     PlaceholderUtils.replace(
                             ConfigManager.getString("design/menus/market/main.yml", "gui-title", "&0Аукцион (%current_page%/%pages_amount%)"),
@@ -112,6 +116,12 @@ public class Main extends AbstractMenu {
                 itemStack.setItemMeta(itemMeta);
                 itemStack.setAmount(sellItem.getAmount());
                 inventory.setItem(slot, itemStack);
+                if(sellItem.isFake()){
+                    final int boughtSlot = slots.get(slotIndex);
+                    Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
+                        inventory.setItem(boughtSlot, LiteAuction.getBoughtItem());
+                    }, 20);
+                }
                 slotIndex++;
             }
 
