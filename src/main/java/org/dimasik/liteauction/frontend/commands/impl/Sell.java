@@ -75,7 +75,7 @@ public class Sell extends SubCommand {
             }
 
             try {
-                List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(MarketSortingType.CHEAPEST_PER_UNIT, TagUtil.getPartialTags(itemStack)).get();
+                List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(MarketSortingType.CHEAPEST_PER_UNIT, TagUtil.getPartialTags(itemStack), 1, 1).get();
                 int priceForOne = ConfigManager.getInt("settings/settings.yml", "default-auto-price", 500);
                 if(!sellItems.isEmpty()){
                     priceForOne = sellItems.get(0).getPrice();
@@ -366,8 +366,7 @@ public class Sell extends SubCommand {
 
     private int getItemsInAuction(String player){
         try {
-            List<SellItem> sellItems = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(player).get();
-            return sellItems.size();
+            return LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(player).get();
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException();
         }

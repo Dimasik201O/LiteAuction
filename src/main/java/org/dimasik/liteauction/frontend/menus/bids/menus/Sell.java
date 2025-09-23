@@ -8,6 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.Pair;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
+import org.dimasik.liteauction.backend.config.utils.PlaceholderUtils;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.format.Formatter;
 import org.dimasik.liteauction.backend.utils.format.Parser;
@@ -36,11 +40,12 @@ public class Sell extends AbstractMenu {
         try{
             items.clear();
             int slot = 0;
-            List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItems(viewer.getName()).get();
-            int startIndex = 45 * (page - 1);
+            List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItems(viewer.getName(), page, 45).get();
             int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
-            inventory = Bukkit.createInventory(this, 54, Parser.color("Товары на продаже"));
-            for(int i = startIndex; i < items.size() && slot < 45; i++) {
+            inventory = ConfigUtils.buildInventory(this, "design/menus/bids/sell.yml", "inventory-type",
+                    ConfigManager.getString("design/menus/bids/sell.yml", "gui-title", "&x&0&0&D&8&F&F Товары на продаже")
+            );
+            for(int i = 0; i < items.size() && slot < 45; i++) {
                 BidItem bidItem = items.get(i);
                 this.items.put(slot, bidItem);
                 ItemStack itemStack = bidItem.decodeItemStack();
@@ -49,61 +54,29 @@ public class Sell extends AbstractMenu {
                 if(itemMeta != null && itemMeta.getLore() != null){
                     lore = itemMeta.getLore();
                 }
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F " + String.join("&f, &x&0&0&D&8&F&F", TagUtil.getItemCategories(bidItem.getTags()))));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Истекает через:&x&0&0&D&8&F&F " + Formatter.getTimeUntilExpiration(bidItem)));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Цена:&x&0&0&D&8&F&F " + Formatter.formatPrice(bidItem.getCurrentPrice())));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F● &x&D&5&D&B&D&CДанный товар можно"));
-                lore.add(Parser.color(" &0.&x&D&5&D&B&D&C  купить &x&0&0&D&8&F&Fтолько полностью&x&D&5&D&B&D&C."));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"));
+                lore.addAll(ConfigManager.getStringList("design/menus/bids/sell.yml", "active-items.lore.main").stream().map(s -> PlaceholderUtils.replace(
+                        s,
+                        true,
+                        new Pair<>("%categories%", String.join("&f, &x&0&0&D&8&F&F", TagUtil.getItemCategories(bidItem.getTags()))),
+                        new Pair<>("%expirytime%", Formatter.getTimeUntilExpiration(bidItem)),
+                        new Pair<>("%current_price%", Formatter.formatPrice(bidItem.getCurrentPrice()))
+                )).toList());
+                lore.addAll(ConfigManager.getStringList("design/menus/bids/sell.yml", "active-items.lore.by-one").stream().map(s -> Parser.color(s)).toList());
+                lore.addAll(ConfigManager.getStringList("design/menus/bids/sell.yml", "active-items.lore.action").stream().map(s -> Parser.color(s)).toList());
                 itemMeta.setLore(lore);
                 itemStack.setItemMeta(itemMeta);
                 inventory.setItem(slot, itemStack);
                 slot++;
             }
 
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.ARROW);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&F&F&2&2&2&2◀ &x&D&5&D&B&D&CНазад"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(45, itemStack);
-            }
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.GRAY_DYE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F◀ Предыдущая страница"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(48, itemStack);
-            }
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.LIME_DYE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&6Следующая страница ▶"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(50, itemStack);
-            }
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.BOOK);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F Помощь по аукциону"));
-                List<String> lore = new ArrayList<>();
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &f&m                                          &f "));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&9&C&F&9&F&F       Как снять с продажи?"));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&D&5&D&B&D&C Чтобы снять товар с продажи,"));
-                lore.add(Parser.color(" &x&D&5&D&B&D&C нажмите по иконке товара."));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &f&m                                          &f "));
-                lore.add(Parser.color(""));
-                itemMeta.setLore(lore);
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(53, itemStack);
-            }
+            Pair<ItemStack, Integer> back = ConfigUtils.buildItem("design/menus/bids/sell.yml", "back", "&x&F&F&2&2&2&2◀ &x&D&5&D&B&D&CНазад");
+            inventory.setItem(back.getRight(), back.getLeft());
+            Pair<ItemStack, Integer> prev = ConfigUtils.buildItem("design/menus/bids/sell.yml", "prev-page", "&x&0&0&D&8&F&F◀ Предыдущая страница");
+            inventory.setItem(prev.getRight(), prev.getLeft());
+            Pair<ItemStack, Integer> next = ConfigUtils.buildItem("design/menus/bids/sell.yml", "next-page", "&6Следующая страница ▶");
+            inventory.setItem(next.getRight(), next.getLeft());
+            Pair<ItemStack, Integer> help = ConfigUtils.buildItem("design/menus/bids/sell.yml", "help", "&x&0&0&D&8&F&F Помощь по аукциону");
+            inventory.setItem(help.getRight(), help.getLeft());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

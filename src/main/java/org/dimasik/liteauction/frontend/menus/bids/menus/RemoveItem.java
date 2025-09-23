@@ -6,6 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.Pair;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
+import org.dimasik.liteauction.backend.config.utils.PlaceholderUtils;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
@@ -27,7 +31,9 @@ public class RemoveItem extends AbstractMenu {
 
     public RemoveItem compile(){
         try{
-            inventory = Bukkit.createInventory(this, 27, "Снять предмет с продажи");
+            inventory = ConfigUtils.buildInventory(this, "design/menus/bids/remove_item.yml", "inventory-type",
+                    ConfigManager.getString("design/menus/bids/remove_item.yml", "gui-title", "&x&0&0&D&8&F&F Снять предмет с продажи")
+            );
             if(true){
                 ItemStack itemStack = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
                 ItemMeta itemMeta = itemStack.getItemMeta();
@@ -79,11 +85,7 @@ public class RemoveItem extends AbstractMenu {
                 if(itemMeta != null && itemMeta.getLore() != null){
                     lore = itemMeta.getLore();
                 }
-                lore.add(Parser.color(""));
-                lore.add(Parser.color(" &x&0&0&D&8&F&F● &x&D&5&D&B&D&CДанный товар можно"));
-                lore.add(Parser.color(" &0.&x&D&5&D&B&D&C  купить &x&0&0&D&8&F&Fтолько полностью&x&D&5&D&B&D&C."));
-                lore.add(Parser.color(""));
-                lore.add(Parser.color("&x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"));
+                lore.addAll(ConfigManager.getStringList("design/menus/bids/remove_item.yml", "item.lore").stream().map(s -> Parser.color(s)).toList());
                 itemMeta.setLore(lore);
                 itemStack.setItemMeta(itemMeta);
                 inventory.setItem(13, itemStack);

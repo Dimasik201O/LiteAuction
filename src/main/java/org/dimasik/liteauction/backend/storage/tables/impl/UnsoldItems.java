@@ -59,16 +59,37 @@ public class UnsoldItems extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<UnsoldItem>> getAllItems() {
+    public CompletableFuture<List<UnsoldItem>> getAllItems(int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<UnsoldItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement();
-                 ResultSet rs = statement.executeQuery("SELECT * FROM unsold_items")) {
-                while (rs.next()) {
-                    items.add(extractUnsoldItemFromResultSet(rs));
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT * FROM unsold_items ORDER BY id ASC LIMIT ? OFFSET ?")) {
+
+                statement.setInt(1, pageSize);
+                statement.setInt(2, (page - 1) * pageSize);
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        items.add(extractUnsoldItemFromResultSet(rs));
+                    }
+                    return items;
                 }
-                return items;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<Integer> getAllItemsCount() {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 Statement statement = connection.createStatement();
+                 ResultSet rs = statement.executeQuery("SELECT COUNT(*) FROM unsold_items")) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -94,7 +115,7 @@ public class UnsoldItems extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<UnsoldItem>> getPlayerItems(String player) {
+    public CompletableFuture<List<UnsoldItem>> getAllPlayerItems(String player) {
         return CompletableFuture.supplyAsync(() -> {
             List<UnsoldItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
@@ -107,6 +128,47 @@ public class UnsoldItems extends AbstractTable {
                         items.add(extractUnsoldItemFromResultSet(rs));
                     }
                     return items;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<UnsoldItem>> getPlayerItems(String player, int page, int pageSize) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<UnsoldItem> items = new ArrayList<>();
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT * FROM unsold_items WHERE player = ? ORDER BY create_time DESC LIMIT ? OFFSET ?")) {
+
+                statement.setString(1, player);
+                statement.setInt(2, pageSize);
+                statement.setInt(3, (page - 1) * pageSize);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        items.add(extractUnsoldItemFromResultSet(rs));
+                    }
+                    return items;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<Integer> getPlayerItemsCount(String player) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT COUNT(*) FROM unsold_items WHERE player = ?")) {
+
+                statement.setString(1, player);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return 0;
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);

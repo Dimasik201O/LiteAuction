@@ -1,6 +1,5 @@
 package org.dimasik.liteauction.frontend.menus.market.menus;
 
-import hw.zako.netvision.ItemInjector;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -52,13 +51,10 @@ public class Main extends AbstractMenu {
             items.clear();
             List<Integer> slots = ConfigUtils.getSlots("design/menus/market/main.yml", "active-items.slot");
             int slotIndex = 0;
-            List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType).get();
+            int itemCount = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(player, sortingType, filters, categoryType).get();
+            List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType, page, slots.size()).get();
             int slotsCount = slots.size();
-            int startIndex = slotsCount * (page - 1);
-            int pages = items.size() / slotsCount + (items.size() % slotsCount == 0 ? 0 : 1);
-            if(sortingType == MarketSortingType.NEWEST_FIRST) {
-                int res = ItemInjector.injectItem(items, page, slots.size());
-            }
+            int pages = itemCount / slotsCount + (itemCount % slotsCount == 0 ? 0 : 1);
             inventory = ConfigUtils.buildInventory(this, "design/menus/market/main.yml", "inventory-type",
                     PlaceholderUtils.replace(
                             ConfigManager.getString("design/menus/market/main.yml", "gui-title", "&0Аукцион (%current_page%/%pages_amount%)"),
@@ -67,7 +63,7 @@ public class Main extends AbstractMenu {
                             new Pair<>("%pages_amount%", String.valueOf(pages))
                     )
             );
-            for(int i = startIndex; i < items.size() && slotIndex < slotsCount; i++) {
+            for(int i = 0; i < items.size() && slotIndex < slotsCount; i++) {
                 int slot = slots.get(slotIndex);
                 SellItem sellItem = items.get(i);
                 this.items.put(slot, sellItem);
@@ -126,7 +122,7 @@ public class Main extends AbstractMenu {
             }
 
             if(true){
-                int item_count = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(viewer.getName()).get().size();
+                int item_count = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(viewer.getName()).get();
                 Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
                         "design/menus/market/main.yml",
                         "on-sell-items",
@@ -136,7 +132,7 @@ public class Main extends AbstractMenu {
                 inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                int item_count = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(viewer.getName()).get().size();
+                int item_count = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItemsCount(viewer.getName()).get();
                 Pair<ItemStack, Integer> entry = ConfigUtils.buildItem(
                         "design/menus/market/main.yml",
                         "unsold-items",
@@ -231,21 +227,49 @@ public class Main extends AbstractMenu {
                 ), itemStack);
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.CHEST_MINECART);
+                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                        "design/menus/market/main.yml",
+                        "category.material",
+                        "CHEST_MINECART"
+                )));
                 ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&0&D&8&F&F Категории предметов"));
+                itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
+                        "design/menus/market/main.yml",
+                        "category.displayname",
+                        "&x&0&0&D&8&F&F Категории предметов"
+                )));
                 List<String> lore = new ArrayList<>();
-                for(CategoryType categoryType : CategoryType.values()){
-                    if(this.categoryType == categoryType){
-                        lore.add(Parser.color("&o&6&6✔&6 &6" + categoryType.getDisplayName()));
+                for(MarketSortingType sortingType : MarketSortingType.values()){
+                    if(this.sortingType == sortingType){
+                        lore.add(Parser.color(ConfigManager.getString(
+                                "design/menus/market/main.yml",
+                                "category.prefix.selected",
+                                "&o&6&6✔&6 &6"
+                        ) + sortingType.getDisplayName()));
                     }
                     else{
-                        lore.add(Parser.color("&o&x&9&C&F&9&F&F● &f" + categoryType.getDisplayName()));
+                        lore.add(Parser.color(Parser.color(ConfigManager.getString(
+                                "design/menus/market/main.yml",
+                                "category.prefix.unselected",
+                                "&o&x&9&C&F&9&F&F● &f"
+                        ) + sortingType.getDisplayName())));
                     }
                 }
                 itemMeta.setLore(lore);
+                if(ConfigManager.getBoolean(
+                        "design/menus/market/main.yml",
+                        "category.glow",
+                        false
+                )){
+                    itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
                 itemStack.setItemMeta(itemMeta);
-                inventory.setItem(53, itemStack);
+                inventory.setItem(ConfigManager.getInt(
+                        "design/menus/market/main.yml",
+                        "category.slot",
+                        53
+                ), itemStack);
             }
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);

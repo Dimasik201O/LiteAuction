@@ -75,16 +75,37 @@ public class SellItems extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getAllItems() {
+    public CompletableFuture<List<SellItem>> getAllItems(int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement();
-                 ResultSet rs = statement.executeQuery("SELECT * FROM sell_items")) {
-                while (rs.next()) {
-                    items.add(extractSellItemFromResultSet(rs));
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT * FROM sell_items ORDER BY id ASC LIMIT ? OFFSET ?")) {
+
+                statement.setInt(1, pageSize);
+                statement.setInt(2, (page - 1) * pageSize);
+
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        items.add(extractSellItemFromResultSet(rs));
+                    }
+                    return items;
                 }
-                return items;
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<Integer> getAllItemsCount() {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 Statement statement = connection.createStatement();
+                 ResultSet rs = statement.executeQuery("SELECT COUNT(*) FROM sell_items")) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -110,13 +131,15 @@ public class SellItems extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getPlayerItems(String player) {
+    public CompletableFuture<List<SellItem>> getPlayerItems(String player, int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE player = ? ORDER BY create_time DESC")) {
+                         "SELECT * FROM sell_items WHERE player = ? ORDER BY create_time DESC LIMIT ? OFFSET ?")) {
                 statement.setString(1, player);
+                statement.setInt(2, pageSize);
+                statement.setInt(3, (page - 1) * pageSize);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
                         items.add(extractSellItemFromResultSet(rs));
@@ -129,16 +152,36 @@ public class SellItems extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getExpiredPlayerItems(String player) {
+    public CompletableFuture<Integer> getPlayerItemsCount(String player) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT COUNT(*) FROM sell_items WHERE player = ?")) {
+                statement.setString(1, player);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return 0;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<SellItem>> getExpiredPlayerItems(String player, int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
             long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM sell_items WHERE player = ? AND create_time < ?")) {
+                         "SELECT * FROM sell_items WHERE player = ? AND create_time < ? LIMIT ? OFFSET ?")) {
 
                 statement.setString(1, player);
                 statement.setLong(2, twelveHoursAgo);
+                statement.setInt(3, pageSize);
+                statement.setInt(4, (page - 1) * pageSize);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
                         items.add(extractSellItemFromResultSet(rs));
@@ -151,18 +194,44 @@ public class SellItems extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<SellItem>> getItems(MarketSortingType sortingType, Set<String> filters) {
+    public CompletableFuture<Integer> getExpiredPlayerItemsCount(String player) {
+        return CompletableFuture.supplyAsync(() -> {
+            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT COUNT(*) FROM sell_items WHERE player = ? AND create_time < ?")) {
+
+                statement.setString(1, player);
+                statement.setLong(2, twelveHoursAgo);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return 0;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<SellItem>> getItems(MarketSortingType sortingType, Set<String> filters, int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection()) {
-                String sql = buildQuery(sortingType, filters);
+                String sql = buildQuery(sortingType, filters) + " LIMIT ? OFFSET ?";
                 try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    int paramIndex = 1;
+
                     if (filters != null && !filters.isEmpty()) {
-                        int paramIndex = 1;
                         for (String filter : filters) {
                             statement.setString(paramIndex++, "%" + filter + "%");
                         }
                     }
+
+                    statement.setInt(paramIndex++, pageSize);
+                    statement.setInt(paramIndex, (page - 1) * pageSize);
+
                     try (ResultSet rs = statement.executeQuery()) {
                         while (rs.next()) {
                             items.add(extractSellItemFromResultSet(rs));
@@ -176,13 +245,38 @@ public class SellItems extends AbstractTable {
         });
     }
 
+    public CompletableFuture<Integer> getItemsCount(MarketSortingType sortingType, Set<String> filters) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                String countSql = buildCountQuery(filters);
+                try (PreparedStatement statement = connection.prepareStatement(countSql)) {
+                    if (filters != null && !filters.isEmpty()) {
+                        int paramIndex = 1;
+                        for (String filter : filters) {
+                            statement.setString(paramIndex++, "%" + filter + "%");
+                        }
+                    }
+                    try (ResultSet rs = statement.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                        }
+                        return 0;
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     public CompletableFuture<List<SellItem>> getItems(MarketSortingType sortingType,
                                                       Set<String> additionalFilters,
-                                                      CategoryType categoryFilter) {
+                                                      CategoryType categoryFilter,
+                                                      int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection()) {
-                String sql = buildQuery(sortingType, additionalFilters, categoryFilter);
+                String sql = buildQuery(sortingType, additionalFilters, categoryFilter) + " LIMIT ? OFFSET ?";
                 try (PreparedStatement statement = connection.prepareStatement(sql)) {
                     int paramIndex = 1;
 
@@ -198,6 +292,9 @@ public class SellItems extends AbstractTable {
                         }
                     }
 
+                    statement.setInt(paramIndex++, pageSize);
+                    statement.setInt(paramIndex, (page - 1) * pageSize);
+
                     try (ResultSet rs = statement.executeQuery()) {
                         while (rs.next()) {
                             items.add(extractSellItemFromResultSet(rs));
@@ -211,17 +308,52 @@ public class SellItems extends AbstractTable {
         });
     }
 
+    public CompletableFuture<Integer> getItemsCount(MarketSortingType sortingType,
+                                                    Set<String> additionalFilters,
+                                                    CategoryType categoryFilter) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                String countSql = buildCountQuery(additionalFilters, categoryFilter);
+                try (PreparedStatement statement = connection.prepareStatement(countSql)) {
+                    int paramIndex = 1;
+
+                    if (categoryFilter != CategoryType.ALL) {
+                        for (String tag : categoryFilter.getTags()) {
+                            statement.setString(paramIndex++, "%" + tag + "%");
+                        }
+                    }
+
+                    if (additionalFilters != null && !additionalFilters.isEmpty()) {
+                        for (String filter : additionalFilters) {
+                            statement.setString(paramIndex++, "%" + filter + "%");
+                        }
+                    }
+
+                    try (ResultSet rs = statement.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                        }
+                        return 0;
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     public CompletableFuture<List<SellItem>> getItems(String owner,
-                                                             MarketSortingType sortingType,
-                                                             Set<String> additionalFilters,
-                                                             CategoryType categoryFilter) {
+                                                      MarketSortingType sortingType,
+                                                      Set<String> additionalFilters,
+                                                      CategoryType categoryFilter,
+                                                      int page, int pageSize) {
         if(owner == null){
-            return getItems(sortingType, additionalFilters, categoryFilter);
+            return getItems(sortingType, additionalFilters, categoryFilter, page, pageSize);
         }
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
             try (Connection connection = dataSource.getConnection()) {
-                String sql = buildOwnerQuery(owner, sortingType, additionalFilters, categoryFilter);
+                String sql = buildOwnerQuery(owner, sortingType, additionalFilters, categoryFilter) + " LIMIT ? OFFSET ?";
                 try (PreparedStatement statement = connection.prepareStatement(sql)) {
                     int paramIndex = 1;
 
@@ -239,11 +371,54 @@ public class SellItems extends AbstractTable {
                         }
                     }
 
+                    statement.setInt(paramIndex++, pageSize);
+                    statement.setInt(paramIndex, (page - 1) * pageSize);
+
                     try (ResultSet rs = statement.executeQuery()) {
                         while (rs.next()) {
                             items.add(extractSellItemFromResultSet(rs));
                         }
                         return items;
+                    }
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<Integer> getItemsCount(String owner,
+                                                    MarketSortingType sortingType,
+                                                    Set<String> additionalFilters,
+                                                    CategoryType categoryFilter) {
+        if(owner == null){
+            return getItemsCount(sortingType, additionalFilters, categoryFilter);
+        }
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                String countSql = buildOwnerCountQuery(owner, additionalFilters, categoryFilter);
+                try (PreparedStatement statement = connection.prepareStatement(countSql)) {
+                    int paramIndex = 1;
+
+                    statement.setString(paramIndex++, owner);
+
+                    if (categoryFilter != CategoryType.ALL) {
+                        for (String tag : categoryFilter.getTags()) {
+                            statement.setString(paramIndex++, "%" + tag + "%");
+                        }
+                    }
+
+                    if (additionalFilters != null && !additionalFilters.isEmpty()) {
+                        for (String filter : additionalFilters) {
+                            statement.setString(paramIndex++, "%" + filter + "%");
+                        }
+                    }
+
+                    try (ResultSet rs = statement.executeQuery()) {
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                        }
+                        return 0;
                     }
                 }
             } catch (SQLException e) {
@@ -323,6 +498,88 @@ public class SellItems extends AbstractTable {
         }
 
         sql.append(getOrderByClause(sortingType));
+
+        return sql.toString();
+    }
+
+    private String buildCountQuery(Set<String> filters) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM sell_items");
+
+        if (filters != null && !filters.isEmpty()) {
+            sql.append(" WHERE ");
+            for (int i = 0; i < filters.size(); i++) {
+                if (i > 0) {
+                    sql.append(" AND ");
+                }
+                sql.append("tags LIKE ?");
+            }
+        }
+
+        return sql.toString();
+    }
+
+    private String buildCountQuery(Set<String> additionalFilters, CategoryType categoryFilter) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM sell_items");
+        List<String> conditions = new ArrayList<>();
+
+        if (categoryFilter != CategoryType.ALL) {
+            StringBuilder categoryCondition = new StringBuilder("(");
+            List<String> tagConditions = new ArrayList<>();
+
+            for (String tag : categoryFilter.getTags()) {
+                tagConditions.add("tags LIKE ?");
+            }
+
+            categoryCondition.append(String.join(" OR ", tagConditions));
+            categoryCondition.append(")");
+            conditions.add(categoryCondition.toString());
+        }
+
+        if (additionalFilters != null && !additionalFilters.isEmpty()) {
+            StringBuilder filtersCondition = new StringBuilder("(");
+            List<String> filterConditions = new ArrayList<>();
+
+            for (String filter : additionalFilters) {
+                filterConditions.add("tags LIKE ?");
+            }
+
+            filtersCondition.append(String.join(" AND ", filterConditions));
+            filtersCondition.append(")");
+            conditions.add(filtersCondition.toString());
+        }
+
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ");
+            sql.append(String.join(" AND ", conditions));
+        }
+
+        return sql.toString();
+    }
+
+    private String buildOwnerCountQuery(String owner, Set<String> additionalFilters, CategoryType categoryFilter) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM sell_items WHERE player = ?");
+
+        if (categoryFilter != CategoryType.ALL) {
+            sql.append(" AND (");
+            for (int i = 0; i < categoryFilter.getTags().size(); i++) {
+                if (i > 0) {
+                    sql.append(" OR ");
+                }
+                sql.append("tags LIKE ?");
+            }
+            sql.append(")");
+        }
+
+        if (additionalFilters != null && !additionalFilters.isEmpty()) {
+            sql.append(" AND (");
+            for (int i = 0; i < additionalFilters.size(); i++) {
+                if (i > 0) {
+                    sql.append(" AND ");
+                }
+                sql.append("tags LIKE ?");
+            }
+            sql.append(")");
+        }
 
         return sql.toString();
     }
@@ -457,29 +714,7 @@ public class SellItems extends AbstractTable {
             }
         }
 
-        sql.append(" ORDER BY ");
-        switch (sortingType) {
-            case CHEAPEST_FIRST:
-                sql.append("(price * amount) ASC");
-                break;
-            case EXPENSIVE_FIRST:
-                sql.append("(price * amount) DESC");
-                break;
-            case CHEAPEST_PER_UNIT:
-                sql.append("price ASC");
-                break;
-            case EXPENSIVE_PER_UNIT:
-                sql.append("price DESC");
-                break;
-            case NEWEST_FIRST:
-                sql.append("create_time DESC");
-                break;
-            case OLDEST_FIRST:
-                sql.append("create_time ASC");
-                break;
-            default:
-                sql.append("id ASC");
-        }
+        sql.append(getOrderByClause(sortingType));
 
         return sql.toString();
     }

@@ -1,0 +1,38 @@
+inventory-type: 27
+
+gui-title: "Покупка предмета"
+
+approve:
+  material: LIME_STAINED_GLASS_PANE
+  displayname: "&x&0&5&F&B&0&0 ▶ &x&D&5&D&B&D&CКупить"
+  slot:
+    mode: array
+    value: [0,1,2,9,10,11,18,19,20]
+
+neutral:
+  material: GRAY_STAINED_GLASS_PANE
+  displayname: " "
+  slot:
+    mode: array
+    value: [3,4,5,12,14,21,22,23]
+
+cancel:
+  material: RED_STAINED_GLASS_PANE
+  displayname: "&x&F&F&2&2&2&2 ▶ &x&D&5&D&B&D&CОтменить покупку"
+  slot:
+    mode: array
+    value: [6,7,8,15,16,17,24,25,26]
+
+item:
+  slot: 13
+  lore:
+    - ""
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F %categories%"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Продавец:&x&0&0&D&8&F&F %seller%"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Цена:&x&0&0&D&8&F&F %full_price%"
+    - " &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C Цена за 1 ед.:&x&0&0&D&8&F&F %price%"
+    - ""
+
+messages:
+  cannot_take_item: "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."
+  not_enough_money: "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."

@@ -9,6 +9,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.format.Formatter;
 import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
@@ -33,30 +35,21 @@ public class ConfirmItemListener extends AbstractListener {
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
             try {
-                switch (slot) {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 9:
-                    case 10:
-                    case 11:
-                    case 18:
-                    case 19:
-                    case 20:
+                if (ConfigUtils.getSlots("design/menus/market/confirm_item.yml", "approve.slot").contains(slot)) {
                         Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(confirmItem.getSellItem().getId()).get();
                         if (sellItemOptional.isEmpty()){
-                            player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                             return;
                         }
                         else if(sellItemOptional.get().getAmount() < confirmItem.getSellItem().getAmount()){
-                            player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                             return;
                         }
                         SellItem sellItem = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(confirmItem.getSellItem().getId()).get().get();
                         int price = sellItem.getPrice() * sellItem.getAmount();
                         double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
                         if(money < price){
-                            player.sendMessage(Parser.color("&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."));
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.not_enough_money", "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки.")));
                             player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
                             player.closeInventory();
                             return;
@@ -77,18 +70,8 @@ public class ConfirmItemListener extends AbstractListener {
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(confirmItem.getSellItem().getId());
 
                         player.closeInventory();
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 15:
-                    case 16:
-                    case 17:
-                    case 24:
-                    case 25:
-                    case 26:
+                } else if (ConfigUtils.getSlots("design/menus/market/confirm_item.yml", "cancel.slot").contains(slot)) {
                         player.closeInventory();
-                        break;
                 }
             } catch (Exception e) {
                 player.closeInventory();

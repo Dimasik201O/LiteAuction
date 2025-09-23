@@ -1,6 +1,5 @@
 package org.dimasik.liteauction;
 
-import hw.zako.netvision.EventListener;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -73,6 +72,15 @@ public final class LiteAuction extends JavaPlugin {
                 "design/commands/sound.yml",
                 "design/menus/main.yml",
                 "design/menus/market/main.yml",
+                "design/menus/market/confirm_item.yml",
+                "design/menus/market/count_buy_item.yml",
+                "design/menus/market/remove_item.yml",
+                "design/menus/market/sell.yml",
+                "design/menus/market/unsold.yml",
+                "design/menus/bids/main.yml",
+                "design/menus/bids/item_bids.yml",
+                "design/menus/bids/remove_item.yml",
+                "design/menus/bids/sell.yml",
         };
         for(String filePath : files) {
             File file = new File(super.getDataFolder(), filePath);
@@ -164,7 +172,6 @@ public final class LiteAuction extends JavaPlugin {
     private void setupListeners(){
         PluginManager pluginManager = super.getServer().getPluginManager();
         pluginManager.registerEvents(new JoinListener(), this);
-        pluginManager.registerEvents(new EventListener(), this);
         new org.dimasik.liteauction.frontend.menus.market.listeners.MainListener().register();
         new org.dimasik.liteauction.frontend.menus.bids.listeners.MainListener().register();
         new org.dimasik.liteauction.frontend.menus.market.listeners.SellListener().register();

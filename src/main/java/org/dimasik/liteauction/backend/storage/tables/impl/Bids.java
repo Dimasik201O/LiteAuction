@@ -81,13 +81,15 @@ public class Bids extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<Bid>> getBidsByItemId(int itemId) {
+    public CompletableFuture<List<Bid>> getBidsByItemId(int itemId, int beginIndex, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<Bid> bids = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM bids WHERE item_id = ? ORDER BY price ASC")) {
+                         "SELECT * FROM bids WHERE item_id = ? ORDER BY price ASC LIMIT ? OFFSET ?")) {
                 statement.setInt(1, itemId);
+                statement.setInt(2, pageSize);
+                statement.setInt(3, beginIndex);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
                         bids.add(extractBidFromResultSet(rs));
@@ -100,18 +102,57 @@ public class Bids extends AbstractTable {
         });
     }
 
-    public CompletableFuture<List<Bid>> getPlayerBids(String player) {
+    public CompletableFuture<Integer> getBidsByItemIdCount(int itemId) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT COUNT(*) FROM bids WHERE item_id = ?")) {
+
+                statement.setInt(1, itemId);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return 0;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<List<Bid>> getPlayerBids(String player, int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<Bid> bids = new ArrayList<>();
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
-                         "SELECT * FROM bids WHERE player = ? ORDER BY id DESC")) {
+                         "SELECT * FROM bids WHERE player = ? ORDER BY id DESC LIMIT ? OFFSET ?")) {
                 statement.setString(1, player);
+                statement.setInt(2, pageSize);
+                statement.setInt(3, (page - 1) * pageSize);
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
                         bids.add(extractBidFromResultSet(rs));
                     }
                     return bids;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<Integer> getPlayerBidsCount(String player) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         "SELECT COUNT(*) FROM bids WHERE player = ?")) {
+                statement.setString(1, player);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                    return 0;
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);

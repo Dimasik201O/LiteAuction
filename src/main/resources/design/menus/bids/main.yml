@@ -1,0 +1,127 @@
+inventory-type: 54
+
+gui-title: "&0Аукцион (%current_page%/%pages_amount%)"
+
+on-sell-items:
+  material: ENDER_CHEST
+  displayname: "&x&0&0&D&8&F&F ❏ Товары на продаже ❏"
+  slot: 45
+  lore:
+    - ""
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C В этом разделе можно узнать,"
+    - " &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C какие товары &x&0&0&D&8&F&Fсейчас на продаже&f."
+    - ""
+    - "   &6Товаров на продаже:&x&0&0&D&8&F&F %item_count%"
+    - ""
+    - " &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы открыть"
+
+unsold-items:
+  material: CHEST
+  displayname: "&x&0&0&D&8&F&F ❏ Просроченные товары ❏"
+  slot: 46
+  lore:
+    - ""
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C В этом разделе можно узнать,"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C какие ваши товары больше"
+    - " &x&0&0&D&8&F&F&l▍&x&0&0&D&8&F&F не продаются &x&D&5&D&B&D&Cна аукционе."
+    - ""
+    - "   &6Неактивных предметов:&x&0&0&D&8&F&F %item_count%"
+    - ""
+    - " &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы открыть"
+
+update:
+  material: EMERALD
+  displayname: "&x&0&0&D&8&F&F⇵ &x&D&5&D&B&D&CОбновить аукцион"
+  slot: 47
+
+prev-page:
+  material: GRAY_DYE
+  displayname: "&x&0&0&D&8&F&F◀ Предыдущая страница"
+  slot: 48
+
+switch:
+  material: NETHER_STAR
+  displayname: "&x&0&0&D&8&F&F Помощь по аукциону"
+  lore:
+    - ""
+    - " &f&m                                      &f "
+    - ""
+    - " &x&9&C&F&9&F&F              Аукцион"
+    - ""
+    - " &x&D&5&D&B&D&C Вы выставляете свои вещи,"
+    - " &x&D&5&D&B&D&C а другие игроки режима"
+    - " &x&D&5&D&B&D&C покупают их у вас."
+    - ""
+    - " &f&m                                      &f "
+    - ""
+    - " &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы выбрать режим: &x&0&0&D&8&F&FТорги"
+  slot: 49
+
+next-page:
+  material: LIME_DYE
+  displayname: "&6Следующая страница ▶"
+  slot: 50
+
+help:
+  material: PAPER
+  displayname: "&x&0&0&D&8&F&F Помощь по системе аукциона:"
+  lore:
+    - ""
+    - " &x&0&0&D&8&F&F&l&n▍"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы выставлять предметы на продажу,"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C нужно просто написать команду:"
+    - " &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah sell <цена>"
+    - " &x&0&0&D&8&F&F&l&n▍"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Если вы хотите выставить предметы"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C без поштучной возможности покупки:"
+    - " &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah sell <цена> full"
+    - " &x&0&0&D&8&F&F&l&n▍"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы найти нужный предмет"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C по названию, пропишите команду:"
+    - " &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah search <название>"
+    - " &x&0&0&D&8&F&F&l&n▍"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы найти все товары игрока,"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C пропишите команду:"
+    - " &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah player <никнейм>"
+    - " &x&0&0&D&8&F&F&l&n▍"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Чтобы переключить звуковые"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C уведомления, пропишите команду:"
+    - " &x&0&0&D&8&F&F&l&n▍&x&0&0&D&8&F&F /ah sound"
+    - " &x&0&0&D&8&F&F&l▍"
+    - ""
+  slot: 51
+
+sorting:
+  material: HOPPER
+  displayname: "&x&0&0&D&8&F&F Сортировка"
+  slot: 52
+
+category:
+  material: CHEST_MINECART
+  displayname: "&x&0&0&D&8&F&F Категории предметов"
+  slot: 53
+
+active-items:
+  lore:
+    main:
+      - ""
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F %categories%"
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Продавец:&x&0&0&D&8&F&F %seller%"
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Истекает через:&x&0&0&D&8&F&F %expirytime%"
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Текущая цена:&x&0&0&D&8&F&F %current_price%"
+      - " &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C Цена шага:&x&0&0&D&8&F&F %step_price%"
+      - ""
+      - " &x&0&0&D&8&F&F● &x&D&5&D&B&D&CДанный товар можно"
+      - " &0.&x&D&5&D&B&D&C  купить &x&0&0&D&8&F&Fтолько полностью&x&D&5&D&B&D&C."
+    seller:
+      - ""
+      - " &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"
+    buyer:
+      - ""
+      - " &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите ЛКМ, чтобы сделать ставку"
+
+messages:
+  updated: "&#00D4FB▶ &fАукцион обновлен."
+  switched_to_market: "&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Торги&f."
+  cannot_take_item: "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."
+  cannot_remove_due_to_bids: "&x&F&F&2&2&2&2▶ &fДанный предмет больше нельзя снять с продажи."

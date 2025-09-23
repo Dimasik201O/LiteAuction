@@ -44,10 +44,10 @@ public class ItemBidsListener extends AbstractListener {
                     }
 
                     ItemStack itemStack = itemBids.getBidItem().decodeItemStack();
-                    List<Bid> bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemId(itemBids.getBidItem().getId()).get();
+                    Optional<Bid> bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getHighestBidForItem(itemBids.getBidItem().getId()).get();
                     Bid lastBid = null;
-                    if(!bids.isEmpty()) lastBid = bids.get(bids.size() - 1);
-                    int addPrice = lastBid != null && lastBid.getPlayer().equalsIgnoreCase(player.getName()) ? bids.get(bids.size() - 1).getPrice() : 0;
+                    if(bids.isPresent()) lastBid = bids.get();
+                    int addPrice = lastBid != null && lastBid.getPlayer().equalsIgnoreCase(player.getName()) ? bids.get().getPrice() : 0;
                     int finalPrice = itemBids.getAvailableBids().get(slot);
 
                     if(finalPrice - addPrice > LiteAuction.getEconomyEditor().getBalance(player.getName())){

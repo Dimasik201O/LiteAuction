@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.config.Pair;
 import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
+import org.dimasik.liteauction.backend.utils.format.Parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +49,12 @@ public class ConfigUtils {
             InventoryType inventoryType = InventoryType.valueOf(ConfigManager.getString(filePath, path, "54"));
             inventory = Bukkit.createInventory(holder,
                     inventoryType,
-                    title
+                    Parser.color(title)
             );
         } catch (IllegalArgumentException e) {
             inventory = Bukkit.createInventory(holder,
                     ConfigManager.getInt(filePath, path, 54),
-                    title
+                    Parser.color(title)
             );
         }
         return inventory;

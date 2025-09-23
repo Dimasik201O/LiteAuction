@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.format.Parser;
@@ -39,11 +40,11 @@ public class SellListener extends AbstractListener {
                         if(sellItem.getPlayer().equalsIgnoreCase(player.getName())){
                             Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(sellItem.getId()).get();
                             if (sellItemOptional.isEmpty()){
-                                player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/sell.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                                 return;
                             }
                             else if(sellItemOptional.get().getAmount() < sellItem.getAmount()){
-                                player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/sell.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                                 return;
                             }
 
@@ -54,8 +55,8 @@ public class SellListener extends AbstractListener {
 
                             int newPage = sell.getPage();
 
-                            List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(sell.getViewer().getName()).get();
-                            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                            int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                            int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                             newPage = Math.min(pages, newPage);
                             newPage = Math.max(1, newPage);
@@ -68,15 +69,15 @@ public class SellListener extends AbstractListener {
                         }
                     }
                 }
-                else if(slot == 45){
+                else if(slot == ConfigManager.getInt("design/menus/market/sell.yml", "back.slot", 45)){
                     Main main = sell.getBack();
                     main.compile().open();
 
-                } else if (slot == 48) {
+                } else if (slot == ConfigManager.getInt("design/menus/market/sell.yml", "prev-page.slot", 48)) {
                     int newPage = sell.getPage() - 1;
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(sell.getViewer().getName()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -89,11 +90,11 @@ public class SellListener extends AbstractListener {
                         Sell newSell = new Sell(newPage, sell.getBack());
                         newSell.setPlayer(player).compile().open();
                     }
-                } else if (slot == 50) {
+                } else if (slot == ConfigManager.getInt("design/menus/market/sell.yml", "next-page.slot", 50)) {
                     int newPage = sell.getPage() + 1;
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(sell.getViewer().getName()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);

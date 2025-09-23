@@ -9,6 +9,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.format.Formatter;
 import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
@@ -33,7 +35,7 @@ public class CountBuyItemListener extends AbstractListener {
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
             try {
-                if(slot == 0){
+                if(slot == ConfigManager.getInt("design/menus/market/count_buy_item.yml", "decrease10.slot", 0)){
                     int newCount = countBuyItem.getCount() - 10;
 
                     Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
@@ -49,7 +51,7 @@ public class CountBuyItemListener extends AbstractListener {
                     countBuyItem.setForceClose(true);
                     new CountBuyItem(sellItem, countBuyItem.getBack(), newCount).setPlayer(player).compile().open();
                 }
-                else if(slot == 1){
+                else if(slot == ConfigManager.getInt("design/menus/market/count_buy_item.yml", "decrease1.slot", 1)){
                     int newCount = countBuyItem.getCount() - 1;
 
                     Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
@@ -65,7 +67,7 @@ public class CountBuyItemListener extends AbstractListener {
                     countBuyItem.setForceClose(true);
                     new CountBuyItem(sellItem, countBuyItem.getBack(), newCount).setPlayer(player).compile().open();
                 }
-                else if(slot == 2){
+                else if(slot == ConfigManager.getInt("design/menus/market/count_buy_item.yml", "confirm.slot", 2)){
                     Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
                     if(sellItemOptional.isEmpty()){
                         player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
@@ -83,7 +85,7 @@ public class CountBuyItemListener extends AbstractListener {
                     int price = sellItem.getPrice() * countBuyItem.getCount();
                     double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
                     if(money < price){
-                        player.sendMessage(Parser.color("&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."));
+                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/count_buy_item.yml", "messages.not_enough_money", "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки.")));
                         if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
                             player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
                         }
@@ -115,7 +117,7 @@ public class CountBuyItemListener extends AbstractListener {
 
                     player.closeInventory();
                 }
-                else if(slot == 3){
+                else if(slot == ConfigManager.getInt("design/menus/market/count_buy_item.yml", "increase1.slot", 3)){
                     int newCount = countBuyItem.getCount() + 1;
 
                     Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
@@ -131,12 +133,12 @@ public class CountBuyItemListener extends AbstractListener {
                     countBuyItem.setForceClose(true);
                     new CountBuyItem(sellItem, countBuyItem.getBack(), newCount).setPlayer(player).compile().open();
                 }
-                else if(slot == 4){
+                else if(slot == ConfigManager.getInt("design/menus/market/count_buy_item.yml", "increase10.slot", 4)){
                     int newCount = countBuyItem.getCount() + 10;
 
                     Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
                     if(sellItemOptional.isEmpty()){
-                        player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/count_buy_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                         return;
                     }
                     SellItem sellItem = sellItemOptional.get();

@@ -17,7 +17,7 @@ public class JoinListener implements Listener {
     public void on(PlayerJoinEvent event){
         Player player = event.getPlayer();
         try {
-            List<UnsoldItem> unsoldItems = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(player.getName()).get();
+            List<UnsoldItem> unsoldItems = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getAllPlayerItems(player.getName()).get();
             for(UnsoldItem unsoldItem : unsoldItems){
                 ItemStack itemStack = unsoldItem.decodeItemStack();
                 ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + unsoldItem.getAmount() + " &fоказался слишком дорогой или никому не нужен. Заберите предмет с Аукциона!"), itemStack);

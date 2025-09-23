@@ -1,0 +1,53 @@
+inventory-type: 54
+
+gui-title: "Товары на продаже"
+
+back:
+  material: ARROW
+  displayname: "&x&F&F&2&2&2&2◀ &x&D&5&D&B&D&CНазад"
+  slot: 45
+
+prev-page:
+  material: GRAY_DYE
+  displayname: "&x&0&0&D&8&F&F◀ Предыдущая страница"
+  slot: 48
+
+next-page:
+  material: LIME_DYE
+  displayname: "&6Следующая страница ▶"
+  slot: 50
+
+help:
+  material: BOOK
+  displayname: "&x&0&0&D&8&F&F Помощь по аукциону"
+  lore:
+    - ""
+    - " &f&m                                          &f "
+    - ""
+    - " &x&9&C&F&9&F&F       Как снять с продажи?"
+    - ""
+    - " &x&D&5&D&B&D&C Чтобы снять товар с продажи,"
+    - " &x&D&5&D&B&D&C нажмите по иконке товара."
+    - ""
+    - " &f&m                                          &f "
+    - ""
+  slot: 53
+
+active-items:
+  lore:
+    main:
+      - ""
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F %categories%"
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Истекает через:&x&0&0&D&8&F&F %expirytime%"
+      - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Цена:&x&0&0&D&8&F&F %full_price%"
+      - " &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C Цена за 1 ед.:&x&0&0&D&8&F&F %price%"
+    by-one:
+      - ""
+      - " &x&0&0&D&8&F&F● &x&D&5&D&B&D&CДанный товар можно"
+      - " &0.&x&D&5&D&B&D&C  купить &x&0&0&D&8&F&Fтолько полностью&x&D&5&D&B&D&C."
+    action:
+      - ""
+      - " &x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"
+
+messages:
+  cannot_take_item: "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."

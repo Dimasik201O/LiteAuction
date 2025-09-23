@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.format.Parser;
@@ -39,7 +40,7 @@ public class UnsoldListener extends AbstractListener {
                         if(unsoldItem.getPlayer().equalsIgnoreCase(player.getName())){
                             Optional<UnsoldItem> unsoldItemOptional = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getItemById(unsoldItem.getId()).get();
                             if(unsoldItemOptional.isEmpty()){
-                                player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/unsold.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                                 return;
                             }
 
@@ -50,8 +51,8 @@ public class UnsoldListener extends AbstractListener {
 
                             int newPage = unsold.getPage();
 
-                            List<UnsoldItem> items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(unsold.getViewer().getName()).get();
-                            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                            int items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItemsCount(unsold.getViewer().getName()).get();
+                            int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                             newPage = Math.min(pages, newPage);
                             newPage = Math.max(1, newPage);
@@ -62,13 +63,13 @@ public class UnsoldListener extends AbstractListener {
                         }
                     }
                 }
-                else if(slot == 45){
+                else if(slot == ConfigManager.getInt("design/menus/market/unsold.yml", "back.slot", 45)){
                     player.closeInventory();
-                } else if (slot == 48) {
+                } else if (slot == ConfigManager.getInt("design/menus/market/unsold.yml", "prev-page.slot", 48)) {
                     int newPage = unsold.getPage() - 1;
 
-                    List<UnsoldItem> items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(unsold.getViewer().getName()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItemsCount(unsold.getViewer().getName()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -81,11 +82,11 @@ public class UnsoldListener extends AbstractListener {
                         Unsold newUnsold = new Unsold(newPage, unsold.getBack());
                         newUnsold.setPlayer(player).compile().open();
                     }
-                } else if (slot == 50) {
+                } else if (slot == ConfigManager.getInt("design/menus/market/unsold.yml", "next-page.slot", 50)) {
                     int newPage = unsold.getPage() + 1;
 
-                    List<UnsoldItem> items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItems(unsold.getViewer().getName()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().getPlayerItemsCount(unsold.getViewer().getName()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);

@@ -103,7 +103,6 @@ update:
   # отвечает за то, что предмет будет переливаться
   glow: false
   displayname: "&x&0&0&D&8&F&F⇵ &x&D&5&D&B&D&CОбновить аукцион"
-  lore: []
   # сообщение при обновлении аукциона
   message: "&#00D4FB▶ &fАукцион обновлен."
 
@@ -113,7 +112,6 @@ prev-page:
   # отвечает за то, что предмет будет переливаться
   glow: false
   displayname: "&x&0&0&D&8&F&F◀ Предыдущая страница"
-  lore: []
 
 # переключение на ставки/торги
 switch:
@@ -186,3 +184,15 @@ sorting:
   prefix:
     selected: "&o&6&6✔&6 &6"
     unselected: "&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&C"
+
+# кнопка переключения категорий
+category:
+  slot: 53
+  material: CHEST_MINECART
+  # отвечает за то, что предмет будет переливаться
+  glow: false
+  displayname: "&x&0&0&D&8&F&F Категории предметов"
+  # префикс перед типом сортировки
+  prefix:
+    selected: "&o&6&6✔&6 &6"
+    unselected: "&o&x&9&C&F&9&F&F● &f"

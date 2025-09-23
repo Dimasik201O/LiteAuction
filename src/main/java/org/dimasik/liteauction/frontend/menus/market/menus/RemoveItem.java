@@ -6,6 +6,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.Pair;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.frontend.menus.abst.AbstractMenu;
@@ -27,50 +30,29 @@ public class RemoveItem extends AbstractMenu {
 
     public RemoveItem compile(){
         try{
-            inventory = Bukkit.createInventory(this, 27, "Снять предмет с продажи");
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&0&5&F&B&0&0▶ &x&D&5&D&B&D&CСнять предмет с продажи"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(0, itemStack);
-                inventory.setItem(1, itemStack);
-                inventory.setItem(2, itemStack);
-                inventory.setItem(9, itemStack);
-                inventory.setItem(10, itemStack);
-                inventory.setItem(11, itemStack);
-                inventory.setItem(18, itemStack);
-                inventory.setItem(19, itemStack);
-                inventory.setItem(20, itemStack);
+            inventory = ConfigUtils.buildInventory(this, "design/menus/market/remove_item.yml", "inventory-type",
+                    ConfigManager.getString("design/menus/market/remove_item.yml", "gui-title", "&x&0&0&D&8&F&F Снять предмет с продажи")
+            );
+            List<Integer> approveSlots = ConfigUtils.getSlots("design/menus/market/remove_item.yml", "approve.slot");
+            if(!approveSlots.isEmpty()){
+                Pair<ItemStack, Integer> item = ConfigUtils.buildItem("design/menus/market/remove_item.yml", "approve", "&x&0&5&F&B&0&0▶ &x&D&5&D&B&D&CСнять предмет с продажи");
+                for(Integer s : approveSlots){
+                    inventory.setItem(s, item.getLeft());
+                }
             }
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color(" "));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(3, itemStack);
-                inventory.setItem(4, itemStack);
-                inventory.setItem(5, itemStack);
-                inventory.setItem(12, itemStack);
-                inventory.setItem(14, itemStack);
-                inventory.setItem(21, itemStack);
-                inventory.setItem(22, itemStack);
-                inventory.setItem(23, itemStack);
+            List<Integer> neutralSlots = ConfigUtils.getSlots("design/menus/market/remove_item.yml", "neutral.slot");
+            if(!neutralSlots.isEmpty()){
+                Pair<ItemStack, Integer> item = ConfigUtils.buildItem("design/menus/market/remove_item.yml", "neutral", " ");
+                for(Integer s : neutralSlots){
+                    inventory.setItem(s, item.getLeft());
+                }
             }
-            if(true){
-                ItemStack itemStack = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(Parser.color("&x&F&F&2&2&2&2▶ &x&D&5&D&B&D&CОтменить"));
-                itemStack.setItemMeta(itemMeta);
-                inventory.setItem(6, itemStack);
-                inventory.setItem(7, itemStack);
-                inventory.setItem(8, itemStack);
-                inventory.setItem(15, itemStack);
-                inventory.setItem(16, itemStack);
-                inventory.setItem(17, itemStack);
-                inventory.setItem(24, itemStack);
-                inventory.setItem(25, itemStack);
-                inventory.setItem(26, itemStack);
+            List<Integer> cancelSlots = ConfigUtils.getSlots("design/menus/market/remove_item.yml", "cancel.slot");
+            if(!cancelSlots.isEmpty()){
+                Pair<ItemStack, Integer> item = ConfigUtils.buildItem("design/menus/market/remove_item.yml", "cancel", "&x&F&F&2&2&2&2▶ &x&D&5&D&B&D&CОтменить");
+                for(Integer s : cancelSlots){
+                    inventory.setItem(s, item.getLeft());
+                }
             }
             if(true){
                 ItemStack itemStack = sellItem.decodeItemStack();
@@ -80,11 +62,10 @@ public class RemoveItem extends AbstractMenu {
                 if(itemMeta != null && itemMeta.getLore() != null){
                     lore = itemMeta.getLore();
                 }
-                lore.add(Parser.color(""));
-                lore.add(Parser.color("&x&0&0&D&8&F&F▶ &x&D&5&D&B&D&CНажмите, чтобы снять с продажи"));
+                lore.addAll(ConfigManager.getStringList("design/menus/market/remove_item.yml", "item.lore").stream().map(s -> Parser.color(s)).toList());
                 itemMeta.setLore(lore);
                 itemStack.setItemMeta(itemMeta);
-                inventory.setItem(13, itemStack);
+                inventory.setItem(ConfigManager.getInt("design/menus/market/remove_item.yml", "item.slot", 13), itemStack);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

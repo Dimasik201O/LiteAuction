@@ -1,6 +1,5 @@
 package org.dimasik.liteauction.frontend.menus.market.listeners;
 
-import hw.zako.netvision.PlayerWarnHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -50,11 +49,6 @@ public class MainListener extends AbstractListener {
                     }
                     SellItem sellItem = main.getItems().get(slot);
                     if(sellItem != null){
-                        if(sellItem.isFake()){
-                            PlayerWarnHandler.addWarning(player);
-                            inventory.setItem(slot, LiteAuction.getBoughtItem().clone());
-                            return;
-                        }
                         if(sellItem.getPlayer().equalsIgnoreCase(player.getName())){
                             new RemoveItem(sellItem, main).setPlayer(player).compile().open();
                         }
@@ -134,8 +128,8 @@ public class MainListener extends AbstractListener {
 
                     int newPage = main.getPage();
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -149,8 +143,8 @@ public class MainListener extends AbstractListener {
                 } else if (slot == ConfigManager.getInt("design/menus/market/main.yml", "prev-page.slot", 48)) {
                     int newPage = main.getPage() - 1;
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -172,8 +166,8 @@ public class MainListener extends AbstractListener {
 
                     int newPage = main.getPage();
 
-                    List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItems(main.getPlayer(), bidsSortingType, main.getFilters(), main.getCategoryType()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItemsCount(main.getPlayer(), bidsSortingType, main.getFilters(), main.getCategoryType()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -188,8 +182,8 @@ public class MainListener extends AbstractListener {
                 } else if (slot == ConfigManager.getInt("design/menus/market/main.yml", "next-page.slot", 50)) {
                     int newPage = main.getPage() + 1;
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -206,7 +200,7 @@ public class MainListener extends AbstractListener {
                         newMain.setPlayer(player).compile().open();
                     }
                 }
-                else if (slot == 52) {
+                else if (slot == ConfigManager.getInt("design/menus/market/main.yml", "sorting.slot", 52)) {
                     MarketSortingType newSortingType;
                     if(event.isLeftClick()) {
                         newSortingType = main.getSortingType().relative(true);
@@ -219,8 +213,8 @@ public class MainListener extends AbstractListener {
                     }
                     int newPage = main.getPage();
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), newSortingType, main.getFilters(), main.getCategoryType()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -235,7 +229,7 @@ public class MainListener extends AbstractListener {
                         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
                     }
                 }
-                else if (slot == 53) {
+                else if (slot == ConfigManager.getInt("design/menus/market/main.yml", "category.slot", 53)) {
                     CategoryType newCategoryType;
                     if(event.isLeftClick()) {
                         newCategoryType = main.getCategoryType().relative(true);
@@ -248,8 +242,8 @@ public class MainListener extends AbstractListener {
                     }
                     int newPage = main.getPage();
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(main.getPlayer(), main.getSortingType(), main.getFilters(), newCategoryType).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(main.getPlayer(), main.getSortingType(), main.getFilters(), main.getCategoryType()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);

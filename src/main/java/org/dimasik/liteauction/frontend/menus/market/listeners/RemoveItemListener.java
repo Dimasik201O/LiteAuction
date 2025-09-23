@@ -8,6 +8,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.format.Parser;
@@ -31,23 +33,14 @@ public class RemoveItemListener extends AbstractListener {
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
             try {
-                switch (slot) {
-                    case 0:
-                    case 1:
-                    case 2:
-                    case 9:
-                    case 10:
-                    case 11:
-                    case 18:
-                    case 19:
-                    case 20:
+                if (ConfigUtils.getSlots("design/menus/market/remove_item.yml", "approve.slot").contains(slot)) {
                         Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(removeItem.getSellItem().getId()).get();
                         if (sellItemOptional.isEmpty()){
-                            player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                             return;
                         }
                         else if(sellItemOptional.get().getAmount() < removeItem.getSellItem().getAmount()){
-                            player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                             return;
                         }
 
@@ -58,18 +51,8 @@ public class RemoveItemListener extends AbstractListener {
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(removeItem.getSellItem().getId());
 
                         player.closeInventory();
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 15:
-                    case 16:
-                    case 17:
-                    case 24:
-                    case 25:
-                    case 26:
+                } else if (ConfigUtils.getSlots("design/menus/market/remove_item.yml", "cancel.slot").contains(slot)) {
                         player.closeInventory();
-                        break;
                 }
             } catch (Exception e) {
                 player.closeInventory();

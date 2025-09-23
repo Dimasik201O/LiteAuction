@@ -1,0 +1,37 @@
+inventory-type: HOPPER
+
+gui-title: "Покупка предмета"
+
+decrease10:
+  material: RED_CONCRETE
+  displayname: "&x&F&F&2&2&2&2▶ Уменьшить на 10 единиц"
+  slot: 0
+
+decrease1:
+  material: RED_CONCRETE
+  displayname: "&x&F&F&2&2&2&2▶ Уменьшить на 1 единиц"
+  slot: 1
+
+confirm:
+  slot: 2
+  lore:
+    - ""
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Категория:&x&0&0&D&8&F&F %categories%"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Продавец:&x&0&0&D&8&F&F %seller%"
+    - " &x&0&0&D&8&F&F&l&n▍&x&D&5&D&B&D&C Цена:&x&0&0&D&8&F&F %full_price%"
+    - " &x&0&0&D&8&F&F&l▍&x&D&5&D&B&D&C Цена за 1 ед.:&x&0&0&D&8&F&F %price%"
+    - ""
+
+increase1:
+  material: LIME_CONCRETE
+  displayname: "&x&0&5&F&B&0&0▶ Увеличить на 1 единиц"
+  slot: 3
+
+increase10:
+  material: LIME_CONCRETE
+  displayname: "&x&0&5&F&B&0&0▶ Увеличить на 10 единиц"
+  slot: 4
+
+messages:
+  cannot_take_item: "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."
+  not_enough_money: "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."

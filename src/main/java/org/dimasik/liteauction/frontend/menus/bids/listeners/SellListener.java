@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.models.Bid;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
@@ -41,14 +42,14 @@ public class SellListener extends AbstractListener {
                         if(bidItem.getPlayer().equalsIgnoreCase(player.getName())){
                             Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(bidItem.getId()).get();
                             if (bidItemOptional.isEmpty()){
-                                player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
+                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/sell.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
                                 return;
                             }
 
                             ItemStack itemStack = bidItem.decodeItemStack();
-                            List<Bid> bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemId(bidItem.getId()).get();
-                            if(!bids.isEmpty()) {
-                                player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fДанный предмет больше нельзя снять с продажи."));
+                            int bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemIdCount(bidItem.getId()).get();
+                            if(bids != 0) {
+                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/sell.yml", "messages.cannot_remove_due_to_bids", "&x&F&F&2&2&2&2▶ &fДанный предмет больше нельзя снять с продажи.")));
                                 return;
                             }
 
@@ -58,8 +59,8 @@ public class SellListener extends AbstractListener {
 
                             int newPage = sell.getPage();
 
-                            List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItems(sell.getViewer().getName()).get();
-                            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                            int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                            int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                             newPage = Math.min(pages, newPage);
                             newPage = Math.max(1, newPage);
@@ -72,14 +73,14 @@ public class SellListener extends AbstractListener {
                         }
                     }
                 }
-                else if(slot == 45){
+                else if(slot == ConfigManager.getInt("design/menus/bids/sell.yml", "back.slot", 45)){
                     Main main = sell.getBack();
                     main.compile().open();
-                } else if (slot == 48) {
+                } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "prev-page.slot", 48)) {
                     int newPage = sell.getPage() - 1;
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(sell.getViewer().getName()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
@@ -92,11 +93,11 @@ public class SellListener extends AbstractListener {
                         Sell newSell = new Sell(newPage, sell.getBack());
                         newSell.setPlayer(player).compile().open();
                     }
-                } else if (slot == 50) {
+                } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "next-page.slot", 50)) {
                     int newPage = sell.getPage() + 1;
 
-                    List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItems(sell.getViewer().getName()).get();
-                    int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
                     newPage = Math.min(pages, newPage);
                     newPage = Math.max(1, newPage);
