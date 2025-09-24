@@ -15,10 +15,12 @@ public class PreClickSellItemEvent extends Event implements Cancellable {
     private final Player player;
     private final SellItem sellItem;
     private final Inventory inventory;
+    private final int slot;
 
-    public PreClickSellItemEvent(Player player, SellItem sellItem, Inventory inventory){
+    public PreClickSellItemEvent(Player player, SellItem sellItem, Inventory inventory, int slot){
         this.player = player;
         this.sellItem = sellItem;
         this.inventory = inventory;
+        this.slot = slot;
     }
 }
