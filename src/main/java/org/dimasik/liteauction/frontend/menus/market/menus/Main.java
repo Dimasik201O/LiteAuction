@@ -67,7 +67,7 @@ public class Main extends AbstractMenu {
             int slotsCount = slots.size();
             int pages = itemCount / slotsCount + (itemCount % slotsCount == 0 ? 0 : 1);
 
-            PostMarketCompileEvent postEvent = new PostMarketCompileEvent(viewer, items);
+            PostMarketCompileEvent postEvent = new PostMarketCompileEvent(viewer, items, page, player, sortingType, categoryType, filters);
             LiteAuction.getEventManager().triggerEvent(postEvent);
             if(postEvent.isCancelled()){
                 return this;
