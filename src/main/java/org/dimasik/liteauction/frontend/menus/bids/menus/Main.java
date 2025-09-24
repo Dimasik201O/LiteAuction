@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
@@ -13,6 +15,7 @@ import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.config.Pair;
 import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.config.utils.PlaceholderUtils;
+import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.utils.format.Formatter;
 import org.dimasik.liteauction.backend.utils.format.Parser;
@@ -116,10 +119,97 @@ public class Main extends AbstractMenu {
             inventory.setItem(next.getRight(), next.getLeft());
             Pair<ItemStack, Integer> help = ConfigUtils.buildItem("design/menus/bids/main.yml", "help", "&x&0&0&D&8&F&F Помощь по системе аукциона:");
             inventory.setItem(help.getRight(), help.getLeft());
-            Pair<ItemStack, Integer> sorting = ConfigUtils.buildItem("design/menus/bids/main.yml", "sorting", "&x&0&0&D&8&F&F Сортировка");
-            inventory.setItem(sorting.getRight(), sorting.getLeft());
-            Pair<ItemStack, Integer> category = ConfigUtils.buildItem("design/menus/bids/main.yml", "category", "&x&0&0&D&8&F&F Категории предметов");
-            inventory.setItem(category.getRight(), category.getLeft());
+
+            if(true){
+                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                        "design/menus/bids/main.yml",
+                        "sorting.material",
+                        "HOPPER"
+                )));
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
+                        "design/menus/bids/main.yml",
+                        "sorting.displayname",
+                        "&x&0&0&D&8&F&F Сортировка"
+                )));
+                List<String> lore = new ArrayList<>();
+                for(BidsSortingType sortingType : BidsSortingType.values()){
+                    if(this.sortingType == sortingType){
+                        lore.add(Parser.color(ConfigManager.getString(
+                                "design/menus/bids/main.yml",
+                                "sorting.prefix.selected",
+                                "&o&6&6✔&6 &6"
+                        ) + sortingType.getDisplayName()));
+                    }
+                    else{
+                        lore.add(Parser.color(Parser.color(ConfigManager.getString(
+                                "design/menus/bids/main.yml",
+                                "sorting.prefix.unselected",
+                                "&o&x&9&C&F&9&F&F● &x&D&5&D&B&D&C"
+                        ) + sortingType.getDisplayName())));
+                    }
+                }
+                itemMeta.setLore(lore);
+                if(ConfigManager.getBoolean(
+                        "design/menus/bids/main.yml",
+                        "sorting.glow",
+                        false
+                )){
+                    itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+                itemStack.setItemMeta(itemMeta);
+                inventory.setItem(ConfigManager.getInt(
+                        "design/menus/bids/main.yml",
+                        "sorting.slot",
+                        52
+                ), itemStack);
+            }
+            if(true){
+                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                        "design/menus/bids/main.yml",
+                        "category.material",
+                        "CHEST_MINECART"
+                )));
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
+                        "design/menus/bids/main.yml",
+                        "category.displayname",
+                        "&x&0&0&D&8&F&F Категории предметов"
+                )));
+                List<String> lore = new ArrayList<>();
+                for(CategoryType categoryType : CategoryType.values()){
+                    if(this.categoryType == categoryType){
+                        lore.add(Parser.color(ConfigManager.getString(
+                                "design/menus/bids/main.yml",
+                                "category.prefix.selected",
+                                "&o&6&6✔&6 &6"
+                        ) + categoryType.getDisplayName()));
+                    }
+                    else{
+                        lore.add(Parser.color(Parser.color(ConfigManager.getString(
+                                "design/menus/bids/main.yml",
+                                "category.prefix.unselected",
+                                "&o&x&9&C&F&9&F&F● &f"
+                        ) + categoryType.getDisplayName())));
+                    }
+                }
+                itemMeta.setLore(lore);
+                if(ConfigManager.getBoolean(
+                        "design/menus/bids/main.yml",
+                        "category.glow",
+                        false
+                )){
+                    itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+                    itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+                itemStack.setItemMeta(itemMeta);
+                inventory.setItem(ConfigManager.getInt(
+                        "design/menus/bids/main.yml",
+                        "category.slot",
+                        53
+                ), itemStack);
+            }
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }

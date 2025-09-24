@@ -1,10 +1,17 @@
 package org.dimasik.liteauction.backend.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum BidsSortingType {
-    CHEAPEST_FIRST,
-    EXPENSIVE_FIRST,
-    NEWEST_FIRST,
-    OLDEST_FIRST;
+    CHEAPEST_FIRST("Сначала дешевые"),
+    EXPENSIVE_FIRST("Сначала дорогие"),
+    NEWEST_FIRST("Сначала новые"),
+    OLDEST_FIRST("Сначала старые");
+
+    private final String displayName;
 
     public BidsSortingType relative(boolean next) {
         BidsSortingType[] values = BidsSortingType.values();

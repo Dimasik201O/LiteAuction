@@ -258,20 +258,20 @@ public class Main extends AbstractMenu {
                         "&x&0&0&D&8&F&F Категории предметов"
                 )));
                 List<String> lore = new ArrayList<>();
-                for(MarketSortingType sortingType : MarketSortingType.values()){
-                    if(this.sortingType == sortingType){
+                for(CategoryType categoryType : CategoryType.values()){
+                    if(this.categoryType == categoryType){
                         lore.add(Parser.color(ConfigManager.getString(
                                 "design/menus/market/main.yml",
                                 "category.prefix.selected",
                                 "&o&6&6✔&6 &6"
-                        ) + sortingType.getDisplayName()));
+                        ) + categoryType.getDisplayName()));
                     }
                     else{
                         lore.add(Parser.color(Parser.color(ConfigManager.getString(
                                 "design/menus/market/main.yml",
                                 "category.prefix.unselected",
                                 "&o&x&9&C&F&9&F&F● &f"
-                        ) + sortingType.getDisplayName())));
+                        ) + categoryType.getDisplayName())));
                     }
                 }
                 itemMeta.setLore(lore);
