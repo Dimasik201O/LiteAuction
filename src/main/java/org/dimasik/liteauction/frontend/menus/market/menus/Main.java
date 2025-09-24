@@ -131,12 +131,6 @@ public class Main extends AbstractMenu {
                 itemStack.setItemMeta(itemMeta);
                 itemStack.setAmount(sellItem.getAmount());
                 inventory.setItem(slot, itemStack);
-                if(sellItem.isFake()){
-                    final int boughtSlot = slots.get(slotIndex);
-                    Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
-                        inventory.setItem(boughtSlot, LiteAuction.getBoughtItem());
-                    }, 20);
-                }
                 slotIndex++;
             }
 

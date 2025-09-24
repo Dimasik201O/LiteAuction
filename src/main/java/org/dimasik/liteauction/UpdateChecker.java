@@ -18,7 +18,7 @@ public class UpdateChecker {
     private final JavaPlugin plugin;
     private final File pluginFile;
     private final boolean testMode = false;
-    private final String currentVersion = "v3.1.2";
+    private final String currentVersion = "v3.1.3";
     private final String changeLogUrl;
     private final String pluginUrl;
 
