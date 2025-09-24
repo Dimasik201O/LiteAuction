@@ -50,7 +50,7 @@ public class MainListener extends AbstractListener {
                     }
                     SellItem sellItem = main.getItems().get(slot);
                     if(sellItem != null){
-                        PreClickSellItemEvent preEvent = new PreClickSellItemEvent(player, sellItem);
+                        PreClickSellItemEvent preEvent = new PreClickSellItemEvent(player, sellItem, inventory);
                         LiteAuction.getEventManager().triggerEvent(preEvent);
                         if(preEvent.isCancelled()){
                             return;
