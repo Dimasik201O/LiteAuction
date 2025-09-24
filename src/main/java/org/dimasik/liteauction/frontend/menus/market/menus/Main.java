@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.api.events.market.compile.MarketSellItemAddEvent;
 import org.dimasik.liteauction.api.events.market.compile.PostMarketCompileEvent;
 import org.dimasik.liteauction.api.events.market.compile.PreMarketCompileEvent;
 import org.dimasik.liteauction.backend.config.ConfigManager;
@@ -85,6 +86,14 @@ public class Main extends AbstractMenu {
             for(int i = 0; i < items.size() && slotIndex < slotsCount; i++) {
                 int slot = slots.get(slotIndex);
                 SellItem sellItem = items.get(i);
+
+                MarketSellItemAddEvent event = new MarketSellItemAddEvent(sellItem, inventory, slotIndex);
+                LiteAuction.getEventManager().triggerEvent(event);
+                if(event.isCancelled()){
+                    slotIndex++;
+                    continue;
+                }
+
                 this.items.put(slot, sellItem);
                 ItemStack itemStack = sellItem.decodeItemStack();
                 ItemMeta itemMeta = itemStack.getItemMeta();
