@@ -34,21 +34,21 @@ public class RemoveItemListener extends AbstractListener {
             int slot = event.getSlot();
             try {
                 if (ConfigUtils.getSlots("design/menus/bids/remove_item.yml", "approve.slot").contains(slot)) {
-                        Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(removeItem.getBidItem().getId()).get();
-                        if (bidItemOptional.isEmpty()){
-                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                            return;
-                        }
+                    Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(removeItem.getBidItem().getId()).get();
+                    if (bidItemOptional.isEmpty()){
+                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                        return;
+                    }
 
-                        ItemStack itemStack = removeItem.getBidItem().decodeItemStack();
-                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
-                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItemOptional.get().getId() + " delete");
-                        addItemInventory(player.getInventory(), itemStack, player.getLocation());
-                        LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(removeItem.getBidItem().getId());
+                    ItemStack itemStack = removeItem.getBidItem().decodeItemStack();
+                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
+                    LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItemOptional.get().getId() + " delete");
+                    addItemInventory(player.getInventory(), itemStack, player.getLocation());
+                    LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(removeItem.getBidItem().getId());
 
-                        player.closeInventory();
+                    player.closeInventory();
                 } else if (ConfigUtils.getSlots("design/menus/bids/remove_item.yml", "cancel.slot").contains(slot)) {
-                        player.closeInventory();
+                    player.closeInventory();
                 }
             } catch (Exception e) {
                 player.closeInventory();

@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.dimasik.liteauction.api.events.EventManager;
 import org.dimasik.liteauction.backend.communication.AbstractCommunication;
 import org.dimasik.liteauction.backend.communication.impl.*;
 import org.dimasik.liteauction.backend.config.ConfigManager;
@@ -40,6 +41,8 @@ public final class LiteAuction extends JavaPlugin {
     @Getter
     private static LiteAuction instance;
     @Getter
+    private static EventManager eventManager;
+    @Getter
     private static EconomyEditor economyEditor;
 
     @Override
@@ -52,6 +55,7 @@ public final class LiteAuction extends JavaPlugin {
         super.getLogger().info("   [   зᴀгᴘʏзᴋᴀ ᴋᴏʜфигуᴘᴀции   ]   ");
         setupConfig();
         setupDatabase();
+        setupEvents();
         setupEconomy();
         setupCommand();
         setupListeners();
@@ -143,6 +147,10 @@ public final class LiteAuction extends JavaPlugin {
             case "local" -> communicationManager = new Local();
             case "default" -> throw new UnsupportedConfigurationException("Метод коммуникации не существует!");
         }
+    }
+
+    private void setupEvents(){
+        eventManager = new EventManager();
     }
 
     private void setupEconomy(){

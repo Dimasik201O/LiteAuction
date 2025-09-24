@@ -12,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.api.events.market.buy.PreClickSellItemEvent;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.enums.AuctionType;
@@ -49,6 +50,12 @@ public class MainListener extends AbstractListener {
                     }
                     SellItem sellItem = main.getItems().get(slot);
                     if(sellItem != null){
+                        PreClickSellItemEvent preEvent = new PreClickSellItemEvent(player, sellItem);
+                        LiteAuction.getEventManager().triggerEvent(preEvent);
+                        if(preEvent.isCancelled()){
+                            return;
+                        }
+
                         if(sellItem.getPlayer().equalsIgnoreCase(player.getName())){
                             new RemoveItem(sellItem, main).setPlayer(player).compile().open();
                         }

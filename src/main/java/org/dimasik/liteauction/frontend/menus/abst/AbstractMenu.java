@@ -17,7 +17,9 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     public void open(){
-        viewer.openInventory(inventory);
+        if(inventory != null) {
+            viewer.openInventory(inventory);
+        }
     }
 
     public abstract AbstractMenu compile();

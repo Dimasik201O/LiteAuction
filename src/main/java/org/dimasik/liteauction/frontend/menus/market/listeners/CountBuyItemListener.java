@@ -9,6 +9,8 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.api.events.market.buy.BuySellItemEvent;
+import org.dimasik.liteauction.api.events.market.buy.CountBuySellItemEvent;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
@@ -90,6 +92,12 @@ public class CountBuyItemListener extends AbstractListener {
                             player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
                         }
                         player.closeInventory();
+                        return;
+                    }
+
+                    CountBuySellItemEvent postEvent = new CountBuySellItemEvent(player, sellItem, countBuyItem.getCount());
+                    LiteAuction.getEventManager().triggerEvent(postEvent);
+                    if(!postEvent.isCancelled()){
                         return;
                     }
 

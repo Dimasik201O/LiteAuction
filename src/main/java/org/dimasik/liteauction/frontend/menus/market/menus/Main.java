@@ -5,18 +5,18 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.api.events.market.compile.PostMarketCompileEvent;
+import org.dimasik.liteauction.api.events.market.compile.PreMarketCompileEvent;
 import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.config.Pair;
 import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.config.utils.PlaceholderUtils;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
-import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.backend.utils.format.Formatter;
@@ -48,6 +48,17 @@ public class Main extends AbstractMenu {
 
     public Main compile(){
         try {
+            PreMarketCompileEvent preEvent = new PreMarketCompileEvent(viewer, page, player, sortingType, categoryType, filters);
+            LiteAuction.getEventManager().triggerEvent(preEvent);
+            if(preEvent.isCancelled()){
+                return this;
+            }
+            this.page = preEvent.getPage();
+            this.player = preEvent.getTarget();
+            this.sortingType = preEvent.getSortingType();
+            this.categoryType = preEvent.getCategoryType();
+            this.filters = preEvent.getFilters();
+
             items.clear();
             List<Integer> slots = ConfigUtils.getSlots("design/menus/market/main.yml", "active-items.slot");
             int slotIndex = 0;
@@ -55,6 +66,14 @@ public class Main extends AbstractMenu {
             List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType, page, slots.size()).get();
             int slotsCount = slots.size();
             int pages = itemCount / slotsCount + (itemCount % slotsCount == 0 ? 0 : 1);
+
+            PostMarketCompileEvent postEvent = new PostMarketCompileEvent(viewer, items);
+            LiteAuction.getEventManager().triggerEvent(postEvent);
+            if(postEvent.isCancelled()){
+                return this;
+            }
+            items = postEvent.getItems();
+
             inventory = ConfigUtils.buildInventory(this, "design/menus/market/main.yml", "inventory-type",
                     PlaceholderUtils.replace(
                             ConfigManager.getString("design/menus/market/main.yml", "gui-title", "&0Аукцион (%current_page%/%pages_amount%)"),
