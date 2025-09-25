@@ -97,7 +97,7 @@ public class CountBuyItemListener extends AbstractListener {
 
                     CountBuySellItemEvent postEvent = new CountBuySellItemEvent(player, sellItem, countBuyItem.getCount());
                     LiteAuction.getEventManager().triggerEvent(postEvent);
-                    if(!postEvent.isCancelled()){
+                    if(postEvent.isCancelled()){
                         return;
                     }
 

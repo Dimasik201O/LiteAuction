@@ -58,7 +58,7 @@ public class ConfirmItemListener extends AbstractListener {
 
                     BuySellItemEvent postEvent = new BuySellItemEvent(player, sellItem);
                     LiteAuction.getEventManager().triggerEvent(postEvent);
-                    if(!postEvent.isCancelled()){
+                    if(postEvent.isCancelled()){
                         return;
                     }
 
