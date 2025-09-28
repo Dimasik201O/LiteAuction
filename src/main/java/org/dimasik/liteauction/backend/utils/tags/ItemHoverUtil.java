@@ -17,6 +17,9 @@ import static org.dimasik.liteauction.backend.utils.ItemNameUtil.getLocalizedIte
 @UtilityClass
 public class ItemHoverUtil {
     public static void sendHoverItemMessage(Player player, String message, ItemStack hoverItem) {
+        if(!message.contains("%item%")){
+            player.sendMessage(message);
+        }
         String[] parts = message.split("%item%", 2);
 
         TextComponent textComponent = new TextComponent(TextComponent.fromLegacyText(parts[0]));
