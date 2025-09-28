@@ -19,6 +19,7 @@ public class ItemHoverUtil {
     public static void sendHoverItemMessage(Player player, String message, ItemStack hoverItem) {
         if(!message.contains("%item%")){
             player.sendMessage(message);
+            return;
         }
         String[] parts = message.split("%item%", 2);
 
