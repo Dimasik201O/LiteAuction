@@ -17,13 +17,7 @@ import java.util.regex.Pattern;
 public class Parser {
 
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([a-fA-F0-9]{6})");
-    private static final boolean SUPPORTS_RGB;
-
-    static {
-        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-        int subVersion = Integer.parseInt(version.replace("v", "").replace("1_", "").replaceAll("_R\\d", ""));
-        SUPPORTS_RGB = subVersion >= 16;
-    }
+    private static final boolean SUPPORTS_RGB = true;
 
     public static String color(String message) {
         if (message == null) return "";

@@ -5,6 +5,7 @@ api-version: '1.16'
 softdepend:
   - StickEco
   - Vault
+  - PlaceholderAPI
 commands:
   ah:
     aliases:

@@ -7,7 +7,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.hover.content.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.dimasik.liteauction.backend.utils.ItemEncrypt;
+import org.dimasik.liteauction.backend.utils.ItemEncryptUtil;
 import org.dimasik.liteauction.backend.utils.nms.NBTUtil;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class ItemHoverUtil {
 
     public static String getHoverItemMessage(String message, ItemStack hoverItem) {
         try {
-            return ItemEncrypt.encodeItem(hoverItem) + " " + message;
+            return ItemEncryptUtil.encodeItem(hoverItem) + " " + message;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -3,6 +3,8 @@ package org.dimasik.liteauction.backend.storage.tables.impl;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
+import org.dimasik.liteauction.backend.config.utils.ConfigUtils;
 import org.dimasik.liteauction.backend.enums.CategoryType;
 import org.dimasik.liteauction.backend.enums.MarketSortingType;
 import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
@@ -173,7 +175,7 @@ public class SellItems extends AbstractTable {
     public CompletableFuture<List<SellItem>> getExpiredPlayerItems(String player, int page, int pageSize) {
         return CompletableFuture.supplyAsync(() -> {
             List<SellItem> items = new ArrayList<>();
-            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+            long twelveHoursAgo = System.currentTimeMillis() - (ConfigManager.getLong("settings.settings.yml", "lifetime.sell", 43200) * 1000);
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
                          "SELECT * FROM sell_items WHERE player = ? AND create_time < ? LIMIT ? OFFSET ?")) {
@@ -196,7 +198,7 @@ public class SellItems extends AbstractTable {
 
     public CompletableFuture<Integer> getExpiredPlayerItemsCount(String player) {
         return CompletableFuture.supplyAsync(() -> {
-            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+            long twelveHoursAgo = System.currentTimeMillis() - (ConfigManager.getLong("settings.settings.yml", "lifetime.sell", 43200) * 1000);
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
                          "SELECT COUNT(*) FROM sell_items WHERE player = ? AND create_time < ?")) {
@@ -655,7 +657,7 @@ public class SellItems extends AbstractTable {
 
     public CompletableFuture<Void> moveExpiredItems() {
         return CompletableFuture.runAsync(() -> {
-            long twelveHoursAgo = System.currentTimeMillis() - (12 * 60 * 60 * 1000);
+            long twelveHoursAgo = System.currentTimeMillis() - (ConfigManager.getLong("settings.settings.yml", "lifetime.sell", 43200) * 1000);
             try (Connection connection = dataSource.getConnection()) {
                 connection.setAutoCommit(false);
                 try (PreparedStatement selectStatement = connection.prepareStatement(

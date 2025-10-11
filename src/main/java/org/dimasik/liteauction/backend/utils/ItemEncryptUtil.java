@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 @UtilityClass
-public class ItemEncrypt {
+public class ItemEncryptUtil {
 
     public static String encodeItem(ItemStack item) throws IOException {
         if (item == null) {

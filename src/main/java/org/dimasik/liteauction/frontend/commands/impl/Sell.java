@@ -54,7 +54,7 @@ public class Sell extends SubCommand {
                 );
                 return;
             }
-            if(itemStack.getType().toString().endsWith("SHULKER_BOX")) {
+            if(itemStack.getType().toString().endsWith("SHULKER_BOX") && ConfigManager.getBoolean("settings/settings.yml", "sell-only-empty-shulkers", true)) {
                 BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
                 if (blockStateMeta != null) {
                     BlockState blockState = blockStateMeta.getBlockState();
@@ -96,7 +96,7 @@ public class Sell extends SubCommand {
                             return;
                         }
                         if (canSell(player)) {
-                            LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, isFull);
+                            LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncryptUtil.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), priceForOne, itemCount, isFull);
                             ItemHoverUtil.sendHoverItemMessage(player,
                                     PlaceholderUtils.replace(
                                             player,
@@ -164,7 +164,7 @@ public class Sell extends SubCommand {
                 );
                 return;
             }
-            if(itemStack.getType().toString().endsWith("SHULKER_BOX")) {
+            if(itemStack.getType().toString().endsWith("SHULKER_BOX") && ConfigManager.getBoolean("settings/settings.yml", "sell-only-empty-shulkers", true)) {
                 BlockStateMeta blockStateMeta = (BlockStateMeta) itemStack.getItemMeta();
                 if (blockStateMeta != null) {
                     BlockState blockState = blockStateMeta.getBlockState();
@@ -237,7 +237,7 @@ public class Sell extends SubCommand {
                         }
 
                         if(canSell(player)) {
-                            LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.clone()), TagUtil.getAllTags(itemStack), price, step, (translatedTime * 1000) + System.currentTimeMillis());
+                            LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().addItem(player.getName(), ItemEncryptUtil.encodeItem(itemStack.clone()), TagUtil.getAllTags(itemStack), price, step, (translatedTime * 1000) + System.currentTimeMillis());
                             ItemHoverUtil.sendHoverItemMessage(player,
                                     PlaceholderUtils.replace(
                                             player,
@@ -265,7 +265,7 @@ public class Sell extends SubCommand {
                 }
 
                 if(canSell(player)) {
-                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncrypt.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price / itemCount, itemCount, full);
+                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().addItem(player.getName(), ItemEncryptUtil.encodeItem(itemStack.asOne()), TagUtil.getAllTags(itemStack), price / itemCount, itemCount, full);
                     ItemHoverUtil.sendHoverItemMessage(player,
                             PlaceholderUtils.replace(
                                     player,

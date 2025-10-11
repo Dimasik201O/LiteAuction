@@ -53,7 +53,6 @@ public class Main extends AbstractMenu {
             items.clear();
             int slot = 0;
             List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItems(player, sortingType, filters, categoryType, page, 45).get();
-            int startIndex = 45 * (page - 1);
             int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
             inventory = ConfigUtils.buildInventory(this, "design/menus/bids/main.yml", "inventory-type",
                     PlaceholderUtils.replace(
@@ -63,7 +62,7 @@ public class Main extends AbstractMenu {
                             new Pair<>("%pages_amount%", String.valueOf(pages))
                     )
             );
-            for(int i = startIndex; i < items.size() && slot < 45; i++) {
+            for(int i = 0; i < items.size() && slot < 45; i++) {
                 BidItem bidItem = items.get(i);
                 this.items.put(slot, bidItem);
                 ItemStack itemStack = bidItem.decodeItemStack();
@@ -121,11 +120,11 @@ public class Main extends AbstractMenu {
             inventory.setItem(help.getRight(), help.getLeft());
 
             if(true){
-                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                ItemStack itemStack = ConfigUtils.getBaseItem(
                         "design/menus/bids/main.yml",
                         "sorting.material",
-                        "HOPPER"
-                )));
+                        Material.HOPPER
+                );
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
                         "design/menus/bids/main.yml",
@@ -166,11 +165,11 @@ public class Main extends AbstractMenu {
                 ), itemStack);
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                ItemStack itemStack = ConfigUtils.getBaseItem(
                         "design/menus/bids/main.yml",
                         "category.material",
-                        "CHEST_MINECART"
-                )));
+                        Material.CHEST_MINECART
+                );
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
                         "design/menus/bids/main.yml",

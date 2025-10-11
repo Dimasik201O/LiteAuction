@@ -2,6 +2,7 @@ package org.dimasik.liteauction.backend.config.utils;
 
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.dimasik.liteauction.backend.config.Pair;
 import org.dimasik.liteauction.backend.utils.format.Parser;
@@ -27,6 +28,9 @@ public class PlaceholderUtils {
             }
         }
         if(applyParser) origin = Parser.color(origin);
-        return PlaceholderAPI.setPlaceholders(source, origin);
+        if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            return PlaceholderAPI.setPlaceholders(source, origin);
+        }
+        return origin;
     }
 }

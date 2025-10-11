@@ -2,6 +2,7 @@ package org.dimasik.liteauction.backend.storage.tables.impl;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.dimasik.liteauction.LiteAuction;
+import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.storage.tables.AbstractTable;
 import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 
@@ -178,7 +179,7 @@ public class UnsoldItems extends AbstractTable {
 
     public CompletableFuture<Integer> deleteExpiredItems() {
         return CompletableFuture.supplyAsync(() -> {
-            long sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000);
+            long sevenDaysAgo = System.currentTimeMillis() - (ConfigManager.getLong("settings.settings.yml", "lifetime.unsold", 604800) * 1000);
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
                          "DELETE FROM unsold_items WHERE create_time < ?")) {

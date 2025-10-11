@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.dimasik.liteauction.LiteAuction;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
-import org.dimasik.liteauction.backend.utils.ItemEncrypt;
+import org.dimasik.liteauction.backend.utils.ItemEncryptUtil;
 import org.dimasik.liteauction.backend.utils.tags.ItemHoverUtil;
 import org.dimasik.liteauction.backend.utils.format.Parser;
 import org.dimasik.liteauction.backend.utils.tags.TagUtil;
@@ -94,7 +94,7 @@ public class Admin extends SubCommand {
             boolean byOne = (args.length == 3) || args[4].equalsIgnoreCase("true");
 
             try {
-                LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(target, ItemEncrypt.encodeItem(itemStack), TagUtil.getAllTags(itemStack), price, itemCount, byOne);
+                LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(target, ItemEncryptUtil.encodeItem(itemStack), TagUtil.getAllTags(itemStack), price, itemCount, byOne);
                 ItemHoverUtil.sendHoverItemMessage(player, Parser.color("Предмет %item%&f добавлен в истекшие предметы игроку " + target + " по цене " + (price * itemCount) + " (" + price + " за 1 ед.)"), itemStack);
                 player.setItemInHand(null);
             } catch (IOException e) {

@@ -4,7 +4,7 @@ database:
   # Варианты:
   # - MySQL
   # - SQLite
-  type: MySQL
+  type: SQLite
 
   # MySQL база данных.
   # Если у вас порт не 3306, то указывайте host: "[host]:[port]".
@@ -28,7 +28,7 @@ communication:
   # - Nats
   # - WebSocket
   # - Local (без подключений)
-  type: Redis
+  type: Local
 
   # Тут указываете настройки для Redis, RabbitMQ, Nats и WebSocket в зависимости от выбора выше.
   # Channel - префикс каналов, всего каналов 4 ([channel]_msg, [channel]_hover, [channel]_sound, [channel]_update).

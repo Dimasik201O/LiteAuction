@@ -1,9 +1,9 @@
 package org.dimasik.liteauction.backend.utils.nms;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.server.v1_16_R3.NBTTagCompound;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+
+import java.lang.reflect.Method;
 
 @UtilityClass
 public class NBTUtil {
@@ -13,19 +13,17 @@ public class NBTUtil {
         }
 
         try {
-            net.minecraft.server.v1_16_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+            Class<?> craftItemStackClass = VersionUtil.getCraftItemStackClass();
+            Method asNMSCopyMethod = craftItemStackClass.getMethod("asNMSCopy", ItemStack.class);
+            Object nmsItem = asNMSCopyMethod.invoke(null, itemStack);
 
-            NBTTagCompound tag = nmsItem.getTag();
+            Method getTagMethod = nmsItem.getClass().getMethod("getTag");
+            Object tag = getTagMethod.invoke(nmsItem);
 
             if (tag == null) {
                 return "";
             }
-
             return tag.toString();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
+        } catch (Exception e) { return ""; }
     }
 }

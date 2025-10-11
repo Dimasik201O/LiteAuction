@@ -14,6 +14,7 @@ import org.dimasik.liteauction.backend.config.ConfigManager;
 import org.dimasik.liteauction.backend.config.Pair;
 import org.dimasik.liteauction.backend.exceptions.UnsupportedConfigurationException;
 import org.dimasik.liteauction.backend.utils.format.Parser;
+import org.dimasik.liteauction.backend.utils.nms.HeadUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class ConfigUtils {
     }
 
     public static Pair<ItemStack, Integer> buildItem(String filePath, String path, String defDisplayname, Pair<String, String>... replaces){
-        ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(filePath, path + ".material", "CHEST")));
+        ItemStack itemStack = getBaseItem(filePath, path + ".material", Material.CHEST);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setDisplayName(PlaceholderUtils.replace(
                 ConfigManager.getString(filePath, path + ".displayname", defDisplayname),
@@ -75,11 +76,31 @@ public class ConfigUtils {
                 replaces
         )).toList());
         itemMeta.setLore(lore);
-        if(ConfigManager.getBoolean(filePath, ".glow", false)) {
+        if(ConfigManager.getBoolean(filePath, path + ".glow", false)) {
             itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
             itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         itemStack.setItemMeta(itemMeta);
         return new Pair<>(itemStack, ConfigManager.getInt(filePath, path + ".slot", 0));
+    }
+
+    public static ItemStack getBaseItem(String filePath, String path, Material def){
+        String string = ConfigManager.getString(filePath, path, "null");
+        if(string.startsWith("basehead-")){
+            try{
+                String texture = string.split("basehead-", 2)[1];
+                return HeadUtil.setTexture(new ItemStack(Material.PLAYER_HEAD), texture);
+            }
+            catch (ArrayIndexOutOfBoundsException e){
+                return new ItemStack(def);
+            }
+        }
+        else{
+            try{
+                return new ItemStack(Material.valueOf(string.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                return new ItemStack(def);
+            }
+        }
     }
 }

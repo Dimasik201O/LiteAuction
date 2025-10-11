@@ -4,30 +4,17 @@ import lombok.experimental.UtilityClass;
 import net.minecraft.server.v1_16_R3.EntityPlayer;
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 
 @UtilityClass
 public class ContainerUtil {
+    // переписано без NMS
     public static Inventory getActiveContainer(Player player) {
         if (player == null) return null;
 
-        CraftPlayer craftPlayer = (CraftPlayer) player;
-        EntityPlayer entityPlayer = craftPlayer.getHandle();
-
-        if (entityPlayer.activeContainer == null) {
-            return null;
-        }
-
-        return entityPlayer.activeContainer.getBukkitView().getTopInventory();
+        return player.getOpenInventory().getTopInventory();
     }
 
-    public static boolean hasActiveContainer(Player player) {
-        if (player == null) return false;
-
-        CraftPlayer craftPlayer = (CraftPlayer) player;
-        EntityPlayer entityPlayer = craftPlayer.getHandle();
-
-        return entityPlayer.activeContainer != null &&
-                entityPlayer.activeContainer != entityPlayer.defaultContainer;
-    }
+    // фунция не нужна т.к. инвентарь не будет instanceOf AbstractMenu
 }

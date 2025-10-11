@@ -2,7 +2,6 @@ package org.dimasik.liteauction.frontend.menus.market.menus;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -61,12 +60,9 @@ public class Main extends AbstractMenu {
             this.filters = preEvent.getFilters();
 
             items.clear();
-            List<Integer> slots = ConfigUtils.getSlots("design/menus/market/main.yml", "active-items.slot");
-            int slotIndex = 0;
-            int itemCount = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(player, sortingType, filters, categoryType).get();
-            List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType, page, slots.size()).get();
-            int slotsCount = slots.size();
-            int pages = itemCount / slotsCount + (itemCount % slotsCount == 0 ? 0 : 1);
+            int slot = 0;
+            List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType, page, 45).get();
+            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
 
             PostMarketCompileEvent postEvent = new PostMarketCompileEvent(viewer, items, page, player, sortingType, categoryType, filters);
             LiteAuction.getEventManager().triggerEvent(postEvent);
@@ -83,14 +79,12 @@ public class Main extends AbstractMenu {
                             new Pair<>("%pages_amount%", String.valueOf(pages))
                     )
             );
-            for(int i = 0; i < items.size() && slotIndex < slotsCount; i++) {
-                int slot = slots.get(slotIndex);
+            for(int i = 0; i < items.size() && slot < 45; i++) {
                 SellItem sellItem = items.get(i);
 
-                MarketSellItemAddEvent event = new MarketSellItemAddEvent(sellItem, inventory, slotIndex);
+                MarketSellItemAddEvent event = new MarketSellItemAddEvent(sellItem, inventory, slot);
                 LiteAuction.getEventManager().triggerEvent(event);
                 if(event.isCancelled()){
-                    slotIndex++;
                     continue;
                 }
 
@@ -140,7 +134,7 @@ public class Main extends AbstractMenu {
                 itemStack.setItemMeta(itemMeta);
                 itemStack.setAmount(sellItem.getAmount());
                 inventory.setItem(slot, itemStack);
-                slotIndex++;
+                slot++;
             }
 
             if(true){
@@ -204,11 +198,11 @@ public class Main extends AbstractMenu {
                 inventory.setItem(entry.getRight(), entry.getLeft());
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                ItemStack itemStack = ConfigUtils.getBaseItem(
                         "design/menus/market/main.yml",
                         "sorting.material",
-                        "HOPPER"
-                )));
+                        Material.HOPPER
+                );
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
                         "design/menus/market/main.yml",
@@ -249,11 +243,11 @@ public class Main extends AbstractMenu {
                 ), itemStack);
             }
             if(true){
-                ItemStack itemStack = new ItemStack(Material.valueOf(ConfigManager.getString(
+                ItemStack itemStack = ConfigUtils.getBaseItem(
                         "design/menus/market/main.yml",
                         "category.material",
-                        "CHEST_MINECART"
-                )));
+                        Material.CHEST_MINECART
+                );
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(Parser.color(ConfigManager.getString(
                         "design/menus/market/main.yml",

@@ -207,12 +207,10 @@ public final class LiteAuction extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         for(org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()){
-            if(ContainerUtil.hasActiveContainer(player)){
-                Inventory inventory = ContainerUtil.getActiveContainer(player);
-                InventoryHolder holder = inventory.getHolder();
-                if(holder instanceof AbstractMenu){
-                    inventory.close();
-                }
+            Inventory inventory = ContainerUtil.getActiveContainer(player);
+            InventoryHolder holder = inventory.getHolder();
+            if(holder instanceof AbstractMenu){
+                inventory.close();
             }
         }
         if(communicationManager != null){
