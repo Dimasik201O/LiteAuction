@@ -27,13 +27,13 @@ public class Formatter {
     }
 
     public static String getTimeUntilExpiration(SellItem sellItem) {
-        long expirationTime = sellItem.getCreateTime() + (ConfigManager.getLong("settings.settings.yml", "lifetime.sell", 43200) * 1000);
+        long expirationTime = sellItem.getCreateTime() + (ConfigManager.getLong("settings/settings.yml", "lifetime.sell", 43200) * 1000);
         long remainingTime = expirationTime - System.currentTimeMillis();
         return formatTime(remainingTime);
     }
 
     public static String getTimeUntilDeletion(UnsoldItem unsoldItem) {
-        long deletionTime = unsoldItem.getCreateTime() + (ConfigManager.getLong("settings.settings.yml", "lifetime.unsold", 604800) * 1000);
+        long deletionTime = unsoldItem.getCreateTime() + (ConfigManager.getLong("settings/settings.yml", "lifetime.unsold", 604800) * 1000);
         long remainingTime = deletionTime - System.currentTimeMillis();
         return formatTime(remainingTime);
     }

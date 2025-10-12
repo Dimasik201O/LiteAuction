@@ -179,7 +179,7 @@ public class UnsoldItems extends AbstractTable {
 
     public CompletableFuture<Integer> deleteExpiredItems() {
         return CompletableFuture.supplyAsync(() -> {
-            long sevenDaysAgo = System.currentTimeMillis() - (ConfigManager.getLong("settings.settings.yml", "lifetime.unsold", 604800) * 1000);
+            long sevenDaysAgo = System.currentTimeMillis() - (ConfigManager.getLong("settings/settings.yml", "lifetime.unsold", 604800) * 1000);
             try (Connection connection = dataSource.getConnection();
                  PreparedStatement statement = connection.prepareStatement(
                          "DELETE FROM unsold_items WHERE create_time < ?")) {
