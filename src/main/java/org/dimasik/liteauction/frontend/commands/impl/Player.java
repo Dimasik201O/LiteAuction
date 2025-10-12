@@ -24,7 +24,7 @@ public class Player extends SubCommand {
         if(target.matches("^[a-zA-Z0-9_]+$") && target.length() >= 3 && target.length() <= 16){
             try {
                 GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
-                if(guiData.getAuctionType() == AuctionType.MARKET || !ConfigManager.getBoolean("settings/settings", "enable-bids", true)) {
+                if(guiData.getAuctionType() == AuctionType.MARKET || !ConfigManager.getBoolean("settings/settings.yml", "enable-bids", true)) {
                     org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
                     main.setTarget(target);
                     main.setSortingType(guiData.getMarketSortingType());

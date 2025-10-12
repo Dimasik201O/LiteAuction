@@ -168,7 +168,7 @@ public class MainListener extends AbstractListener {
                         newMain.setPlayer(player).compile().open();
                     }
                 } else if(slot == ConfigManager.getInt("design/menus/market/main.yml", "switch.slot", 49)){
-                    if(ConfigManager.getBoolean("settings/settings", "enable-bids", true)) {
+                    if(ConfigManager.getBoolean("settings/settings.yml", "enable-bids", true)) {
                         GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
                         BidsSortingType bidsSortingType = guiData.getBidsSortingType();
 
