@@ -168,24 +168,26 @@ public class MainListener extends AbstractListener {
                         newMain.setPlayer(player).compile().open();
                     }
                 } else if(slot == ConfigManager.getInt("design/menus/market/main.yml", "switch.slot", 49)){
-                    GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
-                    BidsSortingType bidsSortingType = guiData.getBidsSortingType();
+                    if(ConfigManager.getBoolean("settings/settings", "enable-bids", true)) {
+                        GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
+                        BidsSortingType bidsSortingType = guiData.getBidsSortingType();
 
-                    int newPage = main.getPage();
+                        int newPage = main.getPage();
 
-                    int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItemsCount(main.getPlayer(), bidsSortingType, main.getFilters(), main.getCategoryType()).get();
-                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
+                        int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItemsCount(main.getPlayer(), bidsSortingType, main.getFilters(), main.getCategoryType()).get();
+                        int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
 
-                    newPage = Math.min(pages, newPage);
-                    newPage = Math.max(1, newPage);
+                        newPage = Math.min(pages, newPage);
+                        newPage = Math.max(1, newPage);
 
-                    org.dimasik.liteauction.frontend.menus.bids.menus.Main newMain = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(newPage);
-                    newMain.setTarget(main.getPlayer());
-                    newMain.setFilters(main.getFilters());
-                    newMain.setCategoryType(main.getCategoryType());
-                    newMain.setSortingType(bidsSortingType);
-                    newMain.setPlayer(player).compile().open();
-                    player.sendMessage(Parser.color("&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Ставки&f."));
+                        org.dimasik.liteauction.frontend.menus.bids.menus.Main newMain = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(newPage);
+                        newMain.setTarget(main.getPlayer());
+                        newMain.setFilters(main.getFilters());
+                        newMain.setCategoryType(main.getCategoryType());
+                        newMain.setSortingType(bidsSortingType);
+                        newMain.setPlayer(player).compile().open();
+                        player.sendMessage(Parser.color("&#00D4FB▶ &fРежим торговли был обновлен на: &#E7E7E7Ставки&f."));
+                    }
                 } else if (slot == ConfigManager.getInt("design/menus/market/main.yml", "next-page.slot", 50)) {
                     int newPage = main.getPage() + 1;
 

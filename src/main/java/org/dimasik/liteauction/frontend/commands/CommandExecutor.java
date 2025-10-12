@@ -30,7 +30,7 @@ public class CommandExecutor implements TabExecutor {
         if(args.length < 1){
             try {
                 GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
-                if(guiData.getAuctionType() == AuctionType.MARKET) {
+                if(guiData.getAuctionType() == AuctionType.MARKET || !ConfigManager.getBoolean("settings/settings", "enable-bids", true)) {
                     org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
                     main.setPlayer(player);
                     main.setSortingType(guiData.getMarketSortingType());
