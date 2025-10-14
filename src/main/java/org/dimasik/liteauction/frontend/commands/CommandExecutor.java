@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class CommandExecutor implements TabExecutor {
@@ -29,21 +30,22 @@ public class CommandExecutor implements TabExecutor {
         }
         if(args.length < 1){
             try {
-                GuiData guiData = LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).get();
-                if(guiData.getAuctionType() == AuctionType.MARKET || !ConfigManager.getBoolean("settings/settings.yml", "enable-bids", true)) {
-                    org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
-                    main.setPlayer(player);
-                    main.setSortingType(guiData.getMarketSortingType());
-                    main.setCategoryType(guiData.getCategoryType());
-                    main.compile().open();
-                }
-                else {
-                    org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
-                    main.setPlayer(player);
-                    main.setSortingType(guiData.getBidsSortingType());
-                    main.setCategoryType(guiData.getCategoryType());
-                    main.compile().open();
-                }
+                LiteAuction.getInstance().getDatabaseManager().getGuiDatasManager().getOrDefault(player.getName()).thenAccept((guiData) -> {
+                    if(guiData.getAuctionType() == AuctionType.MARKET || !ConfigManager.getBoolean("settings/settings.yml", "enable-bids", true)) {
+                        org.dimasik.liteauction.frontend.menus.market.menus.Main main = new org.dimasik.liteauction.frontend.menus.market.menus.Main(1);
+                        main.setPlayer(player);
+                        main.setSortingType(guiData.getMarketSortingType());
+                        main.setCategoryType(guiData.getCategoryType());
+                        main.compile().open();
+                    }
+                    else {
+                        org.dimasik.liteauction.frontend.menus.bids.menus.Main main = new org.dimasik.liteauction.frontend.menus.bids.menus.Main(1);
+                        main.setPlayer(player);
+                        main.setSortingType(guiData.getBidsSortingType());
+                        main.setCategoryType(guiData.getCategoryType());
+                        main.compile().open();
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
                 player.sendMessage(Parser.color(
@@ -68,7 +70,9 @@ public class CommandExecutor implements TabExecutor {
             return true;
         }
 
-        subCommand.execute(player, command, args);
+        CompletableFuture.runAsync(() -> {
+            subCommand.execute(player, command, args);
+        });
         return true;
     }
 

@@ -21,6 +21,7 @@ import org.dimasik.liteauction.frontend.menus.market.menus.ConfirmItem;
 import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
@@ -35,55 +36,56 @@ public class ConfirmItemListener extends AbstractListener {
             }
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
-            try {
-                if (ConfigUtils.getSlots("design/menus/market/confirm_item.yml", "approve.slot").contains(slot)) {
-                    Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(confirmItem.getSellItem().getId()).get();
-                    if (sellItemOptional.isEmpty()){
-                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                        return;
+            CompletableFuture.runAsync(() -> {
+                try {
+                    if (ConfigUtils.getSlots("design/menus/market/confirm_item.yml", "approve.slot").contains(slot)) {
+                        Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(confirmItem.getSellItem().getId()).get();
+                        if (sellItemOptional.isEmpty()) {
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                            return;
+                        } else if (sellItemOptional.get().getAmount() < confirmItem.getSellItem().getAmount()) {
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                            return;
+                        }
+                        SellItem sellItem = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(confirmItem.getSellItem().getId()).get().get();
+                        int price = sellItem.getPrice() * sellItem.getAmount();
+                        double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
+                        if (money < price) {
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.not_enough_money", "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки.")));
+                            player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
+                            confirmItem.close();
+                            return;
+                        }
+
+                        BuySellItemEvent postEvent = new BuySellItemEvent(player, sellItem);
+                        LiteAuction.getEventManager().triggerEvent(postEvent);
+                        if (postEvent.isCancelled()) {
+                            return;
+                        }
+
+                        ItemStack itemStack = confirmItem.getSellItem().decodeItemStack();
+                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#FEA900▶ &fВы купили &#FEA900%item%&f &#FEA900x" + confirmItem.getSellItem().getAmount() + " &fу &#FEA900" + sellItem.getPlayer() + " &fза &#FEA900" + Formatter.formatPrice(price)), itemStack);
+                        player.playSound(player.getLocation(), Sound.ENTITY_WANDERING_TRADER_YES, 1f, 1f);
+
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + confirmItem.getSellItem().getId());
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("hover", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + sellItem.getAmount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
+
+                        LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer(), price);
+                        LiteAuction.getEconomyEditor().subtractBalance(player.getName(), price);
+
+                        addItemInventory(player.getInventory(), itemStack.asQuantity(confirmItem.getSellItem().getAmount()), player.getLocation());
+                        LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(confirmItem.getSellItem().getId());
+
+                        confirmItem.close();
+                    } else if (ConfigUtils.getSlots("design/menus/market/confirm_item.yml", "cancel.slot").contains(slot)) {
+                        confirmItem.close();
                     }
-                    else if(sellItemOptional.get().getAmount() < confirmItem.getSellItem().getAmount()){
-                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                        return;
-                    }
-                    SellItem sellItem = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(confirmItem.getSellItem().getId()).get().get();
-                    int price = sellItem.getPrice() * sellItem.getAmount();
-                    double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
-                    if(money < price){
-                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/confirm_item.yml", "messages.not_enough_money", "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки.")));
-                        player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
-                        player.closeInventory();
-                        return;
-                    }
-
-                    BuySellItemEvent postEvent = new BuySellItemEvent(player, sellItem);
-                    LiteAuction.getEventManager().triggerEvent(postEvent);
-                    if(postEvent.isCancelled()){
-                        return;
-                    }
-
-                    ItemStack itemStack = confirmItem.getSellItem().decodeItemStack();
-                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#FEA900▶ &fВы купили &#FEA900%item%&f &#FEA900x" + confirmItem.getSellItem().getAmount() + " &fу &#FEA900" + sellItem.getPlayer() + " &fза &#FEA900" + Formatter.formatPrice(price)), itemStack);
-                    player.playSound(player.getLocation(), Sound.ENTITY_WANDERING_TRADER_YES, 1f, 1f);
-
-                    LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + confirmItem.getSellItem().getId());
-                    LiteAuction.getInstance().getCommunicationManager().publishMessage("hover", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + sellItem.getAmount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
-                    LiteAuction.getInstance().getCommunicationManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
-
-                    LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer(), price);
-                    LiteAuction.getEconomyEditor().subtractBalance(player.getName(), price);
-
-                    addItemInventory(player.getInventory(), itemStack.asQuantity(confirmItem.getSellItem().getAmount()), player.getLocation());
-                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(confirmItem.getSellItem().getId());
-
-                    player.closeInventory();
-                } else if (ConfigUtils.getSlots("design/menus/market/confirm_item.yml", "cancel.slot").contains(slot)) {
-                    player.closeInventory();
+                } catch (Exception e) {
+                    confirmItem.close();
+                    player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
                 }
-            } catch (Exception e) {
-                player.closeInventory();
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
-            }
+            });
         }
     }
 
@@ -94,7 +96,7 @@ public class ConfirmItemListener extends AbstractListener {
             if(confirmItem.isForceClose()){
                 return;
             }
-            Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(LiteAuction.getInstance(), () -> {
                 Main main = confirmItem.getBack();
                 if(main.getViewer() != null) {
                     main.compile().open();

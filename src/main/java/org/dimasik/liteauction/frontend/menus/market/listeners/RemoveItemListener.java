@@ -18,6 +18,7 @@ import org.dimasik.liteauction.frontend.menus.market.menus.Main;
 import org.dimasik.liteauction.frontend.menus.market.menus.RemoveItem;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
@@ -32,32 +33,33 @@ public class RemoveItemListener extends AbstractListener {
             }
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
-            try {
-                if (ConfigUtils.getSlots("design/menus/market/remove_item.yml", "approve.slot").contains(slot)) {
-                    Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(removeItem.getSellItem().getId()).get();
-                    if (sellItemOptional.isEmpty()){
-                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                        return;
-                    }
-                    else if(sellItemOptional.get().getAmount() < removeItem.getSellItem().getAmount()){
-                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                        return;
-                    }
+            CompletableFuture.runAsync(() -> {
+                try {
+                    if (ConfigUtils.getSlots("design/menus/market/remove_item.yml", "approve.slot").contains(slot)) {
+                        Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(removeItem.getSellItem().getId()).get();
+                        if (sellItemOptional.isEmpty()) {
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                            return;
+                        } else if (sellItemOptional.get().getAmount() < removeItem.getSellItem().getAmount()) {
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                            return;
+                        }
 
-                    ItemStack itemStack = removeItem.getSellItem().decodeItemStack();
-                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + removeItem.getSellItem().getAmount() + " &fбыл снят с продажи."), itemStack);
-                    LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + removeItem.getSellItem().getId());
-                    addItemInventory(player.getInventory(), itemStack.asQuantity(removeItem.getSellItem().getAmount()), player.getLocation());
-                    LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(removeItem.getSellItem().getId());
+                        ItemStack itemStack = removeItem.getSellItem().decodeItemStack();
+                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + removeItem.getSellItem().getAmount() + " &fбыл снят с продажи."), itemStack);
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "market " + removeItem.getSellItem().getId());
+                        addItemInventory(player.getInventory(), itemStack.asQuantity(removeItem.getSellItem().getAmount()), player.getLocation());
+                        LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(removeItem.getSellItem().getId());
 
-                    player.closeInventory();
-                } else if (ConfigUtils.getSlots("design/menus/market/remove_item.yml", "cancel.slot").contains(slot)) {
-                    player.closeInventory();
+                        removeItem.close();
+                    } else if (ConfigUtils.getSlots("design/menus/market/remove_item.yml", "cancel.slot").contains(slot)) {
+                        removeItem.close();
+                    }
+                } catch (Exception e) {
+                    removeItem.close();
+                    player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
                 }
-            } catch (Exception e) {
-                player.closeInventory();
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
-            }
+            });
         }
     }
 
@@ -68,7 +70,7 @@ public class RemoveItemListener extends AbstractListener {
             if(removeItem.isForceClose()){
                 return;
             }
-            Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(LiteAuction.getInstance(), () -> {
                 Main main = removeItem.getBack();
                 if(main.getViewer() != null) {
                     main.compile().open();

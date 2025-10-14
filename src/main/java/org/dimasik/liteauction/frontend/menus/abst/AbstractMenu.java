@@ -1,9 +1,11 @@
 package org.dimasik.liteauction.frontend.menus.abst;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.dimasik.liteauction.LiteAuction;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractMenu implements InventoryHolder {
@@ -17,8 +19,12 @@ public abstract class AbstractMenu implements InventoryHolder {
     }
 
     public void open(){
-        if(inventory != null) {
-            viewer.openInventory(inventory);
+        if(viewer != null) {
+            if (inventory != null) {
+                Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                    viewer.openInventory(inventory);
+                });
+            }
         }
     }
 
@@ -27,5 +33,13 @@ public abstract class AbstractMenu implements InventoryHolder {
     @Override
     public @NotNull Inventory getInventory() {
         return inventory;
+    }
+
+    public void close(){
+        if(viewer != null){
+            Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
+                viewer.closeInventory();
+            });
+        }
     }
 }

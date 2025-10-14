@@ -1,7 +1,5 @@
 package org.dimasik.liteauction;
 
-import lombok.Getter;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.BufferedReader;
@@ -18,7 +16,7 @@ public class UpdateChecker {
     private final JavaPlugin plugin;
     private final File pluginFile;
     private final boolean testMode = false;
-    private final String currentVersion = "v3.2.2";
+    private final String currentVersion = "v3.3.0";
     private final String changeLogUrl;
     private final String pluginUrl;
 

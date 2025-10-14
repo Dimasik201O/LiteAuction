@@ -18,6 +18,7 @@ import org.dimasik.liteauction.frontend.menus.bids.menus.Main;
 import org.dimasik.liteauction.frontend.menus.bids.menus.RemoveItem;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
@@ -32,28 +33,30 @@ public class RemoveItemListener extends AbstractListener {
             }
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
-            try {
-                if (ConfigUtils.getSlots("design/menus/bids/remove_item.yml", "approve.slot").contains(slot)) {
-                    Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(removeItem.getBidItem().getId()).get();
-                    if (bidItemOptional.isEmpty()){
-                        player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                        return;
+            CompletableFuture.runAsync(() -> {
+                try {
+                    if (ConfigUtils.getSlots("design/menus/bids/remove_item.yml", "approve.slot").contains(slot)) {
+                        Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(removeItem.getBidItem().getId()).get();
+                        if (bidItemOptional.isEmpty()) {
+                            player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/remove_item.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                            return;
+                        }
+
+                        ItemStack itemStack = removeItem.getBidItem().decodeItemStack();
+                        ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
+                        LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItemOptional.get().getId() + " delete");
+                        addItemInventory(player.getInventory(), itemStack, player.getLocation());
+                        LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(removeItem.getBidItem().getId());
+
+                        removeItem.close();
+                    } else if (ConfigUtils.getSlots("design/menus/bids/remove_item.yml", "cancel.slot").contains(slot)) {
+                        removeItem.close();
                     }
-
-                    ItemStack itemStack = removeItem.getBidItem().decodeItemStack();
-                    ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
-                    LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItemOptional.get().getId() + " delete");
-                    addItemInventory(player.getInventory(), itemStack, player.getLocation());
-                    LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(removeItem.getBidItem().getId());
-
-                    player.closeInventory();
-                } else if (ConfigUtils.getSlots("design/menus/bids/remove_item.yml", "cancel.slot").contains(slot)) {
-                    player.closeInventory();
+                } catch (Exception e) {
+                    removeItem.close();
+                    player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
                 }
-            } catch (Exception e) {
-                player.closeInventory();
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
-            }
+            });
         }
     }
 
@@ -64,7 +67,7 @@ public class RemoveItemListener extends AbstractListener {
             if(removeItem.isForceClose()){
                 return;
             }
-            Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(LiteAuction.getInstance(), () -> {
                 Main main = removeItem.getBack();
                 if(main.getViewer() != null) {
                     main.compile().open();

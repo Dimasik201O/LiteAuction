@@ -73,11 +73,9 @@ public abstract class AbstractCommunication {
                                             .stream()
                                             .anyMatch(i -> i.getId() == id)
                             ){
-                                Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                    gui.setForceClose(true);
-                                    gui.compile().open();
-                                    gui.setForceClose(false);
-                                });
+                                gui.setForceClose(true);
+                                gui.compile().open();
+                                gui.setForceClose(false);
                             }
                         }
                         else if(holder instanceof Main gui){
@@ -104,11 +102,9 @@ public abstract class AbstractCommunication {
                                             .stream()
                                             .anyMatch(i -> i.getId() == id)
                             ){
-                                Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                    gui.setForceClose(true);
-                                    gui.compile().open();
-                                    gui.setForceClose(false);
-                                });
+                                gui.setForceClose(true);
+                                gui.compile().open();
+                                gui.setForceClose(false);
                             }
                         }
                         else if(holder instanceof org.dimasik.liteauction.frontend.menus.bids.menus.Main gui){
@@ -132,11 +128,9 @@ public abstract class AbstractCommunication {
                             }
                             else if(action.equalsIgnoreCase("refresh")){
                                 if(gui.getBidItem().getId() == id) {
-                                    Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                        gui.setForceClose(true);
-                                        gui.compile().open();
-                                        gui.setForceClose(false);
-                                    });
+                                    gui.setForceClose(true);
+                                    gui.compile().open();
+                                    gui.setForceClose(false);
                                 }
                             }
                         }

@@ -21,6 +21,7 @@ import org.dimasik.liteauction.frontend.menus.bids.menus.Sell;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.dimasik.liteauction.LiteAuction.addItemInventory;
 
@@ -35,86 +36,87 @@ public class SellListener extends AbstractListener {
             }
             Player player = (Player) event.getWhoClicked();
             int slot = event.getSlot();
-            try {
-                if(slot < 45){
-                    BidItem bidItem = sell.getItems().get(slot);
-                    if(bidItem != null){
-                        if(bidItem.getPlayer().equalsIgnoreCase(player.getName())){
-                            Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(bidItem.getId()).get();
-                            if (bidItemOptional.isEmpty()){
-                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/sell.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
-                                return;
+            CompletableFuture.runAsync(() -> {
+                try {
+                    if (slot < 45) {
+                        BidItem bidItem = sell.getItems().get(slot);
+                        if (bidItem != null) {
+                            if (bidItem.getPlayer().equalsIgnoreCase(player.getName())) {
+                                Optional<BidItem> bidItemOptional = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItem(bidItem.getId()).get();
+                                if (bidItemOptional.isEmpty()) {
+                                    player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/sell.yml", "messages.cannot_take_item", "&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили.")));
+                                    return;
+                                }
+
+                                ItemStack itemStack = bidItem.decodeItemStack();
+                                int bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemIdCount(bidItem.getId()).get();
+                                if (bids != 0) {
+                                    player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/sell.yml", "messages.cannot_remove_due_to_bids", "&x&F&F&2&2&2&2▶ &fДанный предмет больше нельзя снять с продажи.")));
+                                    return;
+                                }
+
+                                ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
+                                addItemInventory(player.getInventory(), itemStack, player.getLocation());
+                                LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(bidItem.getId());
+
+                                int newPage = sell.getPage();
+
+                                int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                                int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
+
+                                newPage = Math.min(pages, newPage);
+                                newPage = Math.max(1, newPage);
+
+                                sell.setForceClose(true);
+                                Sell newSell = new Sell(newPage, sell.getBack());
+                                newSell.setPlayer(player).compile().open();
+
+                                LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
                             }
+                        }
+                    } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "back.slot", 45)) {
+                        Main main = sell.getBack();
+                        main.compile().open();
+                    } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "prev-page.slot", 48)) {
+                        int newPage = sell.getPage() - 1;
 
-                            ItemStack itemStack = bidItem.decodeItemStack();
-                            int bids = LiteAuction.getInstance().getDatabaseManager().getBidsManager().getBidsByItemIdCount(bidItem.getId()).get();
-                            if(bids != 0) {
-                                player.sendMessage(Parser.color(ConfigManager.getString("design/menus/bids/sell.yml", "messages.cannot_remove_due_to_bids", "&x&F&F&2&2&2&2▶ &fДанный предмет больше нельзя снять с продажи.")));
-                                return;
+                        int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                        int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
+
+                        newPage = Math.min(pages, newPage);
+                        newPage = Math.max(1, newPage);
+
+                        if (newPage != sell.getPage()) {
+                            if (LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
+                                player.playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1f, 1f);
                             }
-
-                            ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
-                            addItemInventory(player.getInventory(), itemStack, player.getLocation());
-                            LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(bidItem.getId());
-
-                            int newPage = sell.getPage();
-
-                            int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
-                            int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
-
-                            newPage = Math.min(pages, newPage);
-                            newPage = Math.max(1, newPage);
-
                             sell.setForceClose(true);
                             Sell newSell = new Sell(newPage, sell.getBack());
                             newSell.setPlayer(player).compile().open();
+                        }
+                    } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "next-page.slot", 50)) {
+                        int newPage = sell.getPage() + 1;
 
-                            LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
+                        int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
+                        int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
+
+                        newPage = Math.min(pages, newPage);
+                        newPage = Math.max(1, newPage);
+
+                        if (newPage != sell.getPage()) {
+                            if (LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
+                                player.playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1f, 1f);
+                            }
+                            sell.setForceClose(true);
+                            Sell newSell = new Sell(newPage, sell.getBack());
+                            newSell.setPlayer(player).compile().open();
                         }
                     }
+                } catch (Exception e) {
+                    sell.close();
+                    player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
                 }
-                else if(slot == ConfigManager.getInt("design/menus/bids/sell.yml", "back.slot", 45)){
-                    Main main = sell.getBack();
-                    main.compile().open();
-                } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "prev-page.slot", 48)) {
-                    int newPage = sell.getPage() - 1;
-
-                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
-                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
-
-                    newPage = Math.min(pages, newPage);
-                    newPage = Math.max(1, newPage);
-
-                    if(newPage != sell.getPage()) {
-                        if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1f, 1f);
-                        }
-                        sell.setForceClose(true);
-                        Sell newSell = new Sell(newPage, sell.getBack());
-                        newSell.setPlayer(player).compile().open();
-                    }
-                } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "next-page.slot", 50)) {
-                    int newPage = sell.getPage() + 1;
-
-                    int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
-                    int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
-
-                    newPage = Math.min(pages, newPage);
-                    newPage = Math.max(1, newPage);
-
-                    if(newPage != sell.getPage()) {
-                        if(LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
-                            player.playSound(player.getLocation(), Sound.ENTITY_EGG_THROW, 1f, 1f);
-                        }
-                        sell.setForceClose(true);
-                        Sell newSell = new Sell(newPage, sell.getBack());
-                        newSell.setPlayer(player).compile().open();
-                    }
-                }
-            } catch (Exception e) {
-                player.closeInventory();
-                player.sendMessage(Parser.color("&#FB2222▶ &fПроизошла &#FB2222ошибка &fпри выполнении действия."));
-            }
+            });
         }
     }
 
@@ -125,7 +127,7 @@ public class SellListener extends AbstractListener {
             if(sell.isForceClose()){
                 return;
             }
-            Bukkit.getScheduler().runTaskLater(LiteAuction.getInstance(), () -> {
+            Bukkit.getScheduler().runTaskLaterAsynchronously(LiteAuction.getInstance(), () -> {
                 Main main = sell.getBack();
                 if(main.getViewer() != null) {
                     main.compile().open();
