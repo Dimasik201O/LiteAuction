@@ -75,8 +75,7 @@ public class SellListener extends AbstractListener {
                             }
                         }
                     } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "back.slot", 45)) {
-                        Main main = sell.getBack();
-                        main.compile().open();
+                        sell.close();
                     } else if (slot == ConfigManager.getInt("design/menus/bids/sell.yml", "prev-page.slot", 48)) {
                         int newPage = sell.getPage() - 1;
 
