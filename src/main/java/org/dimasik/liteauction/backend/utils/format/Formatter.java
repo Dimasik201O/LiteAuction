@@ -6,6 +6,9 @@ import org.dimasik.liteauction.backend.storage.models.BidItem;
 import org.dimasik.liteauction.backend.storage.models.SellItem;
 import org.dimasik.liteauction.backend.storage.models.UnsoldItem;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @UtilityClass
 public class Formatter {
     public static final String CURRENCY_SYMBOL = ConfigManager.getString("settings/settings.yml", "currency-symbol", "¤");
@@ -67,5 +70,11 @@ public class Formatter {
         }
 
         return result.toString().trim();
+    }
+
+    public static String formatDateTime(long milliseconds) {
+        Date date = new Date(milliseconds);
+        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM HH:mm");
+        return formatter.format(date);
     }
 }

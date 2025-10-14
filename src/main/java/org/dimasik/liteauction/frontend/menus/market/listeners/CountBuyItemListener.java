@@ -112,6 +112,7 @@ public class CountBuyItemListener extends AbstractListener {
 
                         LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer().toLowerCase(), price);
                         LiteAuction.getEconomyEditor().subtractBalance(player.getName().toLowerCase(), price);
+                        LiteAuction.getInstance().getDatabaseManager().getHistoryItems().addHistory(sellItem.getPlayer(), player.getName(), sellItem.getItemStack(), countBuyItem.getCount(), sellItem.getPrice());
 
                         addItemInventory(player.getInventory(), itemStack.asQuantity(countBuyItem.getCount()), player.getLocation());
                         if (countBuyItem.getCount() == sellItem.getAmount()) {

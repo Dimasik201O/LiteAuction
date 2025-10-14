@@ -74,6 +74,7 @@ public final class LiteAuction extends JavaPlugin {
                 "design/commands/search.yml",
                 "design/commands/main.yml",
                 "design/commands/sound.yml",
+                "design/commands/history.yml",
                 "design/menus/main.yml",
                 "design/menus/market/main.yml",
                 "design/menus/market/confirm_item.yml",
@@ -175,6 +176,7 @@ public final class LiteAuction extends JavaPlugin {
         new Sound("sound").register();
         new Player("player").register();
         new Admin("admin").register();
+        new History("hist").register();
     }
 
     private void setupListeners(){

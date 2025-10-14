@@ -73,6 +73,7 @@ public class ConfirmItemListener extends AbstractListener {
 
                         LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer(), price);
                         LiteAuction.getEconomyEditor().subtractBalance(player.getName(), price);
+                        LiteAuction.getInstance().getDatabaseManager().getHistoryItems().addHistory(sellItem.getPlayer(), player.getName(), sellItem.getItemStack(), sellItem.getAmount(), sellItem.getPrice());
 
                         addItemInventory(player.getInventory(), itemStack.asQuantity(confirmItem.getSellItem().getAmount()), player.getLocation());
                         LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().deleteItem(confirmItem.getSellItem().getId());

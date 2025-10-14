@@ -3,11 +3,13 @@ package org.dimasik.liteauction.backend.storage.databases;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.dimasik.liteauction.backend.storage.tables.impl.*;
 
 import java.util.concurrent.CompletableFuture;
 
 @Getter
+@NoArgsConstructor
 public abstract class AbstractDatabase {
     protected HikariDataSource dataSource;
     protected SellItems sellItemsManager;
@@ -16,10 +18,7 @@ public abstract class AbstractDatabase {
     protected BidItems bidItemsManager;
     protected Bids bidsManager;
     protected GuiDatas guiDatasManager;
-
-    public AbstractDatabase(){
-
-    }
+    protected HistoryItems historyItems;
 
     public void initialize(HikariConfig config) {
         this.dataSource = new HikariDataSource(config);
@@ -29,6 +28,7 @@ public abstract class AbstractDatabase {
         this.bidItemsManager = new BidItems(dataSource);
         this.bidsManager = new Bids(dataSource);
         this.guiDatasManager = new GuiDatas(dataSource);
+        this.historyItems = new HistoryItems(dataSource);
     }
 
     public CompletableFuture<Void> createTables(){
@@ -38,7 +38,8 @@ public abstract class AbstractDatabase {
                 soundsManager.createTable(),
                 bidItemsManager.createTable(),
                 bidsManager.createTable(),
-                guiDatasManager.createTable()
+                guiDatasManager.createTable(),
+                historyItems.createTable()
         );
     }
 
