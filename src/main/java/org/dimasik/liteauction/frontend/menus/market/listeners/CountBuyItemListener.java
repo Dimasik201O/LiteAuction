@@ -45,7 +45,7 @@ public class CountBuyItemListener extends AbstractListener {
                         Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
                         if (sellItemOptional.isEmpty()) {
                             player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
-                            player.closeInventory();
+                            countBuyItem.close();
                             return;
                         }
                         SellItem sellItem = sellItemOptional.get();
@@ -60,7 +60,7 @@ public class CountBuyItemListener extends AbstractListener {
                         Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
                         if (sellItemOptional.isEmpty()) {
                             player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
-                            player.closeInventory();
+                            countBuyItem.close();
                             return;
                         }
                         SellItem sellItem = sellItemOptional.get();
@@ -73,14 +73,14 @@ public class CountBuyItemListener extends AbstractListener {
                         Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
                         if (sellItemOptional.isEmpty()) {
                             player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
-                            player.closeInventory();
+                            countBuyItem.close();
                             return;
                         }
 
                         SellItem sellItem = sellItemOptional.get();
                         if (sellItem.getAmount() < countBuyItem.getCount()) {
                             player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
-                            player.closeInventory();
+                            countBuyItem.close();
                             return;
                         }
 
@@ -91,7 +91,7 @@ public class CountBuyItemListener extends AbstractListener {
                             if (LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
                                 player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
                             }
-                            player.closeInventory();
+                            countBuyItem.close();
                             return;
                         }
 
@@ -123,14 +123,14 @@ public class CountBuyItemListener extends AbstractListener {
                             LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().updateItem(sellItem);
                         }
 
-                        player.closeInventory();
+                        countBuyItem.close();
                     } else if (slot == ConfigManager.getInt("design/menus/market/count_buy_item.yml", "increase1.slot", 3)) {
                         int newCount = countBuyItem.getCount() + 1;
 
                         Optional<SellItem> sellItemOptional = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItem(countBuyItem.getSellItem().getId()).get();
                         if (sellItemOptional.isEmpty()) {
                             player.sendMessage(Parser.color("&x&F&F&2&2&2&2▶ &fНевозможно забрать предмет, так как его уже купили."));
-                            player.closeInventory();
+                            countBuyItem.close();
                             return;
                         }
                         SellItem sellItem = sellItemOptional.get();
