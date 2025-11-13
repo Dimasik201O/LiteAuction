@@ -52,8 +52,10 @@ public class Main extends AbstractMenu {
         try {
             items.clear();
             int slot = 0;
+            int itemsCnt = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItemsCount(player, sortingType, filters, categoryType).get();
             List<BidItem> items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getItems(player, sortingType, filters, categoryType, page, 45).get();
-            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+            int pages = itemsCnt / 45 + (itemsCnt % 45 == 0 ? 0 : 1);
+
             inventory = ConfigUtils.buildInventory(this, "design/menus/bids/main.yml", "inventory-type",
                     PlaceholderUtils.replace(
                             ConfigManager.getString("design/menus/bids/main.yml", "gui-title", "&0Аукцион (%current_page%/%pages_amount%)"),

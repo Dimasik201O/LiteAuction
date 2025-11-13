@@ -61,8 +61,9 @@ public class Main extends AbstractMenu {
 
             items.clear();
             int slot = 0;
+            int itemsCnt = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItemsCount(player, sortingType, filters, categoryType).get();
             List<SellItem> items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getItems(player, sortingType, filters, categoryType, page, 45).get();
-            int pages = items.size() / 45 + (items.size() % 45 == 0 ? 0 : 1);
+            int pages = itemsCnt / 45 + (itemsCnt % 45 == 0 ? 0 : 1);
 
             PostMarketCompileEvent postEvent = new PostMarketCompileEvent(viewer, items, page, player, sortingType, categoryType, filters);
             LiteAuction.getEventManager().triggerEvent(postEvent);
