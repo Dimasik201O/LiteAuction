@@ -74,8 +74,15 @@ public abstract class AbstractCommunication {
                                             .anyMatch(i -> i.getId() == id)
                             ){
                                 gui.setForceClose(true);
-                                gui.compile().open();
-                                gui.setForceClose(false);
+
+                                int newPage = gui.getPage();
+                                int items = LiteAuction.getInstance().getDatabaseManager().getSellItemsManager().getPlayerItemsCount(gui.getViewer().getName()).get();
+                                int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
+                                newPage = Math.min(pages, newPage);
+                                newPage = Math.max(1, newPage);
+
+                                Sell newSell = new Sell(newPage, gui.getBack());
+                                newSell.setPlayer(player).compile().open();
                             }
                         }
                         else if(holder instanceof Main gui){
@@ -103,8 +110,15 @@ public abstract class AbstractCommunication {
                                             .anyMatch(i -> i.getId() == id)
                             ){
                                 gui.setForceClose(true);
-                                gui.compile().open();
-                                gui.setForceClose(false);
+
+                                int newPage = gui.getPage();
+                                int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItemsCount(gui.getViewer().getName()).get();
+                                int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
+                                newPage = Math.min(pages, newPage);
+                                newPage = Math.max(1, newPage);
+
+                                org.dimasik.liteauction.frontend.menus.bids.menus.Sell newSell = new org.dimasik.liteauction.frontend.menus.bids.menus.Sell(newPage, gui.getBack());
+                                newSell.setPlayer(player).compile().open();
                             }
                         }
                         else if(holder instanceof org.dimasik.liteauction.frontend.menus.bids.menus.Main gui){
