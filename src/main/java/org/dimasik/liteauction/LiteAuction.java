@@ -33,17 +33,14 @@ import java.io.File;
 
 @Getter
 public final class LiteAuction extends JavaPlugin {
+    @Getter
+    private static LiteAuction instance;
     private AbstractDatabase databaseManager;
     private AbstractCommunication communicationManager;
     private CommandExecutor commandExecutor;
-    @Getter
-    private static ItemStack boughtItem;
-    @Getter
-    private static LiteAuction instance;
-    @Getter
-    private static EventManager eventManager;
-    @Getter
-    private static EconomyEditor economyEditor;
+    private ItemStack boughtItem;
+    private EventManager eventManager;
+    private EconomyEditor economyEditor;
 
     @Override
     public void onEnable() {

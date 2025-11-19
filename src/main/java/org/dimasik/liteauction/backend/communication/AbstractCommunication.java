@@ -89,7 +89,7 @@ public abstract class AbstractCommunication {
                             for(Map.Entry<Integer, SellItem> entry : gui.getItems().entrySet()){
                                 if(entry.getValue().getId() == id){
                                     Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                        inventory.setItem(entry.getKey(), LiteAuction.getBoughtItem().clone());
+                                        inventory.setItem(entry.getKey(), LiteAuction.getInstance().getBoughtItem().clone());
                                     });
                                 }
                             }
@@ -126,7 +126,7 @@ public abstract class AbstractCommunication {
                                 for(Map.Entry<Integer, BidItem> entry : gui.getItems().entrySet()){
                                     if(entry.getValue().getId() == id){
                                         Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                            inventory.setItem(entry.getKey(), LiteAuction.getBoughtItem().clone());
+                                            inventory.setItem(entry.getKey(), LiteAuction.getInstance().getBoughtItem().clone());
                                         });
                                     }
                                 }
@@ -136,7 +136,7 @@ public abstract class AbstractCommunication {
                             if(action.equalsIgnoreCase("delete")){
                                 if(gui.getBidItem().getId() == id){
                                     Bukkit.getScheduler().runTask(LiteAuction.getInstance(), () -> {
-                                        inventory.setItem(4, LiteAuction.getBoughtItem().clone());
+                                        inventory.setItem(4, LiteAuction.getInstance().getBoughtItem().clone());
                                     });
                                 }
                             }

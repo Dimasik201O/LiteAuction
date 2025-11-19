@@ -52,7 +52,7 @@ public class MainListener extends AbstractListener {
                         SellItem sellItem = main.getItems().get(slot);
                         if (sellItem != null) {
                             PreClickSellItemEvent preEvent = new PreClickSellItemEvent(player, sellItem, inventory, slot);
-                            LiteAuction.getEventManager().triggerEvent(preEvent);
+                            LiteAuction.getInstance().getEventManager().triggerEvent(preEvent);
                             if (preEvent.isCancelled()) {
                                 return;
                             }
@@ -79,7 +79,7 @@ public class MainListener extends AbstractListener {
                                     newMain.setSortingType(main.getSortingType());
                                     newMain.setPlayer(player).compile().open();
                                 } else if (event.isLeftClick() || sellItem.isByOne() || sellItem.getAmount() == 1) {
-                                    double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
+                                    double money = LiteAuction.getInstance().getEconomyEditor().getBalance(player.getName());
                                     int price = sellItem.getPrice() * sellItem.getAmount();
                                     if (money < price) {
                                         player.sendMessage(Parser.color(ConfigManager.getString(

@@ -236,7 +236,7 @@ public class BidItems extends AbstractTable {
                     }
                     else {
                         Bid lastBid = bidOptional.get();
-                        LiteAuction.getEconomyEditor().addBalance(lastBid.getPlayer(), lastBid.getPrice());
+                        LiteAuction.getInstance().getEconomyEditor().addBalance(lastBid.getPlayer(), lastBid.getPrice());
                         LiteAuction.getInstance().getDatabaseManager().getUnsoldItemsManager().addItem(
                                 lastBid.getPlayer(),
                                 bidItem.getItemStack(),

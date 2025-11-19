@@ -49,7 +49,7 @@ public class Main extends AbstractMenu {
     public Main compile(){
         try {
             PreMarketCompileEvent preEvent = new PreMarketCompileEvent(viewer, page, player, sortingType, categoryType, filters);
-            LiteAuction.getEventManager().triggerEvent(preEvent);
+            LiteAuction.getInstance().getEventManager().triggerEvent(preEvent);
             if(preEvent.isCancelled()){
                 return this;
             }
@@ -66,7 +66,7 @@ public class Main extends AbstractMenu {
             int pages = itemsCnt / 45 + (itemsCnt % 45 == 0 ? 0 : 1);
 
             PostMarketCompileEvent postEvent = new PostMarketCompileEvent(viewer, items, page, player, sortingType, categoryType, filters);
-            LiteAuction.getEventManager().triggerEvent(postEvent);
+            LiteAuction.getInstance().getEventManager().triggerEvent(postEvent);
             if(postEvent.isCancelled()){
                 return this;
             }
@@ -84,7 +84,7 @@ public class Main extends AbstractMenu {
                 SellItem sellItem = items.get(i);
 
                 MarketSellItemAddEvent event = new MarketSellItemAddEvent(sellItem, inventory, slot);
-                LiteAuction.getEventManager().triggerEvent(event);
+                LiteAuction.getInstance().getEventManager().triggerEvent(event);
                 if(event.isCancelled()){
                     continue;
                 }

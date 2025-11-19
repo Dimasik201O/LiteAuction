@@ -51,7 +51,7 @@ public class ItemBidsListener extends AbstractListener {
                         int addPrice = lastBid != null && lastBid.getPlayer().equalsIgnoreCase(player.getName()) ? bids.get().getPrice() : 0;
                         int finalPrice = itemBids.getAvailableBids().get(slot);
 
-                        if (finalPrice - addPrice > LiteAuction.getEconomyEditor().getBalance(player.getName())) {
+                        if (finalPrice - addPrice > LiteAuction.getInstance().getEconomyEditor().getBalance(player.getName())) {
                             player.sendMessage(Parser.color("&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки."));
                             if (LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
                                 player.playSound(player.getLocation(), Sound.ENTITY_VINDICATOR_AMBIENT, 1f, 1f);
@@ -60,9 +60,9 @@ public class ItemBidsListener extends AbstractListener {
                         }
 
                         player.sendMessage(Parser.color("&#00D4FB▶ &fВы поставили ставку."));
-                        LiteAuction.getEconomyEditor().subtractBalance(player.getName(), finalPrice - addPrice);
+                        LiteAuction.getInstance().getEconomyEditor().subtractBalance(player.getName(), finalPrice - addPrice);
                         if (lastBid != null && !lastBid.getPlayer().equalsIgnoreCase(player.getName())) {
-                            LiteAuction.getEconomyEditor().addBalance(lastBid.getPlayer(), finalPrice - addPrice);
+                            LiteAuction.getInstance().getEconomyEditor().addBalance(lastBid.getPlayer(), finalPrice - addPrice);
                             LiteAuction.getInstance().getCommunicationManager().publishMessage(
                                     "hover",
                                     lastBid.getPlayer() + " " +

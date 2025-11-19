@@ -85,7 +85,7 @@ public class CountBuyItemListener extends AbstractListener {
                         }
 
                         int price = sellItem.getPrice() * countBuyItem.getCount();
-                        double money = LiteAuction.getEconomyEditor().getBalance(player.getName());
+                        double money = LiteAuction.getInstance().getEconomyEditor().getBalance(player.getName());
                         if (money < price) {
                             player.sendMessage(Parser.color(ConfigManager.getString("design/menus/market/count_buy_item.yml", "messages.not_enough_money", "&#FB2222▶ &fУ вас &#FB2222недостаточно средств &fдля совершения покупки.")));
                             if (LiteAuction.getInstance().getDatabaseManager().getSoundsManager().getSoundToggle(player.getName()).get()) {
@@ -96,7 +96,7 @@ public class CountBuyItemListener extends AbstractListener {
                         }
 
                         CountBuySellItemEvent postEvent = new CountBuySellItemEvent(player, sellItem, countBuyItem.getCount());
-                        LiteAuction.getEventManager().triggerEvent(postEvent);
+                        LiteAuction.getInstance().getEventManager().triggerEvent(postEvent);
                         if (postEvent.isCancelled()) {
                             return;
                         }
@@ -110,8 +110,8 @@ public class CountBuyItemListener extends AbstractListener {
                         LiteAuction.getInstance().getCommunicationManager().publishMessage("hover", sellItem.getPlayer() + " " + Parser.color(ItemHoverUtil.getHoverItemMessage("&#00D4FB▶ &#00D5FB" + player.getName() + " &fкупил у вас &#9AF5FB%item%&f &#9AF5FBx" + countBuyItem.getCount() + " &fза &#FEA900" + price + Formatter.CURRENCY_SYMBOL, sellItem.decodeItemStack().asQuantity(sellItem.getAmount()))));
                         LiteAuction.getInstance().getCommunicationManager().publishMessage("sound", sellItem.getPlayer() + " " + Sound.ENTITY_WANDERING_TRADER_YES.toString().toLowerCase() + " 1.0 1.0");
 
-                        LiteAuction.getEconomyEditor().addBalance(sellItem.getPlayer().toLowerCase(), price);
-                        LiteAuction.getEconomyEditor().subtractBalance(player.getName().toLowerCase(), price);
+                        LiteAuction.getInstance().getEconomyEditor().addBalance(sellItem.getPlayer().toLowerCase(), price);
+                        LiteAuction.getInstance().getEconomyEditor().subtractBalance(player.getName().toLowerCase(), price);
                         LiteAuction.getInstance().getDatabaseManager().getHistoryItems().addHistory(sellItem.getPlayer(), player.getName(), sellItem.getItemStack(), countBuyItem.getCount(), sellItem.getPrice());
 
                         addItemInventory(player.getInventory(), itemStack.asQuantity(countBuyItem.getCount()), player.getLocation());
