@@ -143,8 +143,9 @@ public abstract class AbstractCommunication {
                             else if(action.equalsIgnoreCase("refresh")){
                                 if(gui.getBidItem().getId() == id) {
                                     gui.setForceClose(true);
-                                    gui.compile().open();
-                                    gui.setForceClose(false);
+
+                                    ItemBids itemBids = new ItemBids(gui.getBidItem(), gui.getBack());
+                                    itemBids.setPlayer(player).compile().open();
                                 }
                             }
                         }

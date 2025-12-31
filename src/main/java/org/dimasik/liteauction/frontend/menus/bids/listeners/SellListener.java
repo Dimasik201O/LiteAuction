@@ -58,19 +58,6 @@ public class SellListener extends AbstractListener {
                                 ItemHoverUtil.sendHoverItemMessage(player, Parser.color("&#00D4FB▶ &#9AF5FB%item%&f &#9AF5FBx" + itemStack.getAmount() + " &fбыл снят с продажи."), itemStack);
                                 addItemInventory(player.getInventory(), itemStack, player.getLocation());
                                 LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().deleteItem(bidItem.getId());
-
-                                int newPage = sell.getPage();
-
-                                int items = LiteAuction.getInstance().getDatabaseManager().getBidItemsManager().getPlayerItemsCount(sell.getViewer().getName()).get();
-                                int pages = items / 45 + (items % 45 == 0 ? 0 : 1);
-
-                                newPage = Math.min(pages, newPage);
-                                newPage = Math.max(1, newPage);
-
-                                sell.setForceClose(true);
-                                Sell newSell = new Sell(newPage, sell.getBack());
-                                newSell.setPlayer(player).compile().open();
-
                                 LiteAuction.getInstance().getCommunicationManager().publishMessage("update", "bids " + bidItem.getId() + " delete");
                             }
                         }
